@@ -2,8 +2,8 @@ package eu.darken.sdmse.common.files
 
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
 import eu.darken.sdmse.common.debug.logging.log
-import okio.Sink
-import okio.Source
+import kotlinx.coroutines.flow.Flow
+import okio.FileHandle
 
 
 val APathLookup<*>.isDirectory: Boolean
@@ -15,34 +15,37 @@ val APathLookup<*>.isSymlink: Boolean
 val APathLookup<*>.isFile: Boolean
     get() = fileType == FileType.FILE
 
-fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> PL.walk(
+suspend fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> PL.walk(
     gateway: GT,
-    filter: suspend (PL) -> Boolean = { true }
-): PathTreeFlow<P, PL, PLE, GT> = lookedUp.walk(gateway, filter)
+    options: APathGateway.WalkOptions<P, PL> = APathGateway.WalkOptions()
+): Flow<PL> = lookedUp.walk(gateway, options)
+
+suspend fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> PL.du(
+    gateway: GT,
+    options: APathGateway.DuOptions<P, PL> = APathGateway.DuOptions()
+): Long = lookedUp.du(gateway, options)
 
 suspend fun <P : APath, PL : APathLookup<P>> PL.exists(
     gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>
 ): Boolean = lookedUp.exists(gateway)
 
 suspend fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>> PL.delete(
-    gateway: APathGateway<P, PL, PLE>
-) {
-    lookedUp.delete(gateway)
-    log(VERBOSE) { "APath.delete(): Deleted $this" }
-}
+    gateway: APathGateway<P, PL, PLE>,
+    recursive: Boolean = false,
+) = lookedUp.delete(
+    gateway,
+    recursive = recursive
+)
 
-suspend fun <P : APath, PL : APathLookup<P>> PL.deleteAll(
+suspend fun <P : APath, PL : APathLookup<P>> PL.deletewalk(
     gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>,
     filter: (APathLookup<*>) -> Boolean = { true }
-) = lookedUp.deleteAll(gateway, filter)
+) = lookedUp.deleteWalk(gateway, filter)
 
-suspend fun <P : APath, PL : APathLookup<P>> PL.write(
-    gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>
-): Sink = lookedUp.write(gateway)
-
-suspend fun <P : APath, PL : APathLookup<P>> PL.read(
-    gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>
-): Source = lookedUp.read(gateway)
+suspend fun <P : APath, PL : APathLookup<P>> PL.file(
+    gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>,
+    readWrite: Boolean
+): FileHandle = lookedUp.file(gateway, readWrite)
 
 suspend fun <P : APath, PL : APathLookup<P>> PL.canRead(
     gateway: APathGateway<P, out APathLookup<P>, out APathLookupExtended<P>>
@@ -90,6 +93,15 @@ fun APathLookup<*>.removePrefix(prefix: APath, overlap: Int = 0) =
     lookedUp.removePrefix(prefix, overlap)
 
 fun Collection<APathLookup<*>>.filterDistinctRoots(): Set<APathLookup<*>> {
+    log(VERBOSE) { "Creating lookup map..." }
     val lookupMap = this.associateBy { it.lookedUp }
-    return lookupMap.keys.filterDistinctRoots().map { lookupMap.getValue(it) }.toSet()
+    log(VERBOSE) { "Lookup map created with ${lookupMap.size} entries, now filtering..." }
+    return lookupMap.keys
+        .filterDistinctRoots()
+        .map { lookupMap.getValue(it) }
+        .toSet()
+        .also { log(VERBOSE) { "After filtering we got ${it.size} distinct roots" } }
 }
+
+val APathLookup<*>.extension: String?
+    get() = lookedUp.extension

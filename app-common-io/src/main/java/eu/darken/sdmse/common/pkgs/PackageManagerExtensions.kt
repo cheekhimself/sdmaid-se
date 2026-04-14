@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.pm.IPackageDataObserver
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.content.pm.SharedLibraryInfo
 import android.graphics.drawable.Drawable
 import android.os.RemoteException
@@ -17,11 +18,7 @@ import eu.darken.sdmse.common.hasApiLevel
 import eu.darken.sdmse.common.user.UserHandle2
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
-import java.io.IOException
 import kotlin.coroutines.resume
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.jvm.jvmErasure
 
 fun PackageManager.getPackageInfo2(
     pkgId: Pkg.Id,
@@ -47,21 +44,57 @@ fun PackageManager.getIcon2(
     ?.applicationInfo
     ?.let { if (it.icon != 0) it.loadIcon(this) else null }
 
-
-fun PackageManager.getInstalledPackagesAsUser(
-    flags: Int,
+fun PackageManager.getPackageInfosAsUser(
+    packageName: String,
+    flags: Long,
     userHandle: UserHandle2,
 ) = try {
-    PackageManager::class.memberFunctions
-        .filter { it.name == "getInstalledPackagesAsUser" }
-        .first {
-            val arg1 = it.parameters[1].type.jvmErasure
-            val arg2 = it.parameters[2].type.jvmErasure
-            Int::class.isSubclassOf(arg1) && Int::class.isSubclassOf(arg2)
-        }
-        .call(this, flags, userHandle.handleId) as List<PackageInfo>
+    val method = PackageManager::class.java.getMethod(
+        "getPackageInfoAsUser",
+        String::class.java,
+        Int::class.javaPrimitiveType,
+        Int::class.javaPrimitiveType,
+    )
+    method.invoke(this, packageName, flags.toInt(), userHandle.handleId) as PackageInfo?
 } catch (e: Exception) {
-    throw IOException("getInstalledPackagesAsUser($flags,$userHandle) failed", e)
+    log(ERROR) { e.asLog() }
+    null
+}
+
+fun PackageManager.getInstalledPackagesAsUser(
+    flags: Long,
+    userHandle: UserHandle2,
+) = try {
+    if (hasApiLevel(33)) {
+        @Suppress("NewApi", "UNCHECKED_CAST")
+        try {
+            val method = PackageManager::class.java.getMethod(
+                "getInstalledPackagesAsUser",
+                PackageInfoFlags::class.java,
+                Int::class.javaPrimitiveType,
+            )
+            method.invoke(this, PackageInfoFlags.of(flags), userHandle.handleId) as List<PackageInfo>
+        } catch (_: NoSuchMethodException) {
+            @Suppress("UNCHECKED_CAST")
+            val method = PackageManager::class.java.getMethod(
+                "getInstalledPackagesAsUser",
+                Int::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType,
+            )
+            method.invoke(this, flags.toInt(), userHandle.handleId) as List<PackageInfo>
+        }
+    } else {
+        @Suppress("UNCHECKED_CAST")
+        val method = PackageManager::class.java.getMethod(
+            "getInstalledPackagesAsUser",
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+        )
+        method.invoke(this, flags.toInt(), userHandle.handleId) as List<PackageInfo>
+    }
+} catch (e: Exception) {
+    log(ERROR) { e.asLog() }
+    throw e
 }
 
 // WORKAROUND

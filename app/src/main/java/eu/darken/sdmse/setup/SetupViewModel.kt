@@ -1,20 +1,31 @@
 package eu.darken.sdmse.setup
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.darken.sdmse.common.SingleLiveEvent
 import eu.darken.sdmse.common.WebpageTool
+import androidx.navigation.navOptions
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.flow.setupCommonEventHandlers
-import eu.darken.sdmse.common.navigation.navArgs
+import eu.darken.sdmse.common.navigation.routes.DashboardRoute
 import eu.darken.sdmse.common.permissions.Permission
+import eu.darken.sdmse.common.permissions.RuntimePermission
+import eu.darken.sdmse.common.pkgs.getLaunchIntent
+import eu.darken.sdmse.common.pkgs.getSettingsIntent
+import eu.darken.sdmse.common.pkgs.toPkgId
 import eu.darken.sdmse.common.uix.ViewModel3
 import eu.darken.sdmse.setup.automation.AutomationSetupCardVH
 import eu.darken.sdmse.setup.automation.AutomationSetupModule
+import eu.darken.sdmse.setup.inventory.InventorySetupCardVH
+import eu.darken.sdmse.setup.inventory.InventorySetupModule
 import eu.darken.sdmse.setup.notification.NotificationSetupCardVH
 import eu.darken.sdmse.setup.notification.NotificationSetupModule
 import eu.darken.sdmse.setup.root.RootSetupCardVH
@@ -27,14 +38,19 @@ import eu.darken.sdmse.setup.storage.StorageSetupCardVH
 import eu.darken.sdmse.setup.storage.StorageSetupModule
 import eu.darken.sdmse.setup.usagestats.UsageStatsSetupCardVH
 import eu.darken.sdmse.setup.usagestats.UsageStatsSetupModule
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class SetupViewModel @Inject constructor(
     @Suppress("unused") private val handle: SavedStateHandle,
     dispatcherProvider: DispatcherProvider,
+    @Suppress("StaticFieldLeak") @ApplicationContext private val context: Context,
     private val setupManager: SetupManager,
     private val storageSetupModule: StorageSetupModule,
     private val safSetupModule: SAFSetupModule,
@@ -44,145 +60,208 @@ class SetupViewModel @Inject constructor(
     private val shizukuSetupModule: ShizukuSetupModule,
 ) : ViewModel3(dispatcherProvider = dispatcherProvider) {
 
-    private val navArgs by handle.navArgs<SetupFragmentArgs>()
+    private val route = SetupRoute.from(handle)
 
     init {
         setupManager.setDismissed(false)
     }
 
     // TODO support filtering based on screenOptions.filterTypes
-    val screenOptions = navArgs.options ?: SetupScreenOptions()
+    val screenOptions = route.options ?: SetupScreenOptions()
 
     val events = SingleLiveEvent<SetupEvents>()
 
-    val listItems: LiveData<List<SetupAdapter.Item>> = setupManager.state
+    private val itemsStateFlow: StateFlow<List<SetupAdapter.Item>?> = setupManager.state
         .map { setupState ->
             val items = mutableListOf<SetupAdapter.Item>()
 
+            val typeFilter = screenOptions.typeFilter
             setupState.moduleStates
-                .filter { screenOptions.typeFilter == null || screenOptions.typeFilter.contains(it.type) }
-                .filter { !it.isComplete || screenOptions.showCompleted }
+                .filter { typeFilter == null || typeFilter.contains(it.type) }
+                .filter { it !is SetupModule.State.Current || !it.isComplete || screenOptions.showCompleted }
                 .mapNotNull { state ->
-                    when (state) {
-                        is SAFSetupModule.State -> SAFSetupCardVH.Item(
-                            state = state,
-                            onPathClicked = {
-                                if (!it.hasAccess) {
-                                    events.postValue(SetupEvents.SafRequestAccess(it))
-                                }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#storage-access-framework")
-                            },
-                        ).takeIf { it.state.paths.isNotEmpty() }
+                    when (state.type) {
+                        SetupModule.Type.SAF -> when (state) {
+                            is SetupModule.State.Current -> SAFSetupCardVH.Item(
+                                state = state as SAFSetupModule.Result,
+                                onPathClicked = {
+                                    if (!it.hasAccess) {
+                                        events.postValue(SetupEvents.SafRequestAccess(it))
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#storage-access-framework")
+                                },
+                            ).takeIf { it.state.paths.isNotEmpty() }
 
-                        is StorageSetupModule.State -> StorageSetupCardVH.Item(
-                            state = state,
-                            onPathClicked = {
-                                state.missingPermission.firstOrNull()?.let {
-                                    events.postValue(SetupEvents.RuntimePermissionRequests(it))
-                                }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#manage-storage")
-                            },
-                        )
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
 
-                        is RootSetupModule.State -> RootSetupCardVH.Item(
-                            state = state,
-                            onToggleUseRoot = {
-                                launch {
-                                    rootSetupModule.toggleUseRoot(it)
-                                    rootSetupModule.refresh()
-                                }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#root-access")
-                            },
-                        )
+                        SetupModule.Type.STORAGE -> when (state) {
+                            is SetupModule.State.Current -> StorageSetupCardVH.Item(
+                                state = state as StorageSetupModule.Result,
+                                onPathClicked = {
+                                    state.missingPermission.firstOrNull()?.let {
+                                        events.postValue(SetupEvents.RuntimePermissionRequests(it))
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#manage-storage")
+                                },
+                            )
 
-                        is UsageStatsSetupModule.State -> UsageStatsSetupCardVH.Item(
-                            state = state,
-                            onGrantAction = {
-                                state.missingPermission.firstOrNull()?.let {
-                                    events.postValue(SetupEvents.RuntimePermissionRequests(it))
-                                }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#usage-statistics")
-                            }
-                        )
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
 
-                        is AutomationSetupModule.State -> AutomationSetupCardVH.Item(
-                            state = state,
-                            onGrantAction = {
-                                launch {
-                                    automationSetupModule.setAllow(true)
-                                    automationSetupModule.refresh()
-                                    if (!state.canSelfEnable) {
-                                        events.postValue(SetupEvents.ConfigureAccessibilityService(state))
+                        SetupModule.Type.ROOT -> when (state) {
+                            is SetupModule.State.Current -> RootSetupCardVH.Item(
+                                state = state as RootSetupModule.Result,
+                                onToggleUseRoot = {
+                                    launch {
+                                        rootSetupModule.toggleUseRoot(it)
+                                        rootSetupModule.refresh()
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#root-access")
+                                },
+                            )
+
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
+
+                        SetupModule.Type.USAGE_STATS -> when (state) {
+                            is SetupModule.State.Current -> UsageStatsSetupCardVH.Item(
+                                state = state as UsageStatsSetupModule.Result,
+                                onGrantAction = {
+                                    state.missingPermission.firstOrNull()?.let {
+                                        events.postValue(SetupEvents.RuntimePermissionRequests(it))
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#usage-statistics")
+                                }
+                            )
+
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
+
+                        SetupModule.Type.AUTOMATION -> when (state) {
+                            is SetupModule.State.Current -> AutomationSetupCardVH.Item(
+                                state = state as AutomationSetupModule.Result,
+                                onGrantAction = {
+                                    launch {
+                                        automationSetupModule.setAllow(true)
+                                        automationSetupModule.refresh()
+                                        if (!state.canSelfEnable) {
+                                            events.postValue(SetupEvents.ConfigureAccessibilityService(state))
+                                        }
+                                    }
+                                },
+                                onDismiss = {
+                                    launch {
+                                        automationSetupModule.setAllow(false)
+                                        automationSetupModule.refresh()
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#accessibility-service")
+                                },
+                                onRestrictionsShow = {
+                                    events.postValue(SetupEvents.ShowOurDetailsPage(state.liftRestrictionsIntent))
+                                },
+                                onRestrictionsHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#acs-appops-restrictions")
+                                },
+                            )
+
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
+
+                        SetupModule.Type.NOTIFICATION -> when (state) {
+                            is SetupModule.State.Current -> NotificationSetupCardVH.Item(
+                                state = state as NotificationSetupModule.Result,
+                                onGrantAction = {
+                                    state.missingPermission.firstOrNull()?.let {
+                                        events.postValue(SetupEvents.RuntimePermissionRequests(it))
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#notifications")
+                                }
+                            )
+
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
+
+                        SetupModule.Type.SHIZUKU -> when (state) {
+                            is SetupModule.State.Current -> ShizukuSetupCardVH.Item(
+                                state = state as ShizukuSetupModule.Result,
+                                onToggleUseShizuku = {
+                                    launch { shizukuSetupModule.toggleUseShizuku(it) }
+                                },
+                                onHelp = {
+                                    webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#shizuku")
+                                },
+                                onOpen = {
+                                    state.pkg.getLaunchIntent(context)?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)?.let {
+                                        try {
+                                            context.startActivity(it)
+                                        } catch (e: ActivityNotFoundException) {
+                                            errorEvents.postValue(e)
+                                        }
                                     }
                                 }
-                            },
-                            onDismiss = {
-                                launch {
-                                    automationSetupModule.setAllow(false)
-                                    automationSetupModule.refresh()
+                            )
+
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
+
+                        SetupModule.Type.INVENTORY -> when (state) {
+                            is SetupModule.State.Current -> InventorySetupCardVH.Item(
+                                state = state as InventorySetupModule.Result,
+                                // TODO: If more setup cards need runtime-vs-settings branching, extract a shared helper
+                                onGrantAction = {
+                                    val result = state as InventorySetupModule.Result
+                                    val runtimePerm = result.missingPermission.firstOrNull { it is RuntimePermission }
+                                    if (runtimePerm != null) {
+                                        events.postValue(SetupEvents.RuntimePermissionRequests(runtimePerm))
+                                    } else {
+                                        events.postValue(SetupEvents.ShowOurDetailsPage(result.settingsIntent))
+                                    }
+                                },
+                                onHelp = {
+                                    webpageTool.open(InventorySetupModule.INFO_URL)
                                 }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#accessibility-service")
-                            },
-                            onRestrictionsShow = {
-                                events.postValue(SetupEvents.ShowOurDetailsPage(state.liftRestrictionsIntent))
-                            },
-                            onRestrictionsHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#acs-appops-restrictions")
-                            },
-                        )
+                            )
 
-                        is NotificationSetupModule.State -> NotificationSetupCardVH.Item(
-                            state = state,
-                            onGrantAction = {
-                                state.missingPermission.firstOrNull()?.let {
-                                    events.postValue(SetupEvents.RuntimePermissionRequests(it))
-                                }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#notifications")
-                            }
-                        )
-
-                        is ShizukuSetupModule.State -> ShizukuSetupCardVH.Item(
-                            state = state,
-                            onToggleUseShizuku = {
-                                launch { shizukuSetupModule.toggleUseShizuku(it) }
-                            },
-                            onHelp = {
-                                webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#shizuku")
-                            },
-                        )
-
-                        else -> throw IllegalArgumentException("Unknown state: $state")
+                            is SetupModule.State.Loading -> SetupModuleLoadingCardVH.Item(state)
+                        }
                     }
                 }
                 .sortedBy { item ->
                     if (screenOptions.showCompleted && !item.state.isComplete) {
                         Int.MIN_VALUE
+                    } else if (item is RootSetupCardVH.Item && item.state.isInstalled && item.state.useRoot == null) {
+                        Int.MIN_VALUE
                     } else {
-                        DISPLAY_ORDER.indexOfFirst { it.isInstance(item) }
+                        DISPLAY_ORDER.indexOfFirst { it == item.state.type }
                     }
                 }
                 .run { items.addAll(this) }
 
             items
         }
-        .onEach {
-            if (it.isEmpty() && !screenOptions.showCompleted) {
-                navback()
-            }
-        }
         .setupCommonEventHandlers(TAG) { "listItems" }
+        .stateIn(vmScope, SharingStarted.Eagerly, null)
+
+    val listItems: LiveData<List<SetupAdapter.Item>> = itemsStateFlow
+        .filterNotNull()
+        .asLiveData2()
+
+    val isSetupComplete: LiveData<Boolean> = itemsStateFlow
+        .map { items -> items != null && items.isEmpty() && !screenOptions.showCompleted }
+        .distinctUntilChanged()
         .asLiveData2()
 
     fun onSafAccessGranted(uri: Uri?) = launch {
@@ -205,13 +284,18 @@ class SetupViewModel @Inject constructor(
                     storageSetupModule.onPermissionChanged(permission, granted)
                 }
 
-                Permission.IGNORE_BATTERY_OPTIMIZATION -> {}
                 Permission.PACKAGE_USAGE_STATS -> {}
                 Permission.POST_NOTIFICATIONS -> {}
                 Permission.WRITE_SECURE_SETTINGS -> {}
+                Permission.QUERY_ALL_PACKAGES -> {}
+                Permission.GET_INSTALLED_APPS -> {}
                 null -> {}
             }
             setupManager.refresh()
+        } else if (permission == Permission.GET_INSTALLED_APPS) {
+            // Runtime dialog may not work on some OEMs — fall back to app settings
+            val settingsIntent = context.packageName.toPkgId().getSettingsIntent(context)
+            events.postValue(SetupEvents.ShowOurDetailsPage(settingsIntent))
         }
     }
 
@@ -222,7 +306,12 @@ class SetupViewModel @Inject constructor(
 
     fun navback() {
         if (screenOptions.isOnboarding) {
-            SetupFragmentDirections.actionSetupFragmentToDashboardFragment().navigate()
+            navigateTo(
+                DashboardRoute,
+                navOptions = navOptions {
+                    popUpTo(DashboardRoute) { inclusive = true }
+                }
+            )
         } else {
             popNavStack()
         }
@@ -230,12 +319,14 @@ class SetupViewModel @Inject constructor(
 
     companion object {
         private val DISPLAY_ORDER = listOf(
-            StorageSetupCardVH.Item::class,
-            SAFSetupCardVH.Item::class,
-            UsageStatsSetupCardVH.Item::class,
-            AutomationSetupCardVH.Item::class,
-            ShizukuSetupCardVH.Item::class,
-            RootSetupCardVH.Item::class,
+            SetupModule.Type.INVENTORY,
+            SetupModule.Type.NOTIFICATION,
+            SetupModule.Type.STORAGE,
+            SetupModule.Type.SAF,
+            SetupModule.Type.SHIZUKU,
+            SetupModule.Type.ROOT,
+            SetupModule.Type.USAGE_STATS,
+            SetupModule.Type.AUTOMATION,
         )
         private val TAG = logTag("Setup", "ViewModel")
     }

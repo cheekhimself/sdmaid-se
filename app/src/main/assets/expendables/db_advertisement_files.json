@@ -31,10 +31,12 @@
 	  "packages": ["com.tencent.mm"],
 	  "fileFilter": [
 		{
-		  "locations": ["SDCARD"],
-		  "startsWith": ["tencent/MicroMsg/"],
-		  "patterns": [
-			"^(?>tencent/MicroMsg/sns_ad_landingpages/)([\\W\\w]+?)$"
+		  "locations": ["SDCARD", "PUBLIC_DATA"],
+		  "startsWith": [
+			"tencent/MicroMsg/sns_ad_landingpages/",
+			"tencent/MicroMsg/hbstoryvideo/",
+			"com.tencent.mm/MicroMsg/sns_ad_landingpages/",
+			"com.tencent.mm/MicroMsg/hbstoryvideo/"
 		  ]
 		}
 	  ]
@@ -44,7 +46,7 @@
 		  "locations": ["SDCARD"],
 		  "startsWith": ["MidasOversea/"],
 		  "patterns": [
-			"^(?>MidasOversea/)([\\W\\w]+?)$"
+			"^(?>MidasOversea/)(.+?)$"
 		  ]
 		}
 	  ]
@@ -54,7 +56,7 @@
 		  "locations": ["SDCARD"],
 		  "startsWith": [".bmob/"],
 		  "patterns": [
-			"^(?>\\.bmob/)([\\W\\w]+?)$"
+			"^(?>\\.bmob/)(.+?)$"
 		  ]
 		}
 	  ]
@@ -142,6 +144,23 @@
 		  "patterns": [
 			"^com.miui.msa.global/filessplash_preload/.+?$",
 			"^com.miui.msa.global/filespush_ad_preload/.+?$"
+		  ]
+		}
+	  ]
+	}, {
+	  "packages": [
+		"com.lenovo.anyshare.gps",
+		"com.lenovo.anyshare",
+		"shareit.lite",
+		"shareit.premium"
+	  ],
+	  "fileFilter": [
+		{
+		  "locations": ["PUBLIC_DATA"],
+		  "contains": [
+			"/files/mb/",
+			"/files/cooperation/",
+			"/files/.ad/"
 		  ]
 		}
 	  ]

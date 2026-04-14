@@ -3,7 +3,6 @@ package eu.darken.sdmse.setup
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -11,19 +10,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import eu.darken.sdmse.R
-import eu.darken.sdmse.common.DeviceDetective
+import eu.darken.sdmse.common.EdgeToEdgeHelper
 import eu.darken.sdmse.common.WebpageTool
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.device.DeviceDetective
 import eu.darken.sdmse.common.error.asErrorDialogBuilder
 import eu.darken.sdmse.common.lists.differ.update
 import eu.darken.sdmse.common.lists.setupDefaults
+import eu.darken.sdmse.common.navigation.getSpanCount
+import eu.darken.sdmse.common.navigation.routes.DataAreasRoute
+import eu.darken.sdmse.common.navigation.safeNavigate
 import eu.darken.sdmse.common.permissions.Permission
 import eu.darken.sdmse.common.permissions.Specialpermission
 import eu.darken.sdmse.common.uix.Fragment3
@@ -43,7 +47,7 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
     @Inject lateinit var webpageTool: WebpageTool
     @Inject lateinit var deviceDetective: DeviceDetective
 
-    private lateinit var safRequestLauncher: ActivityResultLauncher<SAFSetupModule.State.PathAccess>
+    private lateinit var safRequestLauncher: ActivityResultLauncher<SAFSetupModule.Result.PathAccess>
     private var awaitedPermission: Permission? = null
     private lateinit var specialPermissionLauncher: ActivityResultLauncher<Intent>
     private lateinit var runtimePermissionLauncher: ActivityResultLauncher<String>
@@ -70,9 +74,22 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        EdgeToEdgeHelper(requireActivity()).apply {
+            insetsPadding(ui.root, left = true, right = true)
+            insetsPadding(ui.appbarlayout, top = true)
+            insetsPadding(ui.list, bottom = true)
+        }
+
+        ui.list.setupDefaults(
+            setupAdapter,
+            verticalDividers = false,
+            fastscroll = false,
+            layouter = GridLayoutManager(context, getSpanCount(widthDp = 720), GridLayoutManager.VERTICAL, false),
+        )
+
         ui.toolbar.apply {
             setupWithNavController(findNavController())
-            if (vm.screenOptions.isOnboarding) setNavigationIcon(R.drawable.ic_baseline_close_24)
+            if (vm.screenOptions.isOnboarding) setNavigationIcon(eu.darken.sdmse.common.ui.R.drawable.ic_baseline_close_24)
             setNavigationOnClickListener { vm.navback() }
             setOnMenuItemClickListener {
                 when (it.itemId) {
@@ -82,7 +99,7 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
                     }
 
                     R.id.action_show_areas -> {
-                        SetupFragmentDirections.actionSetupFragmentToDataAreasFragment().navigate()
+                        safeNavigate(DataAreasRoute)
                         true
                     }
 
@@ -92,10 +109,16 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
             menu?.findItem(R.id.action_show_areas)?.isVisible = !vm.screenOptions.isOnboarding
         }
 
-        ui.list.setupDefaults(setupAdapter, dividers = false)
-
         vm.listItems.observe2(ui) {
             setupAdapter.update(it)
+        }
+
+        var hasNavigatedBack = false
+        vm.isSetupComplete.observe2(ui) { isComplete ->
+            if (isComplete && !hasNavigatedBack) {
+                vm.navback()
+                hasNavigatedBack = true
+            }
         }
 
         vm.events.observe2(ui) { event ->
@@ -119,6 +142,7 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
                     }
                     errorDialog.show()
                 }
+
                 is SetupEvents.SafWrongPathError -> {
                     Snackbar.make(requireView(), R.string.setup_saf_error_wrong_path, Snackbar.LENGTH_LONG)
                         .setAction(eu.darken.sdmse.common.R.string.general_help_action) {
@@ -126,6 +150,7 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
                         }
                         .show()
                 }
+
                 is SetupEvents.RuntimePermissionRequests -> {
                     awaitedPermission = event.item
                     when (event.item) {
@@ -150,6 +175,7 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
                                 }
                             }
                         }
+
                         else -> try {
                             runtimePermissionLauncher.launch(event.item.permissionId)
                         } catch (e: ActivityNotFoundException) {
@@ -158,15 +184,16 @@ class SetupFragment : Fragment3(R.layout.setup_fragment) {
                         }
                     }
                 }
+
                 is SetupEvents.ConfigureAccessibilityService -> {
                     try {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        specialPermissionLauncher.launch(intent)
+                        specialPermissionLauncher.launch(event.item.settingsIntent)
                     } catch (e: Exception) {
                         log(TAG, ERROR) { "Failed to open accessibility settings page: ${e.asLog()}" }
                         e.asErrorDialogBuilder(requireActivity()).show()
                     }
                 }
+
                 is SetupEvents.ShowOurDetailsPage -> {
                     try {
                         startActivity(event.intent)

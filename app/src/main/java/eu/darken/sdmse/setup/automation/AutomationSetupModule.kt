@@ -10,24 +10,27 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import eu.darken.sdmse.automation.core.AutomationManager
-import eu.darken.sdmse.automation.core.AutomationService
-import eu.darken.sdmse.common.DeviceDetective
-import eu.darken.sdmse.common.SystemSettingsProvider.*
 import eu.darken.sdmse.common.coroutine.AppScope
 import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.device.DeviceDetective
+import eu.darken.sdmse.common.device.RomType
 import eu.darken.sdmse.common.flow.replayingShare
-import eu.darken.sdmse.common.permissions.Permission
 import eu.darken.sdmse.common.rngString
 import eu.darken.sdmse.common.root.RootManager
-import eu.darken.sdmse.common.shizuku.ShizukuManager
 import eu.darken.sdmse.main.core.GeneralSettings
 import eu.darken.sdmse.setup.SetupModule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import java.time.Instant
 import javax.inject.Inject
+import eu.darken.sdmse.setup.SetupBinding
 import javax.inject.Singleton
 
 @Singleton
@@ -38,20 +41,24 @@ class AutomationSetupModule @Inject constructor(
     private val automationManager: AutomationManager,
     private val deviceDetective: DeviceDetective,
     rootManager: RootManager,
-    shizukuManager: ShizukuManager,
 ) : SetupModule {
 
     private val refreshTrigger = MutableStateFlow(rngString)
-    override val state = combine(
+    override val state: Flow<SetupModule.State> = combine(
         rootManager.useRoot,
-        shizukuManager.useShizuku,
         refreshTrigger
-    ) { useRoot, useShizuku, _ ->
+    ) { useRoot, _ ->
         val isServiceEnabled = automationManager.isServiceEnabled()
         log(TAG) { "isServiceEnabled=$isServiceEnabled" }
 
         val isServiceRunning = automationManager.isServiceLaunched()
         log(TAG) { "isServiceRunning=$isServiceRunning" }
+
+        val canSelfEnable = automationManager.canSelfEnable()
+        log(TAG) { "canSelfEnable=$canSelfEnable" }
+
+        val isShortcutOrButtonEnabled = automationManager.isShortcutOrButtonEnabled()
+        log(TAG) { "isShortcutOrButtonEnabled=$isShortcutOrButtonEnabled" }
 
         val mightBeRestricted = context.mightBeRestrictedDueToSideload()
         log(TAG) { "mightBeRestricted=$mightBeRestricted" }
@@ -63,7 +70,10 @@ class AutomationSetupModule @Inject constructor(
         log(TAG) { "hasTriggeredRestrictions=$hasTriggeredRestrictions" }
 
         // https://cs.android.com/android/platform/superproject/+/master:packages/apps/Settings/src/com/android/settings/applications/appinfo/AppInfoDashboardFragment.java;l=520
-        val showAppOpsRestrictionHint = !hasPassedRestrictions && hasTriggeredRestrictions && mightBeRestricted
+        val showAppOpsRestrictionHint = !hasPassedRestrictions
+                && hasTriggeredRestrictions
+                && mightBeRestricted
+                && !canSelfEnable
         log(TAG) { "showAppOpsRestrictionHint=$showAppOpsRestrictionHint" }
 
         // Settings details screen needs to have the system UID, not ours, otherwise the appops setting is invisible
@@ -71,28 +81,33 @@ class AutomationSetupModule @Inject constructor(
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
-        val canSelfEnable = Permission.WRITE_SECURE_SETTINGS.isGranted(context)
-        log(TAG) { "canSelfEnable=$canSelfEnable" }
-
-        log(TAG) { "useShizuku: $useShizuku" }
         log(TAG) { "useRoot: $useRoot" }
 
-        State(
+        @Suppress("USELESS_CAST")
+        Result(
             isNotRequired = useRoot,
             hasConsent = generalSettings.hasAcsConsent.value(),
             canSelfEnable = canSelfEnable,
             isServiceEnabled = isServiceEnabled,
             isServiceRunning = isServiceRunning,
-            needsXiaomiAutostart = deviceDetective.isXiaomi() && !canSelfEnable,
+            isShortcutOrButtonEnabled = isShortcutOrButtonEnabled,
+            needsXiaomiAutostart = deviceDetective.getROMType() == RomType.MIUI && !canSelfEnable,
             liftRestrictionsIntent = liftRestrictionsIntent,
-            showAppOpsRestrictionHint = showAppOpsRestrictionHint
-        ).also { log(TAG) { "New ACS setup state: $it" } }
-    }.replayingShare(appScope)
+            showAppOpsRestrictionHint = showAppOpsRestrictionHint,
+            settingsIntent = when (deviceDetective.getROMType()) {
+                RomType.ANDROID_TV -> Intent(Settings.ACTION_SETTINGS)
+                else -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            }
+        ) as SetupModule.State
+    }
+        .onEach { log(TAG) { "New ACS setup state: $it" } }
+        .onStart { emit(Loading()) }
+        .replayingShare(appScope)
 
     suspend fun setAllow(allowed: Boolean) {
         log(TAG) { "setAllow($allowed)" }
         if (!allowed) {
-            AutomationService.instance?.let {
+            automationManager.currentService.first()?.let {
                 log(TAG) { "Disabling active accessibility service" }
                 it.disableSelf()
             }
@@ -107,19 +122,26 @@ class AutomationSetupModule @Inject constructor(
         refreshTrigger.value = rngString
     }
 
-    data class State(
+    data class Loading(
+        override val startAt: Instant = Instant.now(),
+    ) : SetupModule.State.Loading {
+        override val type: SetupModule.Type = SetupModule.Type.AUTOMATION
+    }
+
+    data class Result(
         val isNotRequired: Boolean,
         val hasConsent: Boolean?,
         val canSelfEnable: Boolean,
         val isServiceEnabled: Boolean,
         val isServiceRunning: Boolean,
+        val isShortcutOrButtonEnabled: Boolean,
         val needsXiaomiAutostart: Boolean,
         val liftRestrictionsIntent: Intent,
         val showAppOpsRestrictionHint: Boolean,
-    ) : SetupModule.State {
+        val settingsIntent: Intent,
+    ) : SetupModule.State.Current {
 
-        override val type: SetupModule.Type
-            get() = SetupModule.Type.AUTOMATION
+        override val type: SetupModule.Type = SetupModule.Type.AUTOMATION
 
         override val isComplete: Boolean = when {
             isNotRequired -> true // ACS not needed
@@ -138,6 +160,7 @@ class AutomationSetupModule @Inject constructor(
     @Module @InstallIn(SingletonComponent::class)
     abstract class DIM {
         @Binds @IntoSet abstract fun mod(mod: AutomationSetupModule): SetupModule
+        @Binds @SetupBinding(SetupModule.Type.AUTOMATION) abstract fun named(mod: AutomationSetupModule): SetupModule
     }
 
     companion object {

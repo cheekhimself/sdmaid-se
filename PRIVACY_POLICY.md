@@ -1,6 +1,12 @@
+---
+layout: plain
+permalink: /privacy
+title: "Privacy Policy"
+---
+
 # Privacy policy
 
-This is the privacy policy for the Android app "SD Maid 2/SE".
+This is the privacy policy for the Android app "SD Maid 2/SE" by Matthias Urhahn (darken).
 
 ## Preamble
 
@@ -22,9 +28,18 @@ In general, SD Maid only processes data locally, on your device. Two edge cases 
 
 ### Query installed apps
 
-SD Maid can show you which files belong to uninstalled applications. To do this SD Maid needs to know which applications
-are currently installed. Retrieving the information about all currently installed applications requires
-the `QUERY_ALL_PACKAGES` permission. Information is processed locally on your device.
+SD Maid has multiple features that require the `QUERY_ALL_PACKAGES` permission.
+The `QUERY_ALL_PACKAGES` permission allows SD Maid to retrieve the inventory of installed apps, i.e. know which apps you currently have installed on your device.
+
+Information about your installed apps is only processed locally on your device.
+
+Features that use this permission:
+* "CorpseFinder" can show you which files belong to uninstalled applications. To do this SD Maid needs to know which applications are currently installed.
+* "StorageAnalyzer" shows how much space different apps occupy on each of your storage devices (built-in, removable sdcard and mass storage devices). Results are divided into "app files", "user files" and "system data".
+SD Maid needs to know which apps you have installed to be able to interpret the results correctly.
+* "AppCleaner" suggests files that can be deleted to gain more storage space. Each suggested file belongs to an installed app this requires knowing all installed apps.
+* "AppControl" offers a searchable and filterable list of apps on your device. Depending your device, various actions are available per app, as well as batch operations on multiple apps.
+* "SystemCleaner" searches the device based on user supplied criteria. One criteria can be to find APKs which are already installed. To determine if an APK is already installed, SD Maid needs to which apps are currently installed on your device.
 
 ### Accessibility service
 

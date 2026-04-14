@@ -2,7 +2,7 @@ package eu.darken.sdmse.setup.saf
 
 import android.content.res.ColorStateList
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import eu.darken.sdmse.R
 import eu.darken.sdmse.common.getColorForAttr
 import eu.darken.sdmse.common.lists.BindableVH
@@ -26,13 +26,13 @@ class SAFCardPathAdapter @Inject constructor() :
     override fun getItemCount(): Int = data.size
 
     init {
-        addMod(DataBinderMod(data))
+        addMod(DataBinderMod({ data }))
         addMod(SimpleVHCreatorMod { VH(it) })
     }
 
     data class Item(
-        val pathAccess: SAFSetupModule.State.PathAccess,
-        val onClicked: (SAFSetupModule.State.PathAccess) -> Unit,
+        val pathAccess: SAFSetupModule.Result.PathAccess,
+        val onClicked: (SAFSetupModule.Result.PathAccess) -> Unit,
     ) : DifferItem {
         override val stableId: Long = this.javaClass.hashCode().toLong()
     }
@@ -52,7 +52,7 @@ class SAFCardPathAdapter @Inject constructor() :
                     if (item.pathAccess.hasAccess) R.drawable.folder_lock_open else R.drawable.folder_lock
                 )
                 imageTintList = if (item.pathAccess.hasAccess) {
-                    ColorStateList.valueOf(ContextCompat.getColor(context, R.color.state_positive_3))
+                    ColorStateList.valueOf(context.getColorForAttr(androidx.appcompat.R.attr.colorPrimary))
                 } else {
                     ColorStateList.valueOf(context.getColorForAttr(androidx.appcompat.R.attr.colorControlNormal))
                 }
@@ -60,7 +60,7 @@ class SAFCardPathAdapter @Inject constructor() :
 
             primary.text = item.pathAccess.label.get(context)
             secondary.text = item.pathAccess.localPath.userReadablePath.get(context)
-
+            tertiary.isVisible = item.pathAccess.hasAccess
             itemView.setOnClickListener { item.onClicked(item.pathAccess) }
         }
 

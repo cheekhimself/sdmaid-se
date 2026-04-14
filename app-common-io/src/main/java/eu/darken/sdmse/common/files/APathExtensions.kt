@@ -1,23 +1,24 @@
 package eu.darken.sdmse.common.files
 
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.log
-import eu.darken.sdmse.common.files.local.*
+import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.files.local.crumbsTo
 import eu.darken.sdmse.common.files.local.isAncestorOf
 import eu.darken.sdmse.common.files.local.isParentOf
 import eu.darken.sdmse.common.files.local.startsWith
-import eu.darken.sdmse.common.files.saf.*
+import eu.darken.sdmse.common.files.saf.SAFPath
 import eu.darken.sdmse.common.files.saf.crumbsTo
 import eu.darken.sdmse.common.files.saf.isAncestorOf
 import eu.darken.sdmse.common.files.saf.isParentOf
 import eu.darken.sdmse.common.files.saf.startsWith
-import okio.Sink
-import okio.Source
+import kotlinx.coroutines.flow.Flow
+import okio.FileHandle
 import java.io.File
 import java.io.IOException
 import java.time.Instant
-import java.util.*
+import java.util.Collections
 import eu.darken.sdmse.common.files.local.removePrefix as removePrefixLocalPath
 import eu.darken.sdmse.common.files.saf.removePrefix as removePrefixSafPath
 
@@ -39,11 +40,19 @@ fun APath.asFile(): File = when (this) {
     else -> File(this.path)
 }
 
-fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> P.walk(
+suspend fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> P.walk(
     gateway: GT,
-    filter: suspend (PL) -> Boolean = { true }
-): PathTreeFlow<P, PL, PLE, GT> {
-    return PathTreeFlow(gateway, this, filter)
+    options: APathGateway.WalkOptions<P, PL> = APathGateway.WalkOptions()
+): Flow<PL> {
+    return gateway.walk(this, options)
+}
+
+
+suspend fun <P : APath, PL : APathLookup<P>, PLE : APathLookupExtended<P>, GT : APathGateway<P, PL, PLE>> P.du(
+    gateway: GT,
+    options: APathGateway.DuOptions<P, PL> = APathGateway.DuOptions()
+): Long {
+    return gateway.du(this, options)
 }
 
 suspend fun <T : APath> T.exists(gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>): Boolean {
@@ -98,42 +107,53 @@ suspend fun <T : APath> T.createDirIfNecessary(gateway: APathGateway<T, out APat
     return this
 }
 
-suspend fun <T : APath> T.delete(gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>) {
-    gateway.delete(this)
-    log(VERBOSE) { "APath.delete(): Deleted $this" }
+suspend fun <T : APath> T.delete(
+    gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>,
+    recursive: Boolean = false,
+) {
+    gateway.delete(
+        this,
+        recursive = recursive
+    )
+    log(VERBOSE) { "APath.delete(recursive=$recursive): Deleted $this" }
 }
 
-// TODO move this into the gateways?
-suspend fun <T : APath> T.deleteAll(
+suspend fun <T : APath> T.deleteWalk(
     gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>,
     filter: (APathLookup<*>) -> Boolean = { true }
 ) {
     try {
-        // Recursion enter
         val lookup = gateway.lookup(this)
 
         if (lookup.isDirectory) {
-            gateway.listFiles(this).forEach { it.deleteAll(gateway, filter) }
+            gateway.listFiles(this).forEach {
+                it.deleteWalk(gateway, filter) // Recursion enter
+            }
         }
 
         if (!filter(lookup)) {
             log(VERBOSE) { "Skipped due to filter: $this" }
             return
         }
-    } catch (e: ReadException) {
-        if (!gateway.exists(this)) return else throw e
+    } catch (e: PathException) {
+        val exists = gateway.exists(this)
+        if (!exists) {
+            log(WARN) { "Path failed to delete, but no longer exists: $this" }
+            return
+        } else {
+            throw e
+        }
     }
 
     // Recursion exit
-    this.delete(gateway)
+    this.delete(gateway, recursive = false)
 }
 
-suspend fun <T : APath> T.write(gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>): Sink {
-    return gateway.write(this)
-}
-
-suspend fun <T : APath> T.read(gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>): Source {
-    return gateway.read(this)
+suspend fun <T : APath> T.file(
+    gateway: APathGateway<T, out APathLookup<T>, out APathLookupExtended<T>>,
+    readWrite: Boolean,
+): FileHandle {
+    return gateway.file(this, readWrite)
 }
 
 suspend fun <T : APath> T.createSymlink(
@@ -271,3 +291,8 @@ fun Collection<APath>.filterDistinctRoots(): Set<APath> = this
         }
     }
     .toSet()
+
+val APath.extension: String?
+    get() = name.substringAfterLast('.', "").takeIf { it.isNotEmpty() }
+
+fun APath.child(segs: Segments) = child(*segs.toTypedArray())

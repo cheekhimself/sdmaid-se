@@ -1,6 +1,5 @@
 package eu.darken.sdmse.common.permissions
 
-import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
@@ -9,13 +8,15 @@ import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.PowerManager
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import eu.darken.sdmse.common.BuildConfigWrap
-import eu.darken.sdmse.common.DeviceDetective
-import kotlin.reflect.full.isSubclassOf
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
+import eu.darken.sdmse.common.debug.logging.log
+import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.device.DeviceDetective
+import eu.darken.sdmse.common.device.RomType
 
 
 @Suppress("ClassName")
@@ -28,24 +29,6 @@ sealed class Permission(
 
     object POST_NOTIFICATIONS
         : Permission("android.permission.POST_NOTIFICATIONS"), RuntimePermission
-
-    @SuppressLint("BatteryLife")
-    object IGNORE_BATTERY_OPTIMIZATION
-        : Permission("android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"), Specialpermission {
-        override fun isGranted(context: Context): Boolean {
-            val pwm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            return pwm.isIgnoringBatteryOptimizations(BuildConfigWrap.APPLICATION_ID)
-        }
-
-        override fun createIntent(context: Context, deviceDetective: DeviceDetective): Intent = Intent().apply {
-            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-            data = Uri.fromParts("package", context.packageName, null)
-        }
-
-        override fun createIntentFallback(context: Context): Intent = Intent().apply {
-            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     object MANAGE_EXTERNAL_STORAGE
@@ -72,6 +55,10 @@ sealed class Permission(
 
     object PACKAGE_USAGE_STATS
         : Permission("android.permission.PACKAGE_USAGE_STATS"), Specialpermission {
+        private val TAG = logTag("Permission", "UsageStats")
+
+
+        @Suppress("DEPRECATION")
         override fun isGranted(context: Context): Boolean {
             val applicationInfo = context.packageManager.getApplicationInfo(context.packageName, 0)
             val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -80,21 +67,65 @@ sealed class Permission(
                 applicationInfo.uid,
                 applicationInfo.packageName
             )
-            return mode == AppOpsManager.MODE_ALLOWED
+            log(TAG, VERBOSE) { "checkOpNoThrow(OPSTR_GET_USAGE_STATS)=$mode" }
+
+            return when (mode) {
+                AppOpsManager.MODE_ALLOWED -> {
+                    log(TAG, VERBOSE) { "MODE_ALLOWED: Permission explicitly allowed via AppOps" }
+                    true
+                }
+
+                AppOpsManager.MODE_IGNORED, AppOpsManager.MODE_ERRORED -> {
+                    log(TAG, VERBOSE) { "MODE_IGNORED|MODE_ERRORED: Permission explicitly denied via AppOps" }
+                    false
+                }
+
+                AppOpsManager.MODE_DEFAULT -> {
+                    log(TAG, VERBOSE) { "MODE_DEFAULT: Has not been changed or errorneous report." }
+                    val result = ContextCompat.checkSelfPermission(context, permissionId)
+                    log(TAG, VERBOSE) { "checkSelfPermission(PACKAGE_USAGE_STATS)=$result" }
+                    result == PackageManager.PERMISSION_GRANTED
+                }
+
+                else -> {
+                    log(TAG, WARN) { "Unknown mode $mode, assuming permission denied" }
+                    false
+                }
+            }
         }
 
         override fun createIntent(context: Context, deviceDetective: DeviceDetective): Intent {
             val defaultIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             return when {
                 defaultIntent.resolveActivities(context).isNotEmpty() -> return defaultIntent
-                deviceDetective.isAndroidTV() -> Intent(Settings.ACTION_APPLICATION_SETTINGS)
+                deviceDetective.getROMType() == RomType.ANDROID_TV -> Intent(Settings.ACTION_APPLICATION_SETTINGS)
                 else -> Intent(Settings.ACTION_SETTINGS)
             }
         }
     }
 
-    object WRITE_SECURE_SETTINGS
+    data object WRITE_SECURE_SETTINGS
         : Permission("android.permission.WRITE_SECURE_SETTINGS")
+
+    data object QUERY_ALL_PACKAGES
+        : Permission("android.permission.QUERY_ALL_PACKAGES")
+
+    // Non-AOSP permission from Chinese TAF standard (TTAF 108-2022).
+    // Required by Chinese ROMs (HyperOS, ColorOS, OriginOS, HarmonyOS) to access the full app list.
+    // Does not exist on AOSP/Pixel/Samsung — isGranted() returns true when absent.
+    data object GET_INSTALLED_APPS
+        : Permission("com.android.permission.GET_INSTALLED_APPS"), RuntimePermission {
+        override fun isGranted(context: Context): Boolean {
+            val exists = try {
+                context.packageManager.getPermissionInfo(permissionId, 0)
+                true
+            } catch (_: Exception) {
+                false
+            }
+            if (!exists) return true
+            return super.isGranted(context)
+        }
+    }
 
     fun Intent.resolveActivities(context: Context): Collection<ResolveInfo> =
         context.packageManager.queryIntentActivities(
@@ -105,10 +136,16 @@ sealed class Permission(
     companion object {
         // Without lazy there is an NPE: https://youtrack.jetbrains.com/issue/KT-25957
         val values: List<Permission> by lazy {
-            Permission::class.nestedClasses
-                .filter { clazz -> clazz.isSubclassOf(Permission::class) }
-                .map { clazz -> clazz.objectInstance }
-                .filterIsInstance<Permission>()
+            listOf(
+                POST_NOTIFICATIONS,
+                MANAGE_EXTERNAL_STORAGE,
+                WRITE_EXTERNAL_STORAGE,
+                READ_EXTERNAL_STORAGE,
+                PACKAGE_USAGE_STATS,
+                WRITE_SECURE_SETTINGS,
+                QUERY_ALL_PACKAGES,
+                GET_INSTALLED_APPS,
+            )
         }
 
         fun fromId(rawId: String) = values.singleOrNull { it.permissionId == rawId }

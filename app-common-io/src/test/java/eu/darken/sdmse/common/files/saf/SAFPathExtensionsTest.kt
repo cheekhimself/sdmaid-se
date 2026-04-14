@@ -4,7 +4,6 @@ import android.net.Uri
 import eu.darken.sdmse.common.files.*
 import eu.darken.sdmse.common.files.isAncestorOf
 import eu.darken.sdmse.common.files.removePrefix
-import eu.darken.sdmse.common.files.saf.*
 import eu.darken.sdmse.common.files.startsWith
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -14,9 +13,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import testhelpers.BaseTest
+import testhelpers.TestApplication
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [33], application = TestApplication::class)
 class SAFPathExtensionsTest : BaseTest() {
     private val baseTreeUri = "content://com.android.externalstorage.documents/tree/primary%3A"
 
@@ -324,6 +324,8 @@ class SAFPathExtensionsTest : BaseTest() {
         }
         prefixLookup.removePrefix(preLookup) shouldBe segs("fix")
         prefixLookup.removePrefix(pre) shouldBe segs("fix")
+
+        prefix.removePrefix(SAFPath.build(baseTreeUri)) shouldBe segs("pre", "fix")
     }
 
     @Test fun `remove prefix with overlap`() {

@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name_upgraded">SD Maid SE FOSS</string>
     <string name="app_name_upgrade_postfix">FOSS</string>
-    <string name="upgrade_feature_requires_pro">Yêu cầu SD Maid SE Pro</string>
-    <string name="upgrades_dashcard_title">Nâng cấp SD Maid</string>
+    <string name="upgrade_feature_requires_pro">Yêu cầu SD Maid SE FOSS</string>
+    <string name="upgrades_dashcard_title">Nâng cấp SD Maid SE</string>
     <string name="upgrades_dashcard_body">Mở khóa các tính năng bổ sung và trở thành người bảo trợ để hỗ trợ sự phát triển liên tục!</string>
     <string name="upgrades_dashcard_upgrade_action">Nâng cấp</string>
     <string name="upgrade_screen_title">Cải thiện SD Maid</string>
@@ -15,9 +15,5 @@
     <string name="upgrade_screen_sponsor_action">Tài trợ nhà phát triển</string>
     <string name="upgrade_screen_sponsor_action_hint">Giải pháp thay thế là quảng cáo, phân tích và Google Play 🙁</string>
     <string name="upgrade_screen_thanks_toast">Cảm ơn bạn đã hỗ trợ phát triển mã nguồn mở ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">Cùng nhau, chúng ta đã làm cho nó phát hành đầu tiên! Cảm ơn bạn đã giúp tôi thử nghiệm! Quá trình phát triển tất nhiên sẽ tiếp tục, nhưng giờ đây bạn có thể chuyển sang các bản dựng không phải beta. Làm điều này bằng cách tải xuống bản phát hành ổn định mới nhất.</string>
-    <string name="nudge_betagoodbye_hint">Lưu ý nhỏ: Xếp hạng được đưa ra trong quá trình thử nghiệm chỉ hiển thị với tôi, tôi sẽ đánh giá cao nếu bạn có thể xếp hạng SD Maid công khai nếu bạn hài lòng.</string>
-    <string name="nudge_betagoodbye_positive_action">Chọn không tham gia</string>
-    <string name="nudge_betagoodbye_negative_action">Tiếp tục thử nghiệm</string>
+    <string name="upgrade_screen_sponsor_return_too_quick">Quay lại rồi? Sự ủng hộ của bạn giúp SD Maid tồn tại!</string>
 </resources>

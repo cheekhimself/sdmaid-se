@@ -8,6 +8,7 @@ import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 import eu.darken.sdmse.common.BuildConfigWrap
 import eu.darken.sdmse.common.BuildWrap
+import eu.darken.sdmse.common.coil.CoilTempFiles
 import eu.darken.sdmse.common.coroutine.AppScope
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.debug.AutomaticBugReporter
@@ -15,19 +16,27 @@ import eu.darken.sdmse.common.debug.Bugs
 import eu.darken.sdmse.common.debug.DebugSettings
 import eu.darken.sdmse.common.debug.logging.LogCatLogger
 import eu.darken.sdmse.common.debug.logging.Logging
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.error.installErrorDialogCustomizer
+import eu.darken.sdmse.setup.installShowSetupHint
+import eu.darken.sdmse.common.debug.memory.MemoryMonitor
 import eu.darken.sdmse.common.debug.recorder.core.RecorderModule
 import eu.darken.sdmse.common.theming.Theming
 import eu.darken.sdmse.common.updater.UpdateService
 import eu.darken.sdmse.main.core.CurriculumVitae
 import eu.darken.sdmse.main.core.GeneralSettings
+import eu.darken.sdmse.main.core.shortcuts.ShortcutManager
+import eu.darken.sdmse.stats.core.SpaceMonitorControl
+import eu.darken.sdmse.stats.core.TaskStatsCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @HiltAndroidApp
 open class App : Application(), Configuration.Provider {
@@ -43,6 +52,11 @@ open class App : Application(), Configuration.Provider {
     @Inject lateinit var curriculumVitae: CurriculumVitae
     @Inject lateinit var updateService: UpdateService
     @Inject lateinit var theming: Theming
+    @Inject lateinit var coilTempFiles: CoilTempFiles
+    @Inject lateinit var memoryMonitor: MemoryMonitor
+    @Inject lateinit var shortcutManager: ShortcutManager
+    @Inject lateinit var spaceMonitorControl: SpaceMonitorControl
+    @Inject lateinit var taskStatsCoordinator: TaskStatsCoordinator
 
     private val logCatLogger = LogCatLogger()
 
@@ -70,37 +84,56 @@ open class App : Application(), Configuration.Provider {
 
             Bugs.isDebug = isDebug || recorder.isRecording
             Bugs.isTrace = isDebug && isTrace
-            Bugs.isDryRun = isDryRun
+            Bugs.isDryRun = isDebug && isDryRun
         }.launchIn(appScope)
 
         bugReporter.setup(this)
 
-        recorderModule.state
-            .onEach { log(TAG) { "RecorderModule: $it" } }
-            .launchIn(appScope)
-
         theming.setup()
 
+        installErrorDialogCustomizer()
+        installShowSetupHint()
+
+        memoryMonitor.register()
+
+        appScope.launch { coilTempFiles.cleanUp() }
         Coil.setImageLoader(imageLoaderFactory)
 
         curriculumVitae.updateAppLaunch()
 
+        shortcutManager.initialize()
+        taskStatsCoordinator.start()
+        spaceMonitorControl.start()
+
+        val oldHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            log(TAG, ERROR) { "UNCAUGHT EXCEPTION: ${throwable.asLog()}" }
+
+            if (throwable is OutOfMemoryError) {
+                log(TAG, ERROR) { "OutOfMemoryError detected! Memory risk: ${memoryMonitor.getMemoryPressureRisk()}" }
+                memoryMonitor.logCurrentMemoryState()
+            }
+
+            if (oldHandler != null) oldHandler.uncaughtException(thread, throwable) else exitProcess(1)
+            Thread.sleep(100)
+        }
+
         log(TAG) { "onCreate() done! ${Exception().asLog()}" }
     }
 
-
-    override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
-        .setMinimumLoggingLevel(
-            when {
-                BuildConfigWrap.DEBUG -> android.util.Log.VERBOSE
-                BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.DEV -> android.util.Log.DEBUG
-                BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.BETA -> android.util.Log.INFO
-                BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.RELEASE -> android.util.Log.WARN
-                else -> android.util.Log.VERBOSE
-            }
-        )
-        .setWorkerFactory(workerFactory)
-        .build()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setMinimumLoggingLevel(
+                when {
+                    BuildConfigWrap.DEBUG -> android.util.Log.VERBOSE
+                    BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.DEV -> android.util.Log.DEBUG
+                    BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.BETA -> android.util.Log.INFO
+                    BuildConfigWrap.BUILD_TYPE == BuildConfigWrap.BuildType.RELEASE -> android.util.Log.WARN
+                    else -> android.util.Log.VERBOSE
+                }
+            )
+            .setWorkerFactory(workerFactory)
+            .build()
 
     companion object {
         internal val TAG = logTag("App")

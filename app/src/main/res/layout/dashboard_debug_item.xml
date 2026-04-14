@@ -2,9 +2,10 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/DashboardCardItem"
+    style="@style/BaseCardItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    app:cardBackgroundColor="?attr/colorSecondaryContainer"
     tools:ignore="HardcodedText">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +20,8 @@
             android:src="@drawable/ic_spider_thread_onsurface"
             app:layout_constraintBottom_toBottomOf="@id/title"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/title" />
+            app:layout_constraintTop_toTopOf="@id/title"
+            app:tint="?colorOnSecondaryContainer" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title"
@@ -27,7 +29,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Debug mode is enabled"
+            android:text="@string/debug_card_title"
+            android:textColor="?colorOnSecondaryContainer"
             app:layout_constraintStart_toEndOf="@id/icon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed" />
@@ -44,28 +47,33 @@
                 style="@style/Widget.Material3.CompoundButton.MaterialSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Enable trace mode" />
+                android:text="@string/debug_card_trace_mode_label"
+                android:textColor="?colorOnSecondaryContainer" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/dryrun_enabled"
                 style="@style/Widget.Material3.CompoundButton.MaterialSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Enable dry-run mode" />
+                android:text="@string/debug_card_dryrun_mode_label"
+                android:textColor="?colorOnSecondaryContainer" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/areas_reload_action"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reload data areas" />
+                android:layout_marginTop="8dp"
+                android:text="@string/debug_card_areas_reload_action"
+                android:textColor="?colorOnSecondaryContainer" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/pkgs_reload_action"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reload apps" />
+                android:text="@string/debug_card_pkgs_reload_action"
+                android:textColor="?colorOnSecondaryContainer" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/root_test_state"
@@ -73,6 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:textColor="?colorOnSecondaryContainer"
                 tools:text="Root test: Consent=true, Magisk=true, Service=LoremIpsum" />
 
             <com.google.android.material.button.MaterialButton
@@ -80,7 +89,8 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Test root" />
+                android:text="@string/debug_card_root_test_action"
+                android:textColor="?colorOnSecondaryContainer" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/shizuku_test_state"
@@ -88,6 +98,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:textColor="?colorOnSecondaryContainer"
                 tools:text="Shizuku test: Consent=true, Magisk=true, Service=LoremIpsum" />
 
             <com.google.android.material.button.MaterialButton
@@ -95,21 +106,36 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Test Shizuku" />
+                android:text="@string/debug_card_shizuku_test_action"
+                android:textColor="?colorOnSecondaryContainer" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/unknown_folders_action"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Check unknown folders" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/test_action"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Run tests" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/logview_action"
-                style="@style/Widget.Material3.Button"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="View log" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/acs_debug_action"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start ACS debug" />
 
         </LinearLayout>
 

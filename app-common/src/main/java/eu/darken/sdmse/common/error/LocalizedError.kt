@@ -17,6 +17,7 @@ data class LocalizedError(
     val description: CaString,
     val fixActionLabel: CaString? = null,
     val fixAction: ((Activity) -> Unit)? = null,
+    val infoActionLabel: CaString? = null,
     val infoAction: ((Activity) -> Unit)? = null,
 ) {
     fun asText() = caString { "${label.get(it)}:\n${description.get(it)}" }
@@ -26,7 +27,7 @@ fun Throwable.localized(c: Context): LocalizedError = when {
     this is HasLocalizedError -> this.getLocalizedError()
     this is ActivityNotFoundException -> LocalizedError(
         throwable = this,
-        label = caString { "${c.getString(R.string.general_error_label)} - ${this::class.simpleName!!}" },
+        label = caString { "${c.getString(R.string.general_error_label)} - ${this@localized::class.simpleName!!}" },
         description = caString {
             "${it.getString(R.string.general_error_no_compatible_app_found_msg)}\n$localizedMessage"
         }
@@ -34,18 +35,18 @@ fun Throwable.localized(c: Context): LocalizedError = when {
 
     localizedMessage != null -> LocalizedError(
         throwable = this,
-        label = caString { "${c.getString(R.string.general_error_label)} - ${this::class.simpleName!!}" },
+        label = caString { "${c.getString(R.string.general_error_label)} - ${this@localized::class.simpleName!!}" },
         description = caString { localizedMessage ?: getStackTracePeek() }
     )
 
     else -> LocalizedError(
         throwable = this,
-        label = caString { "${c.getString(R.string.general_error_label)} - ${this::class.simpleName!!}" },
+        label = caString { "${c.getString(R.string.general_error_label)} - ${this@localized::class.simpleName!!}" },
         description = caString { getStackTracePeek() }
     )
 }
 
-private fun Throwable.getStackTracePeek() = this.stackTraceToString()
+internal fun Throwable.getStackTracePeek() = this.stackTraceToString()
     .lines()
     .filterIndexed { index, _ -> index > 1 }
     .take(3)

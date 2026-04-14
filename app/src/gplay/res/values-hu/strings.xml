@@ -3,11 +3,19 @@
     <string name="app_name_upgraded">SD Maid SE Pro</string>
     <string name="app_name_upgrade_postfix">Pro</string>
     <string name="upgrade_feature_requires_pro">SD Maid SE Pro szükséges</string>
-    <string name="upgrades_dashcard_title">Az SD Maid frissítése</string>
-    <string name="upgrades_dashcard_body">Az SD Maid Pro jobb eredményeket, több funkciót és lehetőséget kínál a nagy teljesítményű felhasználók számára.</string>
+    <string name="upgrades_dashcard_title">SD Maid SE frissítése</string>
+    <string name="upgrades_dashcard_body">Az SD Maid SE Pro jobb eredményeket, több funkciót és lehetőséget kínál haladó felhasználóknak.</string>
     <string name="upgrades_dashcard_upgrade_action">Frissítés</string>
     <string name="upgrades_gplay_unavailable_error_title">A Google Play nem elérhető</string>
     <string name="upgrades_gplay_unavailable_error_description">SD Maid nem tud csatlakozni a Google Playhez. Telepített és naprakész a Google Play? Be vagy jelentkezve a Google-fiókodba? Próbáld meg a Google Play gyorsítótárának törlését és a készülék újraindítását.</string>
+    <string name="upgrades_gplay_billing_error_label">Google Play hiba</string>
+    <string name="upgrades_gplay_billing_error_description">Probléma lépett fel a Google Playjel. Kérjük, próbáld újra később, vagy indítsd újra a készüléked.\n\nRészletek: %s</string>
+    <string name="upgrades_gplay_internal_error_title">Google Play hiba</string>
+    <string name="upgrades_gplay_internal_error_description">Belső Google Play hiba történt. Kérjük, próbáld meg a következőket:\n\n• Indítsd újra a készüléked\n• Töröld a Google Play Áruház gyorsítótárát\n• Próbáld újra később</string>
+    <string name="upgrades_gplay_network_error_title">Kapcsolódási hiba</string>
+    <string name="upgrades_gplay_network_error_description">Nem sikerült csatlakozni a Google Playhez. Kérjük, ellenőrizd az internetkapcsolatod, és próbáld újra.</string>
+    <string name="upgrades_gplay_already_owned_error_title">Már megvásárolva</string>
+    <string name="upgrades_gplay_already_owned_error_description">Használd a \"Vásárlás visszaállítása\" lehetőséget a vásárlás visszaállításához. Ha a probléma továbbra is fennáll, próbáld meg törölni a Google Play gyorsítótárát és újraindítani a készüléked.</string>
     <string name="upgrades_no_purchases_found_check_account">Nem található vásárlás. A megfelelő fiókot használja?</string>
     <string name="upgrade_screen_title">Szerezze be az SD Maid SE Pro-t</string>
     <string name="upgrade_screen_preamble">Az SD Maid nem tartalmaz hirdetéseket, és nem értékesít felhasználói adatokat. A munkámat Ön finanszírozza ❤️.</string>
@@ -21,9 +29,9 @@
     <string name="upgrade_screen_iap_action">Egyszeri vásárlás</string>
     <string name="upgrade_screen_iap_action_hint">Az egyszeri vásárlás ára %s.</string>
     <string name="upgrade_screen_thanks_toast">Te vagy a legjobb! ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">Együtt eljutottunk az első kiadásig! Köszönöm, hogy segítettél! A fejlesztés természetesen folytatódik, de most már átválthat stabilabb buildekre is, ha akar. Ehhez leiratkozhat a tesztelésről a Google Playen.</string>
-    <string name="nudge_betagoodbye_hint">Apró megjegyzés: A tesztelés során adott értékeléseket csak én látom, hálás lennék, ha nyilvánosan értékelné az SD Maid-et, ha elégedett.</string>
-    <string name="nudge_betagoodbye_positive_action">Kimenet</string>
-    <string name="nudge_betagoodbye_negative_action">Folytasd a tesztelést</string>
+    <string name="upgrade_screen_restore_purchase_action">Vásárlás visszaállítása</string>
+    <string name="upgrade_screen_restore_purchase_message">A frissítés az ugyanazon Google-fiókhoz tartozó összes eszközre érvényes.</string>
+    <string name="upgrade_screen_restore_troubleshooting_msg">Hibaelhárítási tippek a fel nem ismert frissítésekhez:</string>
+    <string name="upgrade_screen_restore_sync_patience_hint">A Play Áruház szinkronizálása időbe telhet. Próbáld meg az újraindítást, a Google Play gyorsítótárának törlését vagy egyszerűen várj.</string>
+    <string name="upgrade_screen_restore_multiaccount_hint">A több fiók összezavarhatja a Google Play-t. Jelentkezz ki más fiókokból, vagy telepítsd a Google Play weboldalán keresztül, amely kikényszeríti a meghatározott fiókkal való társítást.</string>
 </resources>

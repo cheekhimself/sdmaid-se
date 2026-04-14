@@ -3,11 +3,19 @@
     <string name="app_name_upgraded">SD Maid SE Pro</string>
     <string name="app_name_upgrade_postfix">Pro</string>
     <string name="upgrade_feature_requires_pro">Απαιτεί το SD Maid SE Pro</string>
-    <string name="upgrades_dashcard_title">Αναβάθμιση SD Maid</string>
-    <string name="upgrades_dashcard_body">Το SD Maid Pro προσφέρει καλύτερα αποτελέσματα, περισσότερες δυνατότητες, και επιλογές για τους εξειδικευμένους χρήστες.</string>
+    <string name="upgrades_dashcard_title">Αναβάθμιση SD Maid SE</string>
+    <string name="upgrades_dashcard_body">Το SD Maid SE Pro προσφέρει καλύτερα αποτελέσματα, περισσότερες δυνατότητες και επιλογές για προχωρημένους χρήστες.</string>
     <string name="upgrades_dashcard_upgrade_action">Αναβάθμιση</string>
     <string name="upgrades_gplay_unavailable_error_title">Το Google Play δεν είναι διαθέσιμο</string>
     <string name="upgrades_gplay_unavailable_error_description">Η εφαρμογή SD Maid δεν μπορεί να συνδεθεί με το Google Play. Είναι εγκατεστημένο και ενημερωμένο το Google Play; Είναι συνδεδεμένος ο λογαριασμός σας Google; Δοκιμάστε να καθαρίσετε την προσωρινή μνήμη cache της εφαρμογής Google Play και να επανεκκινήσετε τη συσκευή σας.</string>
+    <string name="upgrades_gplay_billing_error_label">Πρόβλημα Google Play</string>
+    <string name="upgrades_gplay_billing_error_description">Παρουσιάστηκε κάποιο πρόβλημα με το Google Play. Δοκιμάστε ξανά αργότερα ή επανεκκινήστε τη συσκευή σας.\n\nΛεπτομέρειες: %s</string>
+    <string name="upgrades_gplay_internal_error_title">Σφάλμα Google Play</string>
+    <string name="upgrades_gplay_internal_error_description">Παρουσιάστηκε εσωτερικό σφάλμα του Google Play. Δοκιμάστε τα εξής:\n\n• Επανεκκινήστε τη συσκευή σας\n• Καθαρίστε την προσωρινή μνήμη του Google Play Store\n• Δοκιμάστε ξανά αργότερα</string>
+    <string name="upgrades_gplay_network_error_title">Σφάλμα σύνδεσης</string>
+    <string name="upgrades_gplay_network_error_description">Αδυναμία σύνδεσης με το Google Play. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο και δοκιμάστε ξανά.</string>
+    <string name="upgrades_gplay_already_owned_error_title">Ήδη αγορασμένο</string>
+    <string name="upgrades_gplay_already_owned_error_description">Χρησιμοποιήστε την επιλογή \"Επαναφορά αγοράς\" για να επαναφέρετε την αγορά σας. Εάν το πρόβλημα παραμένει, δοκιμάστε να καθαρίσετε την προσωρινή μνήμη του Google Play και να επανεκκινήσετε τη συσκευή σας.</string>
     <string name="upgrades_no_purchases_found_check_account">Δε βρέθηκαν αγορές. Χρησιμοποιείτε το σωστό λογαριασμό;</string>
     <string name="upgrade_screen_title">Απόκτησε το SD Maid SE Pro</string>
     <string name="upgrade_screen_preamble">SD Maid δεν έχει διαφημίσεις και δεν πωλεί τα δεδομένα των χρηστών. Η εργασία μου χρηματοδοτείται από εσάς ❤️.</string>
@@ -21,9 +29,9 @@
     <string name="upgrade_screen_iap_action">Εφάπαξ αγορά</string>
     <string name="upgrade_screen_iap_action_hint">Το κόστος της εφάπαξ αγοράς είναι %s.</string>
     <string name="upgrade_screen_thanks_toast">Είστε οι καλύτεροι! ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">Μαζί, τα καταφέραμε να φτάσουμε στην πρώτη κυκλοφορία! Σας ευχαριστώ που με βοηθήσατε! Η ανάπτυξη θα συνεχιστεί, αλλά τώρα μπορείτε να μεταβείτε σε πιο σταθερές εκδόσεις, αν θέλετε. Κάντε αυτό επιλέγοντας να απεγραφείτε στο Google Play.</string>
-    <string name="nudge_betagoodbye_hint">Μικρή σημείωση: Οι αξιολογήσεις που δόθηκαν κατά τη διάρκεια της δοκιμής είναι ορατές μόνο σε μένα, Θα το εκτιμούσα αν θα μπορούσατε να δώσετε SD Maid μια δημόσια βαθμολογία αν είστε ευχαριστημένοι.</string>
-    <string name="nudge_betagoodbye_positive_action">Απεγγραφή</string>
-    <string name="nudge_betagoodbye_negative_action">Συνεχίστε τις δοκιμές</string>
+    <string name="upgrade_screen_restore_purchase_action">Επαναφορά αγοράς</string>
+    <string name="upgrade_screen_restore_purchase_message">Η αναβάθμιση σας είναι έγκυρη σε συσκευές στον ίδιο λογαριασμό Google.</string>
+    <string name="upgrade_screen_restore_troubleshooting_msg">Συμβουλές αντιμετώπισης προβλημάτων για μη αναγνωρισμένες αναβαθμίσεις:</string>
+    <string name="upgrade_screen_restore_sync_patience_hint">Ο συγχρονισμός του Play Store ενδέχεται να πάρει χρόνο. Δοκιμάστε να κάνετε επανεκκίνηση, να καθαρίσετε την προσωρινή μνήμη του Google Play ή απλώς να περιμένετε.</string>
+    <string name="upgrade_screen_restore_multiaccount_hint">Πολλοί λογαριασμοί μπορεί να μπερδέψουν το Google Play. Αποσυνδεθείτε από άλλους λογαριασμούς ή εγκαταστήστε το μέσω του ιστότοπου Google Play, κάτι που αναγκάζει τους συσχετισμούς με έναν συγκεκριμένο λογαριασμό.</string>
 </resources>

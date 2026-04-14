@@ -3,7 +3,6 @@ package eu.darken.sdmse.common.updater
 import android.content.Context
 import dagger.Reusable
 import dagger.hilt.android.qualifiers.ApplicationContext
-import eu.darken.sdmse.common.BuildConfigWrap
 import eu.darken.sdmse.common.WebpageTool
 import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
@@ -12,6 +11,7 @@ import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.getPackageInfo
 import eu.darken.sdmse.common.pkgs.features.getInstallerInfo
 import java.time.Duration
 import java.time.Instant
@@ -24,12 +24,6 @@ class FossUpdateChecker @Inject constructor(
     private val webpageTool: WebpageTool,
     private val settings: FossUpdateSettings,
 ) : UpdateChecker {
-
-    override suspend fun currentChannel(): UpdateChecker.Channel = when (BuildConfigWrap.BUILD_TYPE) {
-        BuildConfigWrap.BuildType.RELEASE -> UpdateChecker.Channel.PROD
-        BuildConfigWrap.BuildType.BETA -> UpdateChecker.Channel.BETA
-        BuildConfigWrap.BuildType.DEV -> UpdateChecker.Channel.BETA
-    }
 
     override suspend fun getLatest(channel: UpdateChecker.Channel): UpdateChecker.Update? {
         log(TAG) { "getLatest($channel) checking..." }
@@ -44,7 +38,7 @@ class FossUpdateChecker @Inject constructor(
             } else {
                 log(TAG) { "Fetching new release data" }
                 when (channel) {
-                    UpdateChecker.Channel.BETA -> checker.allReleases(OWNER, REPO).firstOrNull { it.isPreRelease }
+                    UpdateChecker.Channel.BETA -> checker.allReleases(OWNER, REPO).first()
                     UpdateChecker.Channel.PROD -> checker.latestRelease(OWNER, REPO)
                 }.also {
                     log(TAG, INFO) { "getLatest($channel) new data is $it" }
@@ -103,8 +97,7 @@ class FossUpdateChecker @Inject constructor(
 
     override fun isEnabledByDefault(): Boolean {
         val pm = context.packageManager
-        val installers: Set<String> = pm
-            .getPackageInfo(context.packageName, 0)
+        val installers: Set<String> = context.getPackageInfo()
             .getInstallerInfo(pm)
             .allInstallers
             .map { it.id.name }

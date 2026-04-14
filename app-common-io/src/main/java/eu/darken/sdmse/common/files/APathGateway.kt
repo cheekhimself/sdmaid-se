@@ -1,8 +1,8 @@
 package eu.darken.sdmse.common.files
 
 import eu.darken.sdmse.common.sharedresource.HasSharedResource
-import okio.Sink
-import okio.Source
+import kotlinx.coroutines.flow.Flow
+import okio.FileHandle
 import java.time.Instant
 
 interface APathGateway<
@@ -23,17 +23,39 @@ interface APathGateway<
 
     suspend fun lookupFilesExtended(path: P): Collection<PLUE>
 
+    suspend fun walk(
+        path: P,
+        options: WalkOptions<P, PLU> = WalkOptions()
+    ): Flow<PLU>
+
+    data class WalkOptions<P : APath, PLU : APathLookup<P>>(
+        val pathDoesNotContain: Set<String>? = null,
+        val onFilter: (suspend (PLU) -> Boolean)? = null,
+        val onError: (suspend (PLU, Exception) -> Boolean)? = null,
+        val followSymlinks: Boolean = false,
+    ) {
+        val isDirect: Boolean
+            get() = onFilter == null && onError == null && !followSymlinks
+    }
+
+    suspend fun du(
+        path: P,
+        options: DuOptions<P, PLU> = DuOptions()
+    ): Long
+
+    data class DuOptions<P : APath, PLU : APathLookup<P>>(
+        val abortOnError: Boolean = false,
+    )
+
     suspend fun exists(path: P): Boolean
 
     suspend fun canWrite(path: P): Boolean
 
     suspend fun canRead(path: P): Boolean
 
-    suspend fun read(path: P): Source
+    suspend fun file(path: P, readWrite: Boolean): FileHandle
 
-    suspend fun write(path: P): Sink
-
-    suspend fun delete(path: P)
+    suspend fun delete(path: P, recursive: Boolean)
 
     suspend fun createSymlink(linkPath: P, targetPath: P): Boolean
 

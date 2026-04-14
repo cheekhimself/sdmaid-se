@@ -1,25 +1,40 @@
 package eu.darken.sdmse.common.datastore
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import eu.darken.sdmse.common.debug.Bugs
+import eu.darken.sdmse.common.debug.logging.log
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 
 
-class DataStoreValue<T : Any?> constructor(
+class DataStoreValue<T : Any?>(
     private val dataStore: DataStore<Preferences>,
     private val key: Preferences.Key<*>,
     val reader: (Any?) -> T,
     val writer: (T) -> Any?
 ) {
+    private val dataStoreTag by lazy {
+        "DataStore-${dataStore.file?.name?.removeSuffix(".preferences_pb")}"
+    }
 
     val keyName: String
         get() = key.name
 
     val flow: Flow<T> = dataStore.data
-        .map { prefs -> reader(prefs[this.key]) }
+        .map { prefs -> prefs[this.key] }
+        .distinctUntilChanged()
+        .map { pref -> reader(pref) }
+        .onEach { if (Bugs.isTrace) log(dataStoreTag) { "read $keyName -> $it" } }
 
     data class Updated<T>(
         val old: T,
@@ -40,7 +55,9 @@ class DataStoreValue<T : Any?> constructor(
             }
 
             prefs.toMutablePreferences().apply {
-                set(this@DataStoreValue.key as Preferences.Key<Any?>, after?.let { writer(it) })
+                val toWrite = after?.let { writer(it) }
+                if (Bugs.isTrace) log(dataStoreTag) { "WRITE $keyName <- $toWrite" }
+                set(this@DataStoreValue.key as Preferences.Key<Any?>, toWrite)
             }.toPreferences()
         }
 
@@ -61,13 +78,13 @@ inline fun <reified T : Any?> DataStore<Preferences>.createValue(
 
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> basicKey(key: String, defaultValue: T): Preferences.Key<T> = when (defaultValue) {
-    is Boolean? -> booleanPreferencesKey(key) as Preferences.Key<T>
-    is String? -> stringPreferencesKey(key) as Preferences.Key<T>
-    is Int? -> intPreferencesKey(key) as Preferences.Key<T>
-    is Long? -> longPreferencesKey(key) as Preferences.Key<T>
-    is Float? -> floatPreferencesKey(key) as Preferences.Key<T>
-    else -> throw NotImplementedError()
+inline fun <reified T> basicKey(key: String, defaultValue: T): Preferences.Key<T> = when (T::class) {
+    Boolean::class -> booleanPreferencesKey(key) as Preferences.Key<T>
+    String::class -> stringPreferencesKey(key) as Preferences.Key<T>
+    Int::class -> intPreferencesKey(key) as Preferences.Key<T>
+    Long::class -> longPreferencesKey(key) as Preferences.Key<T>
+    Float::class -> floatPreferencesKey(key) as Preferences.Key<T>
+    else -> throw NotImplementedError("Unsupported type: ${T::class}")
 }
 
 inline fun <reified T> basicReader(

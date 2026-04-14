@@ -5,8 +5,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!--    For some reason this affects PackageManager.getSharedLibraries() results, i.e. trichromelibrary-->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
@@ -33,10 +31,14 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
 
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name="eu.darken.sdmse.App"
@@ -58,6 +60,17 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="eu.darken.sdmse.main.ui.shortcuts.ShortcutActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="eu.darken.sdmse.ACTION_OPEN_APPCONTROL" />
+                <action android:name="eu.darken.sdmse.ACTION_SCAN_DELETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".corpsefinder.core.watcher.UninstallWatcherReceiver"
             android:enabled="false"
@@ -70,6 +83,10 @@
         </receiver>
         <receiver
             android:name=".corpsefinder.core.watcher.ExternalWatcherTaskReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".appcontrol.core.restore.UnarchiveReceiver"
             android:exported="false" />
 
         <receiver
@@ -126,9 +143,8 @@
         <!-- Debug stuff-->
         <activity
             android:name="eu.darken.sdmse.common.debug.recorder.ui.RecorderActivity"
-            android:theme="@style/AppThemeFloating" />
+            android:theme="@style/AppTheme" />
 
-        <service android:name="eu.darken.sdmse.common.debug.recorder.core.RecorderService" />
     </application>
 
 </manifest>

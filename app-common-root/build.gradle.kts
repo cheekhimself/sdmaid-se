@@ -1,28 +1,25 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    id("projectConfig")
 }
 
 apply(plugin = "dagger.hilt.android.plugin")
 
 android {
-    namespace = "${ProjectConfig.packageName}.common.root"
+    namespace = "${projectConfig.packageName}.common.root"
 
-    setupLibraryDefaults()
+    setupLibraryDefaults(projectConfig)
 
     setupModuleBuildTypes()
 
     buildFeatures {
-        viewBinding = true
         aidl = true
     }
 
     setupCompileOptions()
 
-    setupKotlinOptions()
 
     testOptions {
         unitTests {
@@ -30,10 +27,12 @@ android {
         }
         tasks.withType<Test> {
             useJUnitPlatform()
-            setupTestLogging()
+            setupTests()
         }
     }
 }
+
+setupKotlinOptions()
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:${Versions.Desugar.core}")
@@ -44,7 +43,6 @@ dependencies {
     addDI()
     addCoroutines()
     addSerialization()
-    addIO()
 
     addTesting()
 }

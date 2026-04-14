@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    style="@style/BaseScreen">
 
     <include layout="@layout/dashboard_title_item" />
 
@@ -10,13 +11,13 @@
 
     <include layout="@layout/dashboard_setup_item" />
 
-    <include layout="@layout/dashboard_dataarea_item" />
+    <include layout="@layout/dashboard_error_dataarea_item" />
 
-    <include layout="@layout/corpsefinder_dashboard_item" />
+    <include layout="@layout/dashboard_tool_card" />
 
-    <include layout="@layout/systemcleaner_dashboard_item" />
+    <include layout="@layout/dashboard_tool_card" />
 
-    <include layout="@layout/appcleaner_dashboard_item" />
+    <include layout="@layout/dashboard_tool_card" />
 
     <include layout="@layout/dashboard_upgrade_item" />
 

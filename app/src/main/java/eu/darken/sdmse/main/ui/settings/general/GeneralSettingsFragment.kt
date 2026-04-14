@@ -6,21 +6,28 @@ import androidx.annotation.Keep
 import androidx.fragment.app.viewModels
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import eu.darken.sdmse.MainDirections
 import eu.darken.sdmse.R
+import eu.darken.sdmse.common.navigation.routes.UpgradeRoute
+import eu.darken.sdmse.common.navigation.safeNavigate
+import eu.darken.sdmse.main.ui.navigation.DashboardCardConfigRoute
+import eu.darken.sdmse.common.hasApiLevel
+import eu.darken.sdmse.common.locale.toList
 import eu.darken.sdmse.common.observe2
 import eu.darken.sdmse.common.preferences.ListPreference2
 import eu.darken.sdmse.common.preferences.setupWithEnum
-import eu.darken.sdmse.common.uix.PreferenceFragment2
+import eu.darken.sdmse.common.theming.ThemeMode
+import eu.darken.sdmse.common.theming.ThemeStyle
+import eu.darken.sdmse.common.uix.PreferenceFragment3
 import eu.darken.sdmse.main.core.GeneralSettings
 import javax.inject.Inject
 
 @Keep
 @AndroidEntryPoint
-class GeneralSettingsFragment : PreferenceFragment2() {
+class GeneralSettingsFragment : PreferenceFragment3() {
 
-    private val vm: GeneralSettingsViewModel by viewModels()
+    override val vm: GeneralSettingsViewModel by viewModels()
 
     @Inject lateinit var generalSettings: GeneralSettings
     @Inject lateinit var oneClickToolDialog: OneClickOptionsDialog
@@ -36,16 +43,50 @@ class GeneralSettingsFragment : PreferenceFragment2() {
         get() = findPreference(settings.isUpdateCheckEnabled.keyName)!!
     private val oneClickTools: Preference
         get() = findPreference("dashboard.oneclick.tools")!!
+    private val dashboardCardConfig: Preference
+        get() = findPreference("dashboard.card.config")!!
+    private val languageOverride: Preference
+        get() = findPreference("core.ui.language")!!
+
+    private val romTypeOverride: ListPreference2
+        get() = findPreference(settings.romTypeDetection.keyName)!!
 
     override fun onPreferencesCreated() {
-        themeModePref.setupWithEnum(settings.themeMode)
-        themeStylePref.setupWithEnum(settings.themeStyle)
+        super.onPreferencesCreated()
+
+        romTypeOverride.setupWithEnum(settings.romTypeDetection)
+
+        themeModePref.setupWithEnum(settings.themeMode) {
+            when (it) {
+                ThemeMode.SYSTEM -> getString(R.string.ui_theme_mode_system_label)
+                ThemeMode.DARK -> getString(R.string.ui_theme_mode_dark_label)
+                ThemeMode.LIGHT -> getString(R.string.ui_theme_mode_light_label)
+            }
+        }
+        themeStylePref.setupWithEnum(settings.themeStyle) {
+            when (it) {
+                ThemeStyle.DEFAULT -> getString(R.string.ui_theme_style_default_label)
+                ThemeStyle.MATERIAL_YOU -> getString(R.string.ui_theme_style_materialyou_label)
+            }
+        }
 
         oneClickTools.setOnPreferenceClickListener {
             oneClickToolDialog.show(requireContext())
             true
         }
-        super.onPreferencesCreated()
+
+        dashboardCardConfig.setOnPreferenceClickListener {
+            findNavController().safeNavigate(DashboardCardConfigRoute)
+            true
+        }
+
+        languageOverride.apply {
+            isVisible = hasApiLevel(33)
+            setOnPreferenceClickListener {
+                vm.showLanguagePicker()
+                true
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,7 +96,7 @@ class GeneralSettingsFragment : PreferenceFragment2() {
 
                 else -> {
                     {
-                        MainDirections.goToUpgradeFragment(forced = true).navigate()
+                        findNavController().safeNavigate(UpgradeRoute(forced = true))
                     }
                 }
             }
@@ -64,7 +105,7 @@ class GeneralSettingsFragment : PreferenceFragment2() {
 
                 else -> {
                     {
-                        MainDirections.goToUpgradeFragment(forced = true).navigate()
+                        findNavController().safeNavigate(UpgradeRoute(forced = true))
                     }
                 }
             }
@@ -74,7 +115,11 @@ class GeneralSettingsFragment : PreferenceFragment2() {
             updateCheck.isVisible = it
         }
 
+        vm.currentLocales.observe2(this) { locales ->
+            val names = locales.toList().first().displayName.ifEmpty { locales.toString() }
+            languageOverride.summary = getString(R.string.ui_language_override_desc, names)
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
-
 }

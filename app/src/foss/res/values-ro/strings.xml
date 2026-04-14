@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name_upgraded">SD Maid SE FOSS</string>
     <string name="app_name_upgrade_postfix">FOSS</string>
-    <string name="upgrade_feature_requires_pro">Este necesar SD Maid SE Pro</string>
-    <string name="upgrades_dashcard_title">Actualizează SD Maid</string>
+    <string name="upgrade_feature_requires_pro">Necesită SD Maid SE FOSS</string>
+    <string name="upgrades_dashcard_title">Actualizați SD Maid SE</string>
     <string name="upgrades_dashcard_body">Deblochează funcții suplimentare și devino un patron pentru a suporta dezvoltarea continuată!</string>
     <string name="upgrades_dashcard_upgrade_action">Actualizează</string>
     <string name="upgrade_screen_title">Îmbunătățește SD Maid</string>
@@ -15,9 +15,5 @@
     <string name="upgrade_screen_sponsor_action">Sponsorizează dezvoltarea</string>
     <string name="upgrade_screen_sponsor_action_hint">O alternativă sunt reclamele, analizele și Google Play🙁</string>
     <string name="upgrade_screen_thanks_toast">Mulțumesc că îmi suporți această dezvoltare open-source❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1🥳</string>
-    <string name="nudge_betagoodbye_body">Împreună, am putut să facem prima lansare! Mulțumesc pentru că m-ai ajutat. Dezvoltarea va continua bineînțeles, dar acum pot să treci pe construcții non-beta. Fă asta prin descărcarea la ultima lansare stabilă.</string>
-    <string name="nudge_betagoodbye_hint">Mică notă: Evaluările primite în timpul testelor sunt vizibili numai mie. Apreciez dacă pot să îi dai SD Maid o evaluare publică dacă ești fericit.</string>
-    <string name="nudge_betagoodbye_positive_action">Renunță</string>
-    <string name="nudge_betagoodbye_negative_action">Continuă testarea</string>
+    <string name="upgrade_screen_sponsor_return_too_quick">Ai revenit deja? Susținerea ta menține SD Maid în viață!</string>
 </resources>

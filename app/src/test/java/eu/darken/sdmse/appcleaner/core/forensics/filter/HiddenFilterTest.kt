@@ -1,12 +1,8 @@
 package eu.darken.sdmse.appcleaner.core.forensics.filter
 
 import eu.darken.sdmse.appcleaner.core.forensics.BaseFilterTest
-import eu.darken.sdmse.appcleaner.core.forensics.addCandidate
-import eu.darken.sdmse.appcleaner.core.forensics.locs
 import eu.darken.sdmse.appcleaner.core.forensics.neg
-import eu.darken.sdmse.appcleaner.core.forensics.pkgs
 import eu.darken.sdmse.appcleaner.core.forensics.pos
-import eu.darken.sdmse.appcleaner.core.forensics.prefixFree
 import eu.darken.sdmse.common.areas.DataArea.Type.PRIVATE_DATA
 import eu.darken.sdmse.common.areas.DataArea.Type.PUBLIC_DATA
 import eu.darken.sdmse.common.areas.DataArea.Type.SDCARD
@@ -32,650 +28,417 @@ class HiddenFilterTest : BaseFilterTest() {
     private fun create() = HiddenFilter(
         jsonBasedSieveFactory = createJsonSieveFactory(),
         environment = storageEnvironment,
+        gatewaySwitch = gatewaySwitch,
     )
 
-    @Test fun testHiddenCacheDefaults() = runTest {
+    @Test fun `test hidden cache defaults`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/").locs(SDCARD, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/image-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/video-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/image-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.image-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/video-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.video-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/UnityCache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/.cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/_cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/Cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/.Cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/image-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/video-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/UnityCache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/_cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/Cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.Cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/image-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.image-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/video-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.video-cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/video-cache/LmWFkb0wDc9JIjEeQyYLRdQanDA")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg)
-                .prefixFree("$testPkg/files/video-cache/j1ZyoUdWHQxeQ1JzBvzM3_68bn4/0000000000082000")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg)
-                .prefixFree("$testPkg/files/UnityCache/j1ZyoUdWHQxeQ1JzBvzM3_68bn4/0000000000082000")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/TempData")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/TempData/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/TempData")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/TempData/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.temp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/.temp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.temp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.temp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/temp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/temp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/temp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/temp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/tmp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/tmp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/tmp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/tmp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.tmp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/.tmp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.tmp")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.tmp/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/cache.dat")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/cache.dat")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/image_cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/image_cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/image_cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/image_cache/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.trash")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.trash/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.trash")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.trash/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.Trash")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.Trash/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.Trash")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.Trash/file")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/_cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/Cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/.Cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/-cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/image-cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/video-cache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/UnityCache/.nomedia")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/diskcache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/diskcache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/disk-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/disk-cache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/disk_cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/disk_cache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.diskcache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.diskcache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.disk-cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.disk-cache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            neg().pkgs(testPkg).prefixFree("$testPkg/files/.disk_cache")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
-        )
-        addCandidate(
-            pos().pkgs(testPkg).prefixFree("$testPkg/files/.disk_cache/something")
-                .locs(SDCARD, PUBLIC_DATA, PRIVATE_DATA)
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files")
+        neg(setOf(testPkg), setOf(SDCARD, PRIVATE_DATA), "$testPkg/")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/video-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.image-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/video-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.video-cache")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/UnityCache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/_cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/Cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.Cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/video-cache/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/UnityCache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/_cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/Cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.Cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.image-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/video-cache/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.video-cache/file")
+        pos(
+            setOf(testPkg),
+            setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA),
+            "$testPkg/files/video-cache/LmWFkb0wDc9JIjEeQyYLRdQanDA"
+        )
+        pos(
+            setOf(testPkg),
+            setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA),
+            "$testPkg/files/video-cache/j1ZyoUdWHQxeQ1JzBvzM3_68bn4/0000000000082000"
+        )
+        neg(
+            setOf(testPkg),
+            setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA),
+            "$testPkg/files/UnityCache/j1ZyoUdWHQxeQ1JzBvzM3_68bn4/0000000000082000"
+        )
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/TempData")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/TempData/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/TempData")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/TempData/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.temp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.temp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.temp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.temp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/temp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/temp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/temp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/temp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/tmp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/tmp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/tmp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/tmp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.tmp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.tmp/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.tmp")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.tmp/file")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/cache.dat")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/cache.dat")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image_cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image_cache/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image_cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image_cache/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.trash")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.trash/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.trash")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.trash/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.Trash")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.Trash/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.Trash")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.Trash/file")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/_cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/Cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.Cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/-cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image-cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/video-cache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/UnityCache/.nomedia")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/diskcache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/diskcache/something")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk-cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk-cache/something")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk_cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk_cache/something")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.diskcache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.diskcache/something")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk-cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk-cache/something")
+        neg(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk_cache")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk_cache/something")
+
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/-caches/something")
+
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/imagecaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/imagecaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/image_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/image_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.imagecaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.imagecaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.image-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.image-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.image_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.image_caches/something")
+
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/videocaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/videocaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/video-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/video-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/video_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/video_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.videocaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.videocaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.video-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.video-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.video_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.video_caches/something")
+
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/mediacaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/mediacaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/media-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/media-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/media_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/media_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.mediacaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.mediacaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.media-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.media-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.media_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.media_caches/something")
+
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/diskcaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/diskcaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/disk-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/disk_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/disk_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.diskcaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.diskcaches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.disk-caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/files/.disk_caches/something")
+        pos(setOf(testPkg), setOf(SDCARD, PUBLIC_DATA, PRIVATE_DATA), "$testPkg/.disk_caches/something")
+
+        confirm(create())
+    }
+
+    @Test fun `test filter sdm test`() = runTest {
+        addDefaultNegatives()
+        neg("eu.thedarken.sdm.test", PUBLIC_DATA, "com.soundcloud.android/files/skippy")
+        pos("eu.thedarken.sdm.test", SDCARD, "sdm_test_file_cache_v2")
+        pos("eu.thedarken.sdm.test", SDCARD, "sdm_test_file_cache1")
+        pos("eu.thedarken.sdm.test", PUBLIC_DATA, "sdm_test_file_cache2")
+        pos("eu.thedarken.sdm.test", PRIVATE_DATA, "sdm_test_file_cache3")
+        pos("eu.thedarken.sdm.test", PUBLIC_DATA, "eu.thedarken.sdm.test/sdm_test_internal_hidden_cache_direct")
+        pos("eu.thedarken.sdm.test", PUBLIC_DATA, "eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/$rngString")
+        pos("eu.thedarken.sdm.test", PRIVATE_DATA, "eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/$rngString")
+        pos(
+            "eu.thedarken.sdm.test",
+            PRIVATE_DATA,
+            "eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/${UUID.randomUUID()}/$rngString"
         )
         confirm(create())
     }
 
-    @Test fun testFilterSdmTest() = runTest {
+    @Test fun `test filter soundcloud`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("eu.thedarken.sdm.test").locs(PUBLIC_DATA).prefixFree("com.soundcloud.android/files/skippy")
+        neg("com.soundcloud.android", PUBLIC_DATA, "com.soundcloud.android/files/skippy")
+        pos("com.soundcloud.android", PUBLIC_DATA, "com.soundcloud.android/files/skippy/$rngString")
+        confirm(create())
+    }
+
+    @Test fun `test filter aptoide`() = runTest {
+        addDefaultNegatives()
+        neg("cm.aptoide.pt", SDCARD, ".aptoide/icons")
+        pos("cm.aptoide.pt", SDCARD, ".aptoide/icons/$rngString")
+        neg("cm.aptoide.pt", SDCARD, ".aptoide/apks")
+        pos("cm.aptoide.pt", SDCARD, ".aptoide/apks/com.pandora.android.5.2.apk")
+        pos("en.aptoide.com", SDCARD, ".aptoide/apks/com.pandora.android.5.2.apk")
+        confirm(create())
+    }
+
+    @Test fun `test filter google camera`() = runTest {
+        addDefaultNegatives()
+        neg(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/TEMP_SESSIONS"
         )
-        addCandidate(pos().pkgs("eu.thedarken.sdm.test").locs(SDCARD).prefixFree("sdm_test_file_cache_v2"))
-        addCandidate(pos().pkgs("eu.thedarken.sdm.test").locs(SDCARD).prefixFree("sdm_test_file_cache1"))
-        addCandidate(pos().pkgs("eu.thedarken.sdm.test").locs(PUBLIC_DATA).prefixFree("sdm_test_file_cache2"))
-        addCandidate(pos().pkgs("eu.thedarken.sdm.test").locs(PRIVATE_DATA).prefixFree("sdm_test_file_cache3"))
-        addCandidate(
-            pos().pkgs("eu.thedarken.sdm.test").locs(PUBLIC_DATA)
-                .prefixFree("eu.thedarken.sdm.test/sdm_test_internal_hidden_cache_direct")
+        pos(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/TEMP_SESSIONS/PANO_455796234_5545668855"
         )
-        addCandidate(
-            pos().pkgs("eu.thedarken.sdm.test").locs(PUBLIC_DATA)
-                .prefixFree("eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/$rngString")
+        neg(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/refocus"
         )
-        addCandidate(
-            pos().pkgs("eu.thedarken.sdm.test").locs(PRIVATE_DATA)
-                .prefixFree("eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/$rngString")
+        pos(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/refocus/IMG_12547896_698745214"
         )
-        addCandidate(
-            pos().pkgs("eu.thedarken.sdm.test").locs(PRIVATE_DATA).prefixFree(
-                "eu.thedarken.sdm.test/sdm_test_internal_hidden_cache/" + UUID.randomUUID()
-                    .toString() + "/" + rngString
-            )
+        neg(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/panorama_sessions"
+        )
+        pos(
+            "com.google.android.GoogleCamera",
+            PUBLIC_DATA,
+            "com.google.android.GoogleCamera/files/panorama_sessions/session_56987415_43214845"
         )
         confirm(create())
     }
 
-    @Test fun testFilterSoundcloud() = runTest {
+    @Test fun `test filter firefox`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.soundcloud.android").locs(PUBLIC_DATA).prefixFree("com.soundcloud.android/files/skippy")
+        neg(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox_beta/files/mozilla/sqqj1c1o.default/Cache"
         )
-        addCandidate(
-            pos().pkgs("com.soundcloud.android").locs(PUBLIC_DATA)
-                .prefixFree("com.soundcloud.android/files/skippy/$rngString")
+        pos(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox_beta/files/mozilla/sqqj1c1o.default/Cache/$rngString"
+        )
+        neg(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox/files/mozilla/sqqj1c1o.default/Cache"
+        )
+        pos(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox/files/mozilla/sqqj1c1o.default/Cache/$rngString"
+        )
+        neg(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox/app_tmpdir/"
+        )
+        pos(
+            setOf("org.mozilla.firefox", "org.mozilla.firefox_beta"),
+            PRIVATE_DATA,
+            "org.mozilla.firefox/app_tmpdir/$rngString"
         )
         confirm(create())
     }
 
-    @Test fun testFilterAptoide() = runTest {
+    @Test fun `test mozilla fenix`() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("cm.aptoide.pt").locs(SDCARD).prefixFree(".aptoide/icons"))
-        addCandidate(
-            pos().pkgs("cm.aptoide.pt").locs(SDCARD).prefixFree(".aptoide/icons/$rngString")
-        )
-        addCandidate(neg().pkgs("cm.aptoide.pt").locs(SDCARD).prefixFree(".aptoide/apks"))
-        addCandidate(pos().pkgs("cm.aptoide.pt").locs(SDCARD).prefixFree(".aptoide/apks/com.pandora.android.5.2.apk"))
-        addCandidate(pos().pkgs("en.aptoide.com").locs(SDCARD).prefixFree(".aptoide/apks/com.pandora.android.5.2.apk"))
+        neg("org.mozilla.fenix", PRIVATE_DATA, "org.mozilla.fenix/app_tmpdir/")
+        pos("org.mozilla.fenix", PRIVATE_DATA, "org.mozilla.fenix/app_tmpdir/$rngString")
         confirm(create())
     }
 
-    @Test fun testFilterGoogleCamera() = runTest {
+    @Test fun `test filter genie widget`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/TEMP_SESSIONS")
+        neg(
+            "com.google.android.apps.genie.geniewidget",
+            PRIVATE_DATA,
+            "com.google.android.apps.genie.geniewidget/app_news_image_cache"
         )
-        addCandidate(
-            pos().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/TEMP_SESSIONS/PANO_455796234_5545668855")
-        )
-        addCandidate(
-            neg().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/refocus")
-        )
-        addCandidate(
-            pos().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/refocus/IMG_12547896_698745214")
-        )
-        addCandidate(
-            neg().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/panorama_sessions")
-        )
-        addCandidate(
-            pos().pkgs("com.google.android.GoogleCamera").locs(PUBLIC_DATA)
-                .prefixFree("com.google.android.GoogleCamera/files/panorama_sessions/session_56987415_43214845")
+        pos(
+            "com.google.android.apps.genie.geniewidget",
+            PRIVATE_DATA,
+            "com.google.android.apps.genie.geniewidget/app_news_image_cache/abcdefg123456"
         )
         confirm(create())
     }
 
-    @Test fun testFilterFireFox() = runTest {
+    @Test fun `test beautiful widgets`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.firefox_beta/files/mozilla/sqqj1c1o.default/Cache")
+        neg(
+            setOf("com.levelup.beautifulwidgets", "com.levelup.beautifulwidgets.free"),
+            PUBLIC_DATA,
+            "com.levelup.beautifulwidgets/files/Pictures"
         )
-        addCandidate(
-            pos().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA).prefixFree(
-                "org.mozilla.firefox_beta/files/mozilla/sqqj1c1o.default/Cache/$rngString"
-            )
-        )
-        addCandidate(
-            neg().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.firefox/files/mozilla/sqqj1c1o.default/Cache")
-        )
-        addCandidate(
-            pos().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.firefox/files/mozilla/sqqj1c1o.default/Cache/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.firefox/app_tmpdir/")
-        )
-        addCandidate(
-            pos().pkgs("org.mozilla.firefox", "org.mozilla.firefox_beta").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.firefox/app_tmpdir/$rngString")
-        )
-        confirm(create())
-    }
-
-    @Test fun testMozillaFenix() = runTest {
-        addDefaultNegatives()
-        addCandidate(neg().pkgs("org.mozilla.fenix").locs(PRIVATE_DATA).prefixFree("org.mozilla.fenix/app_tmpdir/"))
-        addCandidate(
-            pos().pkgs("org.mozilla.fenix").locs(PRIVATE_DATA)
-                .prefixFree("org.mozilla.fenix/app_tmpdir/$rngString")
-        )
-        confirm(create())
-    }
-
-    @Test fun testFilterGenieWidget() = runTest {
-        addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.google.android.apps.genie.geniewidget").locs(PRIVATE_DATA)
-                .prefixFree("com.google.android.apps.genie.geniewidget/app_news_image_cache")
-        )
-        addCandidate(
-            pos().pkgs("com.google.android.apps.genie.geniewidget").locs(PRIVATE_DATA)
-                .prefixFree("com.google.android.apps.genie.geniewidget/app_news_image_cache/abcdefg123456")
-        )
-        confirm(create())
-    }
-
-    @Test fun testFilterBeautifulWidgets() = runTest {
-        addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.levelup.beautifulwidgets", "com.levelup.beautifulwidgets.free").locs(PUBLIC_DATA)
-                .prefixFree("com.levelup.beautifulwidgets/files/Pictures")
-        )
-        addCandidate(
-            pos().pkgs("com.levelup.beautifulwidgets", "com.levelup.beautifulwidgets.free").locs(PUBLIC_DATA)
-                .prefixFree("com.levelup.beautifulwidgets/files/Pictures/91239123acbbea_540_rounded_top.png")
+        pos(
+            setOf("com.levelup.beautifulwidgets", "com.levelup.beautifulwidgets.free"),
+            PUBLIC_DATA,
+            "com.levelup.beautifulwidgets/files/Pictures/91239123acbbea_540_rounded_top.png"
         )
         confirm(create())
     }
 
     @Test fun testFilterFrostWire() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.frostwire.android").locs(SDCARD).prefixFree("FrostWire/.image_cache"))
-        addCandidate(
-            pos().pkgs("com.frostwire.android").locs(SDCARD)
-                .prefixFree("FrostWire/.image_cache/$rngString")
-        )
+        neg("com.frostwire.android", SDCARD, "FrostWire/.image_cache")
+        pos("com.frostwire.android", SDCARD, "FrostWire/.image_cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterWallbase() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.citc.wallbase").locs(SDCARD).prefixFree("Wallbase/.WallbaseCache"))
-        addCandidate(
-            pos().pkgs("com.citc.wallbase").locs(SDCARD)
-                .prefixFree("Wallbase/.WallbaseCache/$rngString")
-        )
+        neg("com.citc.wallbase", SDCARD, "Wallbase/.WallbaseCache")
+        pos("com.citc.wallbase", SDCARD, "Wallbase/.WallbaseCache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterFacebookKatana() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.facebook.katana").locs(SDCARD).prefixFree("com.facebook.katana/fb_temp"))
-        addCandidate(
-            pos().pkgs("com.facebook.katana").locs(SDCARD)
-                .prefixFree("com.facebook.katana/fb_temp/.facebook_455866544.jpg")
-        )
-        addCandidate(
-            neg().pkgs("com.facebook.katana").locs(PRIVATE_DATA).prefixFree("com.facebook.katana/files/video-cache")
-        )
-        addCandidate(
-            pos().pkgs("com.facebook.katana").locs(PRIVATE_DATA)
-                .prefixFree("com.facebook.katana/files/video-cache/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.facebook.katana").locs(PRIVATE_DATA)
-                .prefixFree("com.facebook.katana/files/ExoPlayerCacheDir")
-        )
-        addCandidate(
-            pos().pkgs("com.facebook.katana").locs(PRIVATE_DATA)
-                .prefixFree("com.facebook.katana/files/ExoPlayerCacheDir/$rngString")
-        )
-        addCandidate(neg().pkgs("com.facebook.katana").locs(SDCARD).prefixFree(".facebook_cache"))
-        addCandidate(
-            pos().pkgs("com.facebook.katana").locs(SDCARD).prefixFree(".facebook_cache/$rngString")
-        )
+        neg("com.facebook.katana", SDCARD, "com.facebook.katana/fb_temp")
+        pos("com.facebook.katana", SDCARD, "com.facebook.katana/fb_temp/.facebook_455866544.jpg")
+        neg("com.facebook.katana", PRIVATE_DATA, "com.facebook.katana/files/video-cache")
+        pos("com.facebook.katana", PRIVATE_DATA, "com.facebook.katana/files/video-cache/$rngString")
+        neg("com.facebook.katana", PRIVATE_DATA, "com.facebook.katana/files/ExoPlayerCacheDir")
+        pos("com.facebook.katana", PRIVATE_DATA, "com.facebook.katana/files/ExoPlayerCacheDir/$rngString")
+        neg("com.facebook.katana", SDCARD, ".facebook_cache")
+        pos("com.facebook.katana", SDCARD, ".facebook_cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterFacebookOcra() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.facebook.orca").locs(SDCARD).prefixFree("com.facebook.orca/fb_temp"))
-        addCandidate(
-            pos().pkgs("com.facebook.orca").locs(SDCARD).prefixFree("com.facebook.orca/fb_temp/.facebook_455866544.jpg")
-        )
-        addCandidate(
-            neg().pkgs("com.facebook.orca").locs(PRIVATE_DATA).prefixFree("com.facebook.orca/files/ExoPlayerCacheDir")
-        )
-        addCandidate(
-            pos().pkgs("com.facebook.orca").locs(PRIVATE_DATA)
-                .prefixFree("com.facebook.orca/files/ExoPlayerCacheDir/$rngString")
-        )
-        addCandidate(neg().pkgs("com.facebook.orca").locs(SDCARD).prefixFree(".facebook_cache"))
-        addCandidate(
-            pos().pkgs("com.facebook.orca").locs(SDCARD).prefixFree(".facebook_cache/$rngString")
-        )
+        neg("com.facebook.orca", SDCARD, "com.facebook.orca/fb_temp")
+        pos("com.facebook.orca", SDCARD, "com.facebook.orca/fb_temp/.facebook_455866544.jpg")
+        neg("com.facebook.orca", PRIVATE_DATA, "com.facebook.orca/files/ExoPlayerCacheDir")
+        pos("com.facebook.orca", PRIVATE_DATA, "com.facebook.orca/files/ExoPlayerCacheDir/$rngString")
+        neg("com.facebook.orca", SDCARD, ".facebook_cache")
+        pos("com.facebook.orca", SDCARD, ".facebook_cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterAntutuGL2() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.antutu.ABenchMark.GL2").locs(PUBLIC_DATA)
-                .prefixFree("com.antutu.ABenchMark.GL2/files/shader")
+        neg(
+            "com.antutu.ABenchMark.GL2",
+            PUBLIC_DATA,
+            "com.antutu.ABenchMark.GL2/files/shader"
         )
-        addCandidate(
-            pos().pkgs("com.antutu.ABenchMark.GL2").locs(PUBLIC_DATA)
-                .prefixFree("com.antutu.ABenchMark.GL2/files/shader/$rngString")
+        pos(
+            "com.antutu.ABenchMark.GL2",
+            PUBLIC_DATA,
+            "com.antutu.ABenchMark.GL2/files/shader/$rngString"
         )
         confirm(create())
     }
 
     @Test fun testFilterDoodleJump() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.lima.doodlejump").locs(PUBLIC_DATA).prefixFree("com.lima.doodlejump/files/cache"))
-        addCandidate(
-            pos().pkgs("com.lima.doodlejump").locs(PUBLIC_DATA)
-                .prefixFree("com.lima.doodlejump/files/cache/$rngString")
-        )
+        neg("com.lima.doodlejump", PUBLIC_DATA, "com.lima.doodlejump/files/cache")
+        pos("com.lima.doodlejump", PUBLIC_DATA, "com.lima.doodlejump/files/cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterAntutu() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.antutu.ABenchMark", "com.qqfriends.com.music").locs(SDCARD)
-                .prefixFree(".antutu/benchmark/avatars")
+        neg(
+            setOf("com.antutu.ABenchMark", "com.qqfriends.com.music"),
+            SDCARD,
+            ".antutu/benchmark/avatars"
         )
-        addCandidate(
-            pos().pkgs("com.antutu.ABenchMark", "com.qqfriends.com.music").locs(SDCARD)
-                .prefixFree(".antutu/benchmark/avatars/$rngString")
+        pos(
+            setOf("com.antutu.ABenchMark", "com.qqfriends.com.music"),
+            SDCARD,
+            ".antutu/benchmark/avatars/$rngString"
         )
         confirm(create())
     }
 
     @Test fun testFilterAudials() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.audials", "com.audials.paid").locs(SDCARD).prefixFree("Audials/temporary/"))
-        addCandidate(
-            pos().pkgs("com.audials", "com.audials.paid").locs(SDCARD)
-                .prefixFree("Audials/temporary/$rngString")
-        )
+        neg(setOf("com.audials", "com.audials.paid"), SDCARD, "Audials/temporary/")
+        pos(setOf("com.audials", "com.audials.paid"), SDCARD, "Audials/temporary/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterAlicoid() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.magine.aliceoid").locs(PRIVATE_DATA).prefixFree("com.magine.aliceoid/data/images"))
-        addCandidate(
-            pos().pkgs("com.magine.aliceoid").locs(PRIVATE_DATA)
-                .prefixFree("com.magine.aliceoid/data/images/12345-67890")
-        )
+        neg("com.magine.aliceoid", PRIVATE_DATA, "com.magine.aliceoid/data/images")
+        pos("com.magine.aliceoid", PRIVATE_DATA, "com.magine.aliceoid/data/images/12345-67890")
         confirm(create())
     }
 
     @Test fun testFilterFlightRadar() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.flightradar24pro").locs(SDCARD).prefixFree("FlightRadar24/Alerts"))
-        addCandidate(pos().pkgs("com.flightradar24pro").locs(SDCARD).prefixFree("FlightRadar24/Alerts/1234567890"))
+        neg("com.flightradar24pro", SDCARD, "FlightRadar24/Alerts")
+        pos("com.flightradar24pro", SDCARD, "FlightRadar24/Alerts/1234567890")
         confirm(create())
     }
 
     @Test fun testFilterPolarisOffice() = runTest {
         addDefaultNegatives()
-        val pkgs = arrayOf(
+        val pkgs = setOf(
             "com.infraware.polarisoffice",
             "com.infraware.polarisoffice5.entbiz.symantec",
             "com.infraware.polarisoffice.entbiz.citrix",
@@ -685,659 +448,520 @@ class HiddenFilterTest : BaseFilterTest() {
             "com.infraware.polarisoffice.entbiz.gd",
             "com.infraware.polarisoffice5tablet"
         )
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".polaris_temp"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".polaris_temp/$rngString"))
+        neg(pkgs, SDCARD, ".polaris_temp")
+        pos(pkgs, SDCARD, ".polaris_temp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterTurboClient() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("turbo.client.free", "turbo.client").locs(SDCARD).prefixFree("Turbo Client/temp"))
-        addCandidate(
-            pos().pkgs("turbo.client.free", "turbo.client").locs(SDCARD)
-                .prefixFree("Turbo Client/temp/$rngString")
-        )
+        neg(setOf("turbo.client.free", "turbo.client"), SDCARD, "Turbo Client/temp")
+        pos(setOf("turbo.client.free", "turbo.client"), SDCARD, "Turbo Client/temp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterYahooMail() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.yahoo.mobile.client.android.mail").locs(SDCARD).prefixFree("yahoo/mail/imgCache"))
-        addCandidate(
-            pos().pkgs("com.yahoo.mobile.client.android.mail").locs(SDCARD)
-                .prefixFree("yahoo/mail/imgCache/$rngString")
-        )
+        neg("com.yahoo.mobile.client.android.mail", SDCARD, "yahoo/mail/imgCache")
+        pos("com.yahoo.mobile.client.android.mail", SDCARD, "yahoo/mail/imgCache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterLGEClipTray() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.lge.software.cliptray").locs(PUBLIC_DATA).prefixFree(".cliptray"))
-        addCandidate(neg().pkgs("com.lge.software.cliptray").locs(PUBLIC_DATA).prefixFree(".cliptray/.nomedia"))
-        addCandidate(
-            pos().pkgs("com.lge.software.cliptray").locs(PUBLIC_DATA)
-                .prefixFree(".cliptray/$rngString")
-        )
+        neg("com.lge.software.cliptray", PUBLIC_DATA, ".cliptray")
+        neg("com.lge.software.cliptray", PUBLIC_DATA, ".cliptray/.nomedia")
+        pos("com.lge.software.cliptray", PUBLIC_DATA, ".cliptray/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterEFile() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.domobile.efile").locs(SDCARD).prefixFree(".eFile_trash"))
-        addCandidate(
-            pos().pkgs("com.domobile.efile").locs(SDCARD).prefixFree(".eFile_trash/$rngString")
-        )
+        neg("com.domobile.efile", SDCARD, ".eFile_trash")
+        pos("com.domobile.efile", SDCARD, ".eFile_trash/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterTencentMovieTicket() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.tencent.movieticket").locs(SDCARD).prefixFree(".QQMovieTicket/.cache"))
-        addCandidate(
-            pos().pkgs("com.tencent.movieticket").locs(SDCARD)
-                .prefixFree(".QQMovieTicket/.cache/$rngString")
-        )
+        neg("com.tencent.movieticket", SDCARD, ".QQMovieTicket/.cache")
+        pos("com.tencent.movieticket", SDCARD, ".QQMovieTicket/.cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterSohuVideo() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.sohu.sohuvideo").locs(PUBLIC_DATA).prefixFree("com.sohu.sohuvideo/tempVideo"))
-        addCandidate(
-            pos().pkgs("com.sohu.sohuvideo").locs(PUBLIC_DATA)
-                .prefixFree("com.sohu.sohuvideo/tempVideo/$rngString")
-        )
+        neg("com.sohu.sohuvideo", PUBLIC_DATA, "com.sohu.sohuvideo/tempVideo")
+        pos("com.sohu.sohuvideo", PUBLIC_DATA, "com.sohu.sohuvideo/tempVideo/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterTencentLbsCheckin() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.tencent.lbs.checkin").locs(SDCARD).prefixFree(".lbsGo/avatar_cache"))
-        addCandidate(
-            pos().pkgs("com.tencent.lbs.checkin").locs(SDCARD)
-                .prefixFree(".lbsGo/avatar_cache/$rngString")
-        )
+        neg("com.tencent.lbs.checkin", SDCARD, ".lbsGo/avatar_cache")
+        pos("com.tencent.lbs.checkin", SDCARD, ".lbsGo/avatar_cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterWuba() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.wuba.jiaoyou").locs(SDCARD).prefixFree("wuba/jiaoyou/casheimage"))
-        addCandidate(
-            pos().pkgs("com.wuba.jiaoyou").locs(SDCARD)
-                .prefixFree("wuba/jiaoyou/casheimage/$rngString")
-        )
+        neg("com.wuba.jiaoyou", SDCARD, "wuba/jiaoyou/casheimage")
+        pos("com.wuba.jiaoyou", SDCARD, "wuba/jiaoyou/casheimage/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterEverNoteSkitch() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.evernote.skitch").locs(SDCARD).prefixFree("Skitch/Temp"))
-        addCandidate(
-            pos().pkgs("com.evernote.skitch").locs(SDCARD).prefixFree("Skitch/Temp/$rngString")
-        )
+        neg("com.evernote.skitch", SDCARD, "Skitch/Temp")
+        pos("com.evernote.skitch", SDCARD, "Skitch/Temp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterAutoNavi() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.telenav.doudouyou.android.autonavi").locs(PUBLIC_DATA)
-                .prefixFree("com.telenav.doudouyou.android.autonavi/cacheimage")
+        neg(
+            "com.telenav.doudouyou.android.autonavi",
+            PUBLIC_DATA,
+            "com.telenav.doudouyou.android.autonavi/cacheimage"
         )
-        addCandidate(
-            pos().pkgs("com.telenav.doudouyou.android.autonavi").locs(PUBLIC_DATA)
-                .prefixFree("com.telenav.doudouyou.android.autonavi/cacheimage/$rngString")
+        pos(
+            "com.telenav.doudouyou.android.autonavi",
+            PUBLIC_DATA,
+            "com.telenav.doudouyou.android.autonavi/cacheimage/$rngString"
         )
         confirm(create())
     }
 
     @Test fun testFilterYahooWeather() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.yahoo.mobile.client.android.weather").locs(SDCARD).prefixFree("yahoo/weather/imgCache")
-        )
-        addCandidate(
-            pos().pkgs("com.yahoo.mobile.client.android.weather").locs(SDCARD)
-                .prefixFree("yahoo/weather/imgCache/$rngString")
-        )
+        neg("com.yahoo.mobile.client.android.weather", SDCARD, "yahoo/weather/imgCache")
+        pos("com.yahoo.mobile.client.android.weather", SDCARD, "yahoo/weather/imgCache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterBahnMultiCity() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("de.bahn.multicity").locs(SDCARD).prefixFree("cache"))
-        addCandidate(pos().pkgs("de.bahn.multicity").locs(SDCARD).prefixFree("cache/mc.json"))
+        neg("de.bahn.multicity", SDCARD, "cache")
+        pos("de.bahn.multicity", SDCARD, "cache/mc.json")
         confirm(create())
     }
 
     @Test fun testFilterPerfectScreenshot() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot").locs(SDCARD)
-                .prefixFree("Pictures/perfectscreenshot_tmp")
+        neg(
+            setOf("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot"),
+            SDCARD,
+            "Pictures/perfectscreenshot_tmp"
         )
-        addCandidate(
-            neg().pkgs("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot").locs(SDCARD)
-                .prefixFree("Pictures/perfectscreenshot_tmp/.nomedia")
+        neg(
+            setOf("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot"),
+            SDCARD,
+            "Pictures/perfectscreenshot_tmp/.nomedia"
         )
-        addCandidate(
-            pos().pkgs("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot").locs(SDCARD)
-                .prefixFree("Pictures/perfectscreenshot_tmp/$rngString")
+        pos(
+            setOf("com.mikedepaul.perfectscreenshotadfree", "com.mikedepaul.perfectscreenshot"),
+            SDCARD,
+            "Pictures/perfectscreenshot_tmp/$rngString"
         )
         confirm(create())
     }
 
     @Test fun testFilterCleanMasterGuard() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.cleanmaster.mguard").locs(PUBLIC_DATA).prefixFree("com.cleanmaster.mguard/files/cache")
-        )
-        addCandidate(
-            pos().pkgs("com.cleanmaster.mguard").locs(PUBLIC_DATA)
-                .prefixFree("com.cleanmaster.mguard/files/cache/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.cleanmaster.mguard").locs(PRIVATE_DATA).prefixFree("com.cleanmaster.mguard/files/cache")
-        )
-        addCandidate(
-            pos().pkgs("com.cleanmaster.mguard").locs(PRIVATE_DATA)
-                .prefixFree("com.cleanmaster.mguard/files/cache/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.cleanmaster.mguard").locs(PUBLIC_DATA).prefixFree("com.cleanmaster.mguard/files/iconcache")
-        )
-        addCandidate(
-            pos().pkgs("com.cleanmaster.mguard").locs(PUBLIC_DATA)
-                .prefixFree("com.cleanmaster.mguard/files/iconcache/$rngString")
-        )
+        neg("com.cleanmaster.mguard", PUBLIC_DATA, "com.cleanmaster.mguard/files/cache")
+        pos("com.cleanmaster.mguard", PUBLIC_DATA, "com.cleanmaster.mguard/files/cache/$rngString")
+        neg("com.cleanmaster.mguard", PRIVATE_DATA, "com.cleanmaster.mguard/files/cache")
+        pos("com.cleanmaster.mguard", PRIVATE_DATA, "com.cleanmaster.mguard/files/cache/$rngString")
+        neg("com.cleanmaster.mguard", PUBLIC_DATA, "com.cleanmaster.mguard/files/iconcache")
+        pos("com.cleanmaster.mguard", PUBLIC_DATA, "com.cleanmaster.mguard/files/iconcache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterMagix() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.magix.camera_mx").locs(SDCARD).prefixFree("Magix/.tmp"))
-        addCandidate(
-            pos().pkgs("com.magix.camera_mx").locs(SDCARD).prefixFree("Magix/.tmp/$rngString")
-        )
+        neg("com.magix.camera_mx", SDCARD, "Magix/.tmp")
+        pos("com.magix.camera_mx", SDCARD, "Magix/.tmp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterFlipboard() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("flipboard.app").locs(PUBLIC_DATA).prefixFree("flipboard.app/files/cache"))
-        addCandidate(
-            pos().pkgs("flipboard.app").locs(PUBLIC_DATA)
-                .prefixFree("flipboard.app/files/cache/$rngString")
-        )
+        neg("flipboard.app", PUBLIC_DATA, "flipboard.app/files/cache")
+        pos("flipboard.app", PUBLIC_DATA, "flipboard.app/files/cache/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterNineGag() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/images")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/images/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/images/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/gags")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gags/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gags/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gags_thumb")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gags_thumb/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gags_thumb/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/gifs")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gifs/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/gifs/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/mp4s")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/mp4s/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/mp4s/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/uploads")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/uploads/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/uploads/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/avatar")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/avatar/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/avatar/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA).prefixFree("com.ninegag.android.app/files/covers")
-        )
-        addCandidate(
-            neg().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/covers/.nomedia")
-        )
-        addCandidate(
-            pos().pkgs("com.ninegag.android.app").locs(PUBLIC_DATA)
-                .prefixFree("com.ninegag.android.app/files/covers/$rngString")
-        )
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/images")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/images/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/images/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags_thumb")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags_thumb/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gags_thumb/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gifs")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gifs/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/gifs/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/mp4s")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/mp4s/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/mp4s/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/uploads")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/uploads/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/uploads/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/avatar")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/avatar/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/avatar/$rngString")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/covers")
+        neg("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/covers/.nomedia")
+        pos("com.ninegag.android.app", PUBLIC_DATA, "com.ninegag.android.app/files/covers/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterAmazonMusic() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.amazon.mp3", "com.amazon.bueller.music").locs(SDCARD).prefixFree("amazonmp3/temp"))
-        addCandidate(
-            pos().pkgs("com.amazon.mp3", "com.amazon.bueller.music").locs(SDCARD)
-                .prefixFree("amazonmp3/temp/$rngString")
-        )
+        neg(setOf("com.amazon.mp3", "com.amazon.bueller.music"), SDCARD, "amazonmp3/temp")
+        pos(setOf("com.amazon.mp3", "com.amazon.bueller.music"), SDCARD, "amazonmp3/temp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterSimplePlanes() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.jundroo.SimplePlanes").locs(SDCARD).prefixFree(".EveryplayCache/com.jundroo.SimplePlanes")
-        )
-        addCandidate(
-            pos().pkgs("com.jundroo.SimplePlanes").locs(SDCARD)
-                .prefixFree(".EveryplayCache/com.jundroo.SimplePlanes/$rngString")
-        )
+        neg("com.jundroo.SimplePlanes", SDCARD, ".EveryplayCache/com.jundroo.SimplePlanes")
+        pos("com.jundroo.SimplePlanes", SDCARD, ".EveryplayCache/com.jundroo.SimplePlanes/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterPolarisViewer() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.infraware.polarisviewer4").locs(SDCARD).prefixFree(".PolarisViewer4/polarisTemp"))
-        addCandidate(
-            pos().pkgs("com.infraware.polarisviewer4").locs(SDCARD)
-                .prefixFree(".PolarisViewer4/polarisTemp/$rngString")
-        )
+        neg("com.infraware.polarisviewer4", SDCARD, ".PolarisViewer4/polarisTemp")
+        pos("com.infraware.polarisviewer4", SDCARD, ".PolarisViewer4/polarisTemp/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterSlingPlayer() = runTest {
         addDefaultNegatives()
-        val pkgs = arrayOf(
+        val pkgs = setOf(
             "com.slingmedia.slingPlayer",
             "com.slingmedia.slingPlayerTablet",
             "com.slingmedia.slingPlayerTabletFreeApp",
             "com.slingmedia.slingPlayerFreeApp"
         )
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayer/files/tsDump"))
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayer/files/logDump"))
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerTablet/files/tsDump"))
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerTablet/files/logDump"))
-        addCandidate(
-            neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerTabletFreeApp/files/tsDump")
-        )
-        addCandidate(
-            neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerTabletFreeApp/files/logDump")
-        )
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerFreeApp/files/tsDump"))
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.slingmedia.slingPlayerFreeApp/files/logDump"))
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayer/files/tsDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayer/files/logDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerTablet/files/tsDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerTablet/files/logDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerTabletFreeApp/files/tsDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerTabletFreeApp/files/logDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerFreeApp/files/tsDump/$rngString")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.slingmedia.slingPlayerFreeApp/files/logDump/$rngString")
-        )
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayer/files/tsDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayer/files/logDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTablet/files/tsDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTablet/files/logDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTabletFreeApp/files/tsDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTabletFreeApp/files/logDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerFreeApp/files/tsDump")
+        neg(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerFreeApp/files/logDump")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayer/files/tsDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayer/files/logDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTablet/files/tsDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTablet/files/logDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTabletFreeApp/files/tsDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerTabletFreeApp/files/logDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerFreeApp/files/tsDump/$rngString")
+        pos(pkgs, PUBLIC_DATA, "com.slingmedia.slingPlayerFreeApp/files/logDump/$rngString")
         confirm(create())
     }
 
     @Test fun testFilterStockGallery() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.sec.android.gallery3d").locs(PRIVATE_DATA).prefixFree("com.sec.android.gallery3d"))
-        addCandidate(
-            neg().pkgs("com.sec.android.gallery3d").locs(PRIVATE_DATA).prefixFree("com.sec.android.gallery3d/Temp")
-        )
-        addCandidate(
-            pos().pkgs("com.sec.android.gallery3d").locs(PRIVATE_DATA)
-                .prefixFree("com.sec.android.gallery3d/Temp/1456180349484")
-        )
+        neg("com.sec.android.gallery3d", PRIVATE_DATA, "com.sec.android.gallery3d")
+        neg("com.sec.android.gallery3d", PRIVATE_DATA, "com.sec.android.gallery3d/Temp")
+        pos("com.sec.android.gallery3d", PRIVATE_DATA, "com.sec.android.gallery3d/Temp/1456180349484")
         confirm(create())
     }
 
     @Test fun testFilterSkype() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache")
+        val pkgs = setOf("com.skype.raider", "com.skype.rover")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/media_cache")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/media_cache"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/media_cache_v2")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/media_cache_v2"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/emo_cache"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache_v2")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/emo_cache_v2"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/media_cache")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/media_cache"
         )
-        addCandidate(
-            neg().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/media_cache_v2")
+        neg(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/media_cache_v2"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/emo_cache_v2/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/media_cache/asyncdb/cache_db.db")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/media_cache/asyncdb/cache_db.db"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.rover/files/darkenlaptop/media_messaging/media_cache_v3/asyncdb/cache_db.db")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.rover/files/darkenlaptop/media_messaging/media_cache_v3/asyncdb/cache_db.db"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/emo_cache/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/emo_cache/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache_v2/^139B4B1968EDE294E5FBC931E304C7E94673B7D70FCB2A60B0^pdefault_60_5cd18fd4-7235-48b9-871f-0210e1e1e7df_distr.png")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/media_cache/asyncdb/cache_db.db"
         )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/emo_cache_v2/^5D2361D8C90B1FA5B1312CDED6C0CEFAF9A125AE9BBA62B2B4^pthumbnail_28f516c6-9074-453b-b076-90bc11a39e3a_distr")
-        )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/media_cache/asyncdb/cache_db.db")
-        )
-        addCandidate(
-            pos().pkgs("com.skype.raider", "com.skype.rover").locs(PRIVATE_DATA)
-                .prefixFree("com.skype.raider/files/darkenlaptop/media_messaging/media_cache_v3/asyncdb/cache_db.db")
+        pos(
+            pkgs,
+            PRIVATE_DATA,
+            "com.skype.raider/files/darkenlaptop/media_messaging/media_cache_v3/asyncdb/cache_db.db"
         )
         confirm(create())
     }
 
-    @Test fun testESFileExplorer() = runTest {
-        val pkgs = arrayOf(
+    @Test fun `test es file explorer`() = runTest {
+        val pkgs = setOf(
             "com.estrongs.android.pop",
             "com.estrongs.android.pop.cupcake",
             "com.estrongs.android.pop.app.shortcut",
             "com.estrongs.android.pop.pro"
         )
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/dianxin/notify/.cache/" + UUID.randomUUID()))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/dianxin/notify/.cache"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree("dianxin/notify/.cache/" + UUID.randomUUID()))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree("dianxin/notify/.cache"))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/recycle/" + UUID.randomUUID()))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/recycle"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".BD_SAPI_CACHE/" + UUID.randomUUID()))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".BD_SAPI_CACHE"))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree("BD_SAPI_CACHE"))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".BD_SAPI"))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/.app_icon_back"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".estrongs/.app_icon_back/strawberrycake"))
+        pos(pkgs, SDCARD, ".estrongs/dianxin/notify/.cache/" + UUID.randomUUID())
+        neg(pkgs, SDCARD, ".estrongs/dianxin/notify/.cache")
+        pos(pkgs, SDCARD, "dianxin/notify/.cache/" + UUID.randomUUID())
+        neg(pkgs, SDCARD, "dianxin/notify/.cache")
+        neg(pkgs, SDCARD, ".estrongs/recycle/" + UUID.randomUUID())
+        neg(pkgs, SDCARD, ".estrongs/recycle")
+        pos(pkgs, SDCARD, ".BD_SAPI_CACHE/" + UUID.randomUUID())
+        neg(pkgs, SDCARD, ".BD_SAPI_CACHE")
+        neg(pkgs, SDCARD, "BD_SAPI_CACHE")
+        neg(pkgs, SDCARD, ".BD_SAPI")
+        neg(pkgs, SDCARD, ".estrongs/.app_icon_back")
+        pos(pkgs, SDCARD, ".estrongs/.app_icon_back/strawberrycake")
         confirm(create())
     }
 
-    @Test fun testCMLauncher() = runTest {
-        addCandidate(
-            pos().pkgs("com.ksmobile.launcher").locs(PUBLIC_DATA)
-                .prefixFree("com.ksmobile.launcher/files/iconcache/" + UUID.randomUUID())
-        )
-        addCandidate(
-            neg().pkgs("com.ksmobile.launcher").locs(PUBLIC_DATA).prefixFree("com.ksmobile.launcher/files/iconcache")
-        )
+    @Test fun `test cm launcher`() = runTest {
+        pos("com.ksmobile.launcher", PUBLIC_DATA, "com.ksmobile.launcher/files/iconcache/" + UUID.randomUUID())
+        neg("com.ksmobile.launcher", PUBLIC_DATA, "com.ksmobile.launcher/files/iconcache")
         confirm(create())
     }
 
-    @Test fun testAsusWebstorage() = runTest {
-        addCandidate(
-            pos().pkgs("com.ecareme.asuswebstorage").locs(PUBLIC_DATA)
-                .prefixFree("com.ecareme.asuswebstorage/folderBrowseCache/" + UUID.randomUUID())
+    @Test fun `test asus webstorage`() = runTest {
+        pos(
+            "com.ecareme.asuswebstorage",
+            PUBLIC_DATA,
+            "com.ecareme.asuswebstorage/folderBrowseCache/" + UUID.randomUUID()
         )
-        addCandidate(
-            neg().pkgs("com.ecareme.asuswebstorage").locs(PUBLIC_DATA)
-                .prefixFree("com.ecareme.asuswebstorage/folderBrowseCache")
-        )
-        confirm(create())
-    }
-
-    @Test fun testEveryplayAppCache() = runTest {
-        addCandidate(
-            pos().pkgs("com.everyplay.everyplayapp").locs(SDCARD)
-                .prefixFree(".EveryplayCache/images/" + UUID.randomUUID())
-        )
-        addCandidate(
-            neg().pkgs("com.everyplay.everyplayapp").locs(SDCARD)
-                .prefixFree(".EveryplayCache/com.some.package/" + UUID.randomUUID())
-        )
-        addCandidate(
-            neg().pkgs("com.everyplay.everyplayapp").locs(SDCARD)
-                .prefixFree(".EveryplayCache/images" + "com.everyplay.everyplayapp")
+        neg(
+            "com.ecareme.asuswebstorage",
+            PUBLIC_DATA,
+            "com.ecareme.asuswebstorage/folderBrowseCache"
         )
         confirm(create())
     }
 
-    @Test fun testFaceFolder() = runTest {
-        addCandidate(
-            pos().pkgs("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d")
-                .locs(SDCARD).prefixFree(".face/facedata")
+    @Test fun `test everyplay app cache`() = runTest {
+        pos(
+            "com.everyplay.everyplayapp",
+            SDCARD,
+            ".EveryplayCache/images/" + UUID.randomUUID()
         )
-        addCandidate(
-            pos().pkgs("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d")
-                .locs(SDCARD).prefixFree(".face/11111")
+        neg(
+            "com.everyplay.everyplayapp",
+            SDCARD,
+            ".EveryplayCache/com.some.package/" + UUID.randomUUID()
         )
-        addCandidate(
-            neg().pkgs("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d")
-                .locs(SDCARD).prefixFree(".face")
+        neg(
+            "com.everyplay.everyplayapp",
+            SDCARD,
+            ".EveryplayCache/images" + "com.everyplay.everyplayapp"
         )
         confirm(create())
     }
 
-    @Test fun testAmazonMarket_downloadedApks() = runTest {
-        addCandidate(
-            pos().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA)
-                .prefixFree("com.amazon.mShop.android/files/update-1-1.apk")
+    @Test fun `test face folder`() = runTest {
+        pos(
+            setOf("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d"),
+            SDCARD,
+            ".face/facedata"
         )
-        addCandidate(
-            pos().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA)
-                .prefixFree("com.amazon.mShop.android/files/update-12-123456789.apk")
+        pos(
+            setOf("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d"),
+            SDCARD,
+            ".face/11111"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA).prefixFree("com.amazon.mShop.android/files")
+        neg(
+            setOf("com.android.gallery3d", "com.google.android.gallery3d", "com.sec.android.gallery3d"),
+            SDCARD,
+            ".face"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA)
-                .prefixFree("com.amazon.mShop.android/files/some.apk")
+        confirm(create())
+    }
+
+    @Test fun `test amazon market downloaded apks`() = runTest {
+        pos(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "com.amazon.mShop.android/files/update-1-1.apk"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA)
-                .prefixFree("com.amazon.mShop.android/files/update-1-12346789.zip")
+        pos(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "com.amazon.mShop.android/files/update-12-123456789.apk"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PRIVATE_DATA).prefixFree("some.other.app/files/update-1-1.apk")
+        neg(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "com.amazon.mShop.android/files"
         )
-        addCandidate(
-            pos().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA)
-                .prefixFree("com.amazon.mShop.android/files/apks/update-1-1.apk")
+        neg(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "com.amazon.mShop.android/files/some.apk"
         )
-        addCandidate(
-            pos().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA)
-                .prefixFree("com.amazon.mShop.android/files/apks/update-12-123456789.apk")
+        neg(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "com.amazon.mShop.android/files/update-1-12346789.zip"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA).prefixFree("com.amazon.mShop.android/files/apks")
+        neg(
+            "com.amazon.mShop.android",
+            PRIVATE_DATA,
+            "some.other.app/files/update-1-1.apk"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA)
-                .prefixFree("com.amazon.mShop.android/files/apks/some.apk")
+        pos(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "com.amazon.mShop.android/files/apks/update-1-1.apk"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA)
-                .prefixFree("com.amazon.mShop.android/files/apks/update-1-12346789.zip")
+        pos(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "com.amazon.mShop.android/files/apks/update-12-123456789.apk"
         )
-        addCandidate(
-            neg().pkgs("com.amazon.mShop.android").locs(PUBLIC_DATA)
-                .prefixFree("some.other.app/files/apks/update-1-1.apk")
+        neg(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "com.amazon.mShop.android/files/apks"
+        )
+        neg(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "com.amazon.mShop.android/files/apks/some.apk"
+        )
+        neg(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "com.amazon.mShop.android/files/apks/update-1-12346789.zip"
+        )
+        neg(
+            "com.amazon.mShop.android",
+            PUBLIC_DATA,
+            "some.other.app/files/apks/update-1-1.apk"
         )
         confirm(create())
     }
 
     @Test fun testKate() = runTest {
-        val pkgs = arrayOf(
+        val pkgs = setOf(
             "com.perm.kate",
             "com.perm.kate.pro",
             "com.perm.kate_new_2"
         )
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".Kate/image_cache/" + UUID.randomUUID()))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree(".Kate/image_cache/-113291110_-2052025531"))
-        addCandidate(neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree(".Kate/image_cache"))
+        pos(pkgs, SDCARD, ".Kate/image_cache/" + UUID.randomUUID())
+        pos(pkgs, SDCARD, ".Kate/image_cache/-113291110_-2052025531")
+        neg(pkgs, PUBLIC_DATA, ".Kate/image_cache")
         confirm(create())
     }
 
-    @Test fun testPlanTronicsFindMyHeadset() = runTest {
-        addCandidate(pos().pkgs("com.plantronics.findmyheadset").locs(SDCARD).prefixFree("cabotEL.log"))
-        addCandidate(neg().pkgs("com.plantronics.findmyheadset").locs(SDCARD).prefixFree("cabotel"))
+    @Test fun `test plan tronics find my headset`() = runTest {
+        pos("com.plantronics.findmyheadset", SDCARD, "cabotEL.log")
+        neg("com.plantronics.findmyheadset", SDCARD, "cabotel")
         confirm(create())
     }
 
-    @Test fun testMotionsStils() = runTest {
-        addCandidate(
-            pos().pkgs("com.google.android.apps.motionstills").locs(SDCARD)
-                .prefixFree("motionstills/warp_grid_cache/test")
-        )
-        addCandidate(
-            neg().pkgs("com.google.android.apps.motionstills").locs(SDCARD)
-                .prefixFree("motionstills/warp_grid_cache/.nomedia")
-        )
-        addCandidate(
-            neg().pkgs("com.google.android.apps.motionstills").locs(SDCARD).prefixFree("motionstills/warp_grid_cache")
-        )
-        addCandidate(neg().pkgs("com.google.android.apps.motionstills").locs(SDCARD).prefixFree("motionstills"))
+    @Test fun `test motions stils`() = runTest {
+        pos("com.google.android.apps.motionstills", SDCARD, "motionstills/warp_grid_cache/test")
+        neg("com.google.android.apps.motionstills", SDCARD, "motionstills/warp_grid_cache/.nomedia")
+        neg("com.google.android.apps.motionstills", SDCARD, "motionstills/warp_grid_cache")
+        neg("com.google.android.apps.motionstills", SDCARD, "motionstills")
         confirm(create())
     }
 
-    @Test fun testPlexMediaServer() = runTest {
-        addCandidate(
-            pos().pkgs("com.plexapp.android").locs(PRIVATE_DATA)
-                .prefixFree("com.plexapp.android/Plex Media Server/Cache/test")
-        )
-        addCandidate(
-            neg().pkgs("com.plexapp.android").locs(PRIVATE_DATA)
-                .prefixFree("com.plexapp.android/Plex Media Server/Cache")
-        )
+    @Test fun `test plex media server`() = runTest {
+        pos("com.plexapp.android", PRIVATE_DATA, "com.plexapp.android/Plex Media Server/Cache/test")
+        neg("com.plexapp.android", PRIVATE_DATA, "com.plexapp.android/Plex Media Server/Cache")
         confirm(create())
     }
 
     @Test fun testFotaDownload() = runTest {
-        addCandidate(pos().pkgs("com.tcl.ota.bb").locs(SDCARD).prefixFree(".fotadownload/test"))
-        addCandidate(neg().pkgs("com.tcl.ota.bb").locs(SDCARD).prefixFree(".fotadownload"))
+        pos("com.tcl.ota.bb", SDCARD, ".fotadownload/test")
+        neg("com.tcl.ota.bb", SDCARD, ".fotadownload")
         confirm(create())
     }
 
     @Test fun testBrowser() = runTest {
-        addCandidate(pos().pkgs("com.android.browser").locs(SDCARD).prefixFree("Browser/MediaCache/Test"))
-        addCandidate(neg().pkgs("com.android.browser").locs(SDCARD).prefixFree("Browser/MediaCache"))
+        pos("com.android.browser", SDCARD, "Browser/MediaCache/Test")
+        neg("com.android.browser", SDCARD, "Browser/MediaCache")
         confirm(create())
     }
 
     @Test fun testUCDownloadsApolloCache() = runTest {
-        val pkgs = arrayOf(
+        val pkgs = setOf(
             "com.UCMobile",
             "com.UCMobile.intl",
             "com.UCMobile.x86",
@@ -1348,111 +972,95 @@ class HiddenFilterTest : BaseFilterTest() {
             "com.uc.browser",
             "com.uc.browser.hd"
         )
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree("UCDownloads/video/.apolloCache"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree("UCDownloads/video/.apolloCache/strawberry"))
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree("UCDownloadsPad/video/.apolloCache"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree("UCDownloadsPad/video/.apolloCache/strawberry"))
-        addCandidate(
-            neg().pkgs(*pkgs).locs(PUBLIC_DATA).prefixFree("com.UCMobile.intl/files/UcDownloads/video/.apolloCache")
-        )
-        addCandidate(
-            pos().pkgs(*pkgs).locs(PUBLIC_DATA)
-                .prefixFree("com.UCMobile.intl/files/UcDownloads/video/.apolloCache/strawberry")
-        )
-        addCandidate(neg().pkgs(*pkgs).locs(SDCARD).prefixFree("supercache"))
-        addCandidate(pos().pkgs(*pkgs).locs(SDCARD).prefixFree("supercache/test"))
+        neg(pkgs, SDCARD, "UCDownloads/video/.apolloCache")
+        pos(pkgs, SDCARD, "UCDownloads/video/.apolloCache/strawberry")
+        neg(pkgs, SDCARD, "UCDownloadsPad/video/.apolloCache")
+        pos(pkgs, SDCARD, "UCDownloadsPad/video/.apolloCache/strawberry")
+        neg(pkgs, PUBLIC_DATA, "com.UCMobile.intl/files/UcDownloads/video/.apolloCache")
+        pos(pkgs, PUBLIC_DATA, "com.UCMobile.intl/files/UcDownloads/video/.apolloCache/strawberry")
+        neg(pkgs, SDCARD, "supercache")
+        pos(pkgs, SDCARD, "supercache/test")
         confirm(create())
     }
 
-    @Test fun testChromeTempDownloadfile() = runTest {
-        addCandidate(neg().pkgs("com.android.chrome").locs(SDCARD).prefixFree("Download"))
-        addCandidate(neg().pkgs("com.android.chrome").locs(SDCARD).prefixFree("Download/.crdownload"))
-        addCandidate(neg().pkgs("com.android.chrome").locs(SDCARD).prefixFree("$rngString.crdownload"))
-        addCandidate(
-            pos().pkgs("com.android.chrome").locs(SDCARD).prefixFree("Download/$rngString.crdownload")
-        )
+    @Test fun `test chrome temp download file`() = runTest {
+        neg("com.android.chrome", SDCARD, "Download")
+        neg("com.android.chrome", SDCARD, "Download/.crdownload")
+        neg("com.android.chrome", SDCARD, "$rngString.crdownload")
+        pos("com.android.chrome", SDCARD, "Download/$rngString.crdownload")
         confirm(create())
     }
 
     @Test fun testMusically() = runTest {
-        addCandidate(
-            neg().pkgs("com.zhiliaoapp.musically").locs(PUBLIC_DATA)
-                .prefixFree("com.zhiliaoapp.musically/files/frescocache")
-        )
-        addCandidate(
-            pos().pkgs("com.zhiliaoapp.musically").locs(PUBLIC_DATA)
-                .prefixFree("com.zhiliaoapp.musically/files/frescocache/$rngString")
-        )
-        addCandidate(
-            neg().pkgs("com.zhiliaoapp.musically").locs(PUBLIC_DATA).prefixFree("com.zhiliaoapp.musically/Videos")
-        )
-        addCandidate(
-            pos().pkgs("com.zhiliaoapp.musically").locs(PUBLIC_DATA)
-                .prefixFree("com.zhiliaoapp.musically/Videos/$rngString")
-        )
+        addDefaultNegatives()
+        neg("com.zhiliaoapp.musically", PUBLIC_DATA, "com.zhiliaoapp.musically/files/frescocache")
+        pos("com.zhiliaoapp.musically", PUBLIC_DATA, "com.zhiliaoapp.musically/files/frescocache/$rngString")
+        neg("com.zhiliaoapp.musically", PUBLIC_DATA, "com.zhiliaoapp.musically/Videos")
+        pos("com.zhiliaoapp.musically", PUBLIC_DATA, "com.zhiliaoapp.musically/Videos/$rngString")
         confirm(create())
     }
 
     @Test fun testSnapchat() = runTest {
-        addCandidate(
-            neg().pkgs("com.snapchat.android").locs(PRIVATE_DATA).prefixFree("com.snapchat.android/files/media_cache")
-        )
-        addCandidate(
-            pos().pkgs("com.snapchat.android").locs(PRIVATE_DATA)
-                .prefixFree("com.snapchat.android/files/media_cache/$rngString")
-        )
+        addDefaultNegatives()
+        neg("com.snapchat.android", PRIVATE_DATA, "com.snapchat.android/files/media_cache")
+        pos("com.snapchat.android", PRIVATE_DATA, "com.snapchat.android/files/media_cache/$rngString")
         confirm(create())
     }
 
     @Test fun testKeerby() = runTest {
-        addCandidate(neg().pkgs("com.keerby.formatfactory").locs(SDCARD).prefixFree("Keerby/FormatFactory/$rngString"))
-        addCandidate(
-            pos().pkgs("com.keerby.formatfactory").locs(SDCARD).prefixFree("Keerby/FormatFactory/tmp/$rngString")
-        )
+        addDefaultNegatives()
+        neg("com.keerby.formatfactory", SDCARD, "Keerby/FormatFactory/$rngString")
+        pos("com.keerby.formatfactory", SDCARD, "Keerby/FormatFactory/tmp/$rngString")
         confirm(create())
     }
 
     @Test fun testGooglePlus() = runTest {
-        addCandidate(
-            neg().pkgs("com.google.android.apps.plus").locs(PUBLIC_DATA, PRIVATE_DATA)
-                .prefixFree("com.google.android.apps.plus/app_localMedia")
+        addDefaultNegatives()
+        neg(
+            "com.google.android.apps.plus",
+            setOf(PUBLIC_DATA, PRIVATE_DATA),
+            "com.google.android.apps.plus/app_localMedia"
         )
-        addCandidate(
-            pos().pkgs("com.google.android.apps.plus").locs(PUBLIC_DATA, PRIVATE_DATA)
-                .prefixFree("com.google.android.apps.plus/app_localMedia/$rngString")
+        pos(
+            "com.google.android.apps.plus",
+            setOf(PUBLIC_DATA, PRIVATE_DATA),
+            "com.google.android.apps.plus/app_localMedia/$rngString"
         )
         confirm(create())
     }
 
     @Test fun testZArchiver() = runTest {
-        addCandidate(neg().pkgs("ru.zdevs.zarchiver").locs(PUBLIC_DATA).prefixFree("ru.zdevs.zarchiver/files"))
-        addCandidate(
-            pos().pkgs("ru.zdevs.zarchiver").locs(PUBLIC_DATA).prefixFree("ru.zdevs.zarchiver/files/$rngString")
-        )
+        addDefaultNegatives()
+        neg("ru.zdevs.zarchiver", PUBLIC_DATA, "ru.zdevs.zarchiver/files")
+        pos("ru.zdevs.zarchiver", PUBLIC_DATA, "ru.zdevs.zarchiver/files/$rngString")
         confirm(create())
     }
 
     @Test fun testNaviKing() = runTest {
-        addCandidate(neg().pkgs("com.kingwaytek.naviking").locs(SDCARD).prefixFree("LocalKingMapTempN5"))
-        addCandidate(pos().pkgs("com.kingwaytek.naviking").locs(SDCARD).prefixFree("LocalKingMapTempN5/$rngString"))
+        addDefaultNegatives()
+        neg("com.kingwaytek.naviking", SDCARD, "LocalKingMapTempN5")
+        pos("com.kingwaytek.naviking", SDCARD, "LocalKingMapTempN5/$rngString")
         confirm(create())
     }
 
     @Test fun testGlock() = runTest {
-        addCandidate(neg().pkgs("com.genie9.glock").locs(SDCARD).prefixFree(".GLock/.cache"))
-        addCandidate(pos().pkgs("com.genie9.glock").locs(SDCARD).prefixFree(".GLock/.cache/$rngString"))
+        addDefaultNegatives()
+        neg("com.genie9.glock", SDCARD, ".GLock/.cache")
+        pos("com.genie9.glock", SDCARD, ".GLock/.cache/$rngString")
         confirm(create())
     }
 
     @Test fun testTCLUpdater() = runTest {
-        addCandidate(neg().pkgs("com.tcl.ota.bb").locs(PUBLIC_DATA).prefixFree(".fotaApps"))
-        addCandidate(pos().pkgs("com.tcl.ota.bb").locs(PUBLIC_DATA).prefixFree(".fotaApps/$rngString"))
+        addDefaultNegatives()
+        neg("com.tcl.ota.bb", PUBLIC_DATA, ".fotaApps")
+        pos("com.tcl.ota.bb", PUBLIC_DATA, ".fotaApps/$rngString")
         confirm(create())
     }
 
     @Test fun testWhatsAppShared() = runTest {
-        addCandidate(neg().pkgs("com.whatsapp").locs(SDCARD).prefixFree("WhatsApp/.Shared"))
-        addCandidate(pos().pkgs("com.whatsapp").locs(SDCARD).prefixFree("WhatsApp/.Shared/$rngString"))
+        addDefaultNegatives()
+        neg("com.whatsapp", SDCARD, "WhatsApp/.Shared")
+        pos("com.whatsapp", SDCARD, "WhatsApp/.Shared/$rngString")
         confirm(create())
     }
 
@@ -1460,459 +1068,419 @@ class HiddenFilterTest : BaseFilterTest() {
      * https://github.com/d4rken/sdmaid-public/issues/2084
      * [GameFilesFilterTest.testUnity3dGameData]
      */
-    @Test fun keepUnityOfflineGameData() = runTest {
-        addCandidate(
-            neg().pkgs("test.pkg").locs(PUBLIC_DATA)
-                .prefixFree("test.pkg/files/Cache/t_head_mask_back.tga.unity3d&ux=1538675986")
-        )
-        addCandidate(
-            neg().pkgs("test.pkg").locs(PUBLIC_DATA)
-                .prefixFree("test.pkg/files/Cache/$rngString.unity3d&ux=$rngString")
-        )
+    @Test fun `test unity offline game data`() = runTest {
+        addDefaultNegatives()
+        neg("test.pkg", PUBLIC_DATA, "test.pkg/files/Cache/t_head_mask_back.tga.unity3d&ux=1538675986")
+        neg("test.pkg", PUBLIC_DATA, "test.pkg/files/Cache/$rngString.unity3d&ux=$rngString")
         confirm(create())
     }
 
     @Test fun testXploreFileManager() = runTest {
-        addCandidate(
-            neg().pkgs("com.lonelycatgames.Xplore").locs(PUBLIC_DATA)
-                .prefixFree("com.lonelycatgames.Xplore/files/Send Anywhere/.temp")
-        )
-        addCandidate(
-            pos().pkgs("com.lonelycatgames.Xplore").locs(PUBLIC_DATA)
-                .prefixFree("com.lonelycatgames.Xplore/files/Send Anywhere/.temp/$rngString")
-        )
+        addDefaultNegatives()
+        neg("com.lonelycatgames.Xplore", PUBLIC_DATA, "com.lonelycatgames.Xplore/files/Send Anywhere/.temp")
+        pos("com.lonelycatgames.Xplore", PUBLIC_DATA, "com.lonelycatgames.Xplore/files/Send Anywhere/.temp/$rngString")
         confirm(create())
     }
 
-    @Test fun testTencentMicroMsg() = runTest {
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg"))
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/sns/$rngString")
+    @Test fun `wechat tencent micro message`() = runTest {
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/sns/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image2/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/video/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/voice2/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/CheckResUpdate")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/CheckResUpdate/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/WebviewCache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/WebviewCache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/Cache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/Cache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/.tmp")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/.tmp/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/CDNTemp")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/CDNTemp/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/FailMsgFileCache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/FailMsgFileCache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/diskcache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/diskcache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e63cd8c46008e42a3d3d614a3temp012345789111")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3temp0123456789111")
+        neg("com.tencent.mm", SDCARD, "tencent/assistant/cache")
+        pos("com.tencent.mm", SDCARD, "tencent/assistant/cache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/assistant/thumbnailcache")
+        pos("com.tencent.mm", SDCARD, "tencent/assistant/thumbnailcache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/assistant/tmp")
+        pos("com.tencent.mm", SDCARD, "tencent/assistant/tmp/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/emoji/cover")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/emoji/cover/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/mmslot/webcached")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/mmslot/webcached/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxacache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxacache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxafiles")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxafiles/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxanewfiles")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxanewfiles/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxvideocache")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxvideocache/$rngString")
+        neg("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxvideotmp")
+        pos("com.tencent.mm", SDCARD, "tencent/MicroMsg/wxvideotmp/$rngString")
+
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/sns/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image2/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/video/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/voice2/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/CheckResUpdate")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/CheckResUpdate/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/WebviewCache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/WebviewCache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/Cache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/Cache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/.tmp")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/.tmp/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/CDNTemp")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/CDNTemp/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/FailMsgFileCache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/FailMsgFileCache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/diskcache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/diskcache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e63cd8c46008e42a3d3d614a3temp012345789111")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3temp0123456789111")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/cache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/cache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/thumbnailcache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/thumbnailcache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/tmp")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/assistant/tmp/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon")
+        pos(
+            "com.tencent.mm",
+            PUBLIC_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon/$rngString"
         )
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download")
+        pos(
+            "com.tencent.mm",
+            PUBLIC_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download/$rngString"
         )
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image2/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/emoji/cover")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/emoji/cover/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/mmslot/webcached")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/mmslot/webcached/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache")
+        pos(
+            "com.tencent.mm",
+            PUBLIC_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache/$rngString"
         )
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/video/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxacache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxacache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxafiles")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxafiles/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxanewfiles")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxanewfiles/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxvideocache")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxvideocache/$rngString")
+        neg("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxvideotmp")
+        pos("com.tencent.mm", PUBLIC_DATA, "com.tencent.mm/MicroMsg/wxvideotmp/$rngString")
+
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/sns/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image/$rngString")
+        neg(
+            "com.tencent.mm",
+            PRIVATE_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/image2/$rngString"
         )
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/voice2/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/video/$rngString")
+        neg(
+            "com.tencent.mm",
+            PRIVATE_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/voice2/$rngString"
         )
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/CheckResUpdate"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/CheckResUpdate/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/WebviewCache"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/WebviewCache/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/Cache"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/Cache/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/.tmp"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/.tmp/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/wxacache"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/wxacache/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/CDNTemp"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/CDNTemp/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/FailMsgFileCache"))
-        addCandidate(
-            pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/FailMsgFileCache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/CheckResUpdate")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/CheckResUpdate/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/WebviewCache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/WebviewCache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/Cache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/Cache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/.tmp")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/.tmp/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/CDNTemp")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/CDNTemp/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/FailMsgFileCache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/FailMsgFileCache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/diskcache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/diskcache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e63cd8c46008e42a3d3d614a3temp012345789111")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3temp0123456789111")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/cache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/cache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/thumbnailcache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/thumbnailcache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/tmp")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/assistant/tmp/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon")
+        pos(
+            "com.tencent.mm",
+            PRIVATE_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon/$rngString"
         )
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/diskcache"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/MicroMsg/diskcache/$rngString"))
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e63cd8c46008e42a3d3d614a3temp012345789111")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download")
+        pos(
+            "com.tencent.mm",
+            PRIVATE_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/cdn/download/$rngString"
         )
-        addCandidate(
-            pos().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3temp0123456789111")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/emoji/cover")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/emoji/cover/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/mmslot/webcached")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/mmslot/webcached/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache")
+        pos(
+            "com.tencent.mm",
+            PRIVATE_DATA,
+            "com.tencent.mm/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/openapi_cache/$rngString"
         )
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("VideoCache/com.tencent.mm"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("VideoCache/com.tencent.mm/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/cache"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/cache/$rngString"))
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/thumbnailcache"))
-        addCandidate(
-            pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/thumbnailcache/$rngString")
-        )
-        addCandidate(neg().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/tmp"))
-        addCandidate(pos().pkgs("com.tencent.mm").locs(SDCARD).prefixFree("tencent/assistant/tmp/$rngString"))
-        addCandidate(
-            neg().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon")
-        )
-        addCandidate(
-            pos().pkgs("com.tencent.mm").locs(SDCARD)
-                .prefixFree("tencent/MicroMsg/efda91e6a3cd8c46008e42a3d3d614a3/brandicon/$rngString")
-        )
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxacache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxacache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxafiles")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxafiles/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxanewfiles")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxanewfiles/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxvideocache")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxvideocache/$rngString")
+        neg("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxvideotmp")
+        pos("com.tencent.mm", PRIVATE_DATA, "com.tencent.mm/MicroMsg/wxvideotmp/$rngString")
+
+        neg("com.tencent.mm", SDCARD, "VideoCache/com.tencent.mm")
+        pos("com.tencent.mm", SDCARD, "VideoCache/com.tencent.mm/$rngString")
+
         confirm(create())
     }
 
     @Test fun testNewsBreak() = runTest {
-        addCandidate(neg().pkgs("com.particlenews.newsbreak").locs(SDCARD).prefixFree(".newsbreak/image"))
-        addCandidate(pos().pkgs("com.particlenews.newsbreak").locs(SDCARD).prefixFree(".newsbreak/image/$rngString"))
+        addDefaultNegatives()
+        neg("com.particlenews.newsbreak", SDCARD, ".newsbreak/image")
+        pos("com.particlenews.newsbreak", SDCARD, ".newsbreak/image/$rngString")
         confirm(create())
     }
 
     @Test fun testSqlitePrime() = runTest {
-        addCandidate(neg().pkgs("com.lastempirestudio.sqliteprime").locs(SDCARD).prefixFree("SqlitePrime/cache"))
-        addCandidate(
-            pos().pkgs("com.lastempirestudio.sqliteprime").locs(SDCARD).prefixFree("SqlitePrime/cache/$rngString")
-        )
+        addDefaultNegatives()
+        neg("com.lastempirestudio.sqliteprime", SDCARD, "SqlitePrime/cache")
+        pos("com.lastempirestudio.sqliteprime", SDCARD, "SqlitePrime/cache/$rngString")
         confirm(create())
     }
 
     @Test fun testSems() = runTest {
-        addCandidate(neg().pkgs("com.samsung.android.mobileservice").locs(SDCARD).prefixFree(".sems"))
-        addCandidate(
-            pos().pkgs("com.samsung.android.mobileservice").locs(SDCARD)
-                .prefixFree(".sems/sa_groups_img_family_grid.png")
-        )
+        addDefaultNegatives()
+        neg("com.samsung.android.mobileservice", SDCARD, ".sems")
+        pos("com.samsung.android.mobileservice", SDCARD, ".sems/sa_groups_img_family_grid.png")
         confirm(create())
     }
 
     @Test fun testQPython() = runTest {
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython"))
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/projects"))
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/.notebook"))
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/lib/1thing"))
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/log"))
-        addCandidate(neg().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/cache"))
-        addCandidate(pos().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/log/1thing"))
-        addCandidate(pos().pkgs("org.qpython.qpy").locs(SDCARD).prefixFree("qpython/cache/1thing"))
+        addDefaultNegatives()
+        neg("org.qpython.qpy", SDCARD, "qpython")
+        neg("org.qpython.qpy", SDCARD, "qpython/projects")
+        neg("org.qpython.qpy", SDCARD, "qpython/.notebook")
+        neg("org.qpython.qpy", SDCARD, "qpython/lib/1thing")
+        neg("org.qpython.qpy", SDCARD, "qpython/log")
+        neg("org.qpython.qpy", SDCARD, "qpython/cache")
+        pos("org.qpython.qpy", SDCARD, "qpython/log/1thing")
+        pos("org.qpython.qpy", SDCARD, "qpython/cache/1thing")
         confirm(create())
     }
 
     @Test fun testVMOS() = runTest {
-        addCandidate(neg().pkgs("com.vmos.glb").locs(SDCARD).prefixFree("VMOSfiletransferstation"))
-        addCandidate(
-            pos().pkgs("com.vmos.glb").locs(SDCARD)
-                .prefixFree("VMOSfiletransferstation/something_!\"§$%&/()=?ÄÖ_:;'ÄÖ'")
-        )
+        addDefaultNegatives()
+        neg("com.vmos.glb", SDCARD, "VMOSfiletransferstation")
+        pos("com.vmos.glb", SDCARD, "VMOSfiletransferstation/something_!\"§$%&/()=?ÄÖ_:;'ÄÖ'")
         confirm(create())
     }
 
     @Test fun testSketchCode() = runTest {
-        addCandidate(neg().pkgs("com.sketch.code.two").locs(SDCARD).prefixFree(".sketchcode"))
-        addCandidate(neg().pkgs("com.sketch.code.two").locs(SDCARD).prefixFree(".sketchcode/temp"))
-        addCandidate(
-            pos().pkgs("com.sketch.code.two").locs(SDCARD)
-                .prefixFree(".sketchcode/temp/something_!\"§$%&/()=?ÄÖ_:;'ÄÖ'")
-        )
+        addDefaultNegatives()
+        neg("com.sketch.code.two", SDCARD, ".sketchcode")
+        neg("com.sketch.code.two", SDCARD, ".sketchcode/temp")
+        pos("com.sketch.code.two", SDCARD, ".sketchcode/temp/something_!\"§$%&/()=?ÄÖ_:;'ÄÖ'")
         confirm(create())
     }
 
     @Test fun testVkontakte() = runTest {
-        addCandidate(
-            neg().pkgs("com.vkontakte.android", "re.sova.five").locs(SDCARD).prefixFree(".vkontakte/something")
-        )
-        addCandidate(
-            pos().pkgs("com.vkontakte.android", "re.sova.five").locs(SDCARD).prefixFree(".vkontakte/autoplay_gif_cache")
-        )
+        addDefaultNegatives()
+        neg("com.vkontakte.android", SDCARD, ".vkontakte/something")
+        pos("com.vkontakte.android", SDCARD, ".vkontakte/autoplay_gif_cache")
         confirm(create())
     }
 
     @Test fun testMagicVideoHiddenTmp() = runTest {
-        addCandidate(neg().pkgs("com.magicvideo.beauty.videoeditor").locs(SDCARD).prefixFree(".tmp"))
-        addCandidate(
-            neg().pkgs("com.magicvideo.beauty.videoeditor").locs(SDCARD)
-                .prefixFree(".tmp508890d1-5954-404a-a28f-01bbb8d5150")
-        )
-        addCandidate(
-            neg().pkgs("com.magicvideo.beauty.videoeditor").locs(SDCARD)
-                .prefixFree(".tmp508890d1-5954-404a-a28f-01bbb8d5150ee")
-        )
-        addCandidate(
-            neg().pkgs("com.magicvideo.beauty.videoeditor").locs(SDCARD)
-                .prefixFree(".tmp508890d1-5954-404a-a28f-01bbb8d5150G")
-        )
-        addCandidate(
-            pos().pkgs("com.magicvideo.beauty.videoeditor").locs(SDCARD)
-                .prefixFree(".tmp508890d1-5954-404a-a28f-01bbb8d5150e")
-        )
-        confirm(create())
-    }
-
-    @Test fun testLikee() = runTest {
-        addCandidate(neg().pkgs("video.like").locs(SDCARD).prefixFree("video.like/nerv-cacheg"))
-        addCandidate(pos().pkgs("video.like").locs(SDCARD).prefixFree("video.like/nerv-cache/something"))
-        addCandidate(neg().pkgs("video.like").locs(PUBLIC_DATA).prefixFree("video.like/files/kk"))
-        addCandidate(pos().pkgs("video.like").locs(PUBLIC_DATA).prefixFree("video.like/files/kk/something"))
-        addCandidate(neg().pkgs("video.like").locs(PUBLIC_DATA).prefixFree("video.like/files/xlog"))
-        addCandidate(pos().pkgs("video.like").locs(PUBLIC_DATA).prefixFree("video.like/files/xlog/test"))
-        confirm(create())
-    }
-
-    @Test fun testLuumi() = runTest {
-        addCandidate(neg().pkgs("photo.editor.photoeditor.filtersforpictures").locs(SDCARD).prefixFree("Lumii/.cache"))
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.filtersforpictures").locs(SDCARD).prefixFree("Lumii/.cache/something")
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.filtersforpictures").locs(SDCARD).prefixFree("Lumii/.tattooTemp")
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.filtersforpictures").locs(SDCARD)
-                .prefixFree("Lumii/.tattooTemp/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testPhotoEditor() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.brush")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.brush/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.bg").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.bg/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.neon").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.neon/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.mosaic")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.mosaic/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.lightfx")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.lightfx/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.filter")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.filter/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.edited_photo")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.edited_photo/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.eraser")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.eraser/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.sticker")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("photo.editor.photoeditor.photoeditorpro").prefixFree("Photo Editor/.sticker/something")
-                .locs(SDCARD)
-        )
+        neg("com.magicvideo.beauty.videoeditor", SDCARD, ".tmp")
+        neg("com.magicvideo.beauty.videoeditor", SDCARD, ".tmp508890d1-5954-404a-a28f-01bbb8d5150")
+        neg("com.magicvideo.beauty.videoeditor", SDCARD, ".tmp508890d1-5954-404a-a28f-01bbb8d5150ee")
+        neg("com.magicvideo.beauty.videoeditor", SDCARD, ".tmp508890d1-5954-404a-a28f-01bbb8d5150G")
         confirm(create())
     }
 
-    @Test fun testPhotoCutPaste() = runTest {
-        addCandidate(
-            neg().pkgs("com.morningshine.autocutpaste").locs(SDCARD).prefixFree("DCIM/Auto Photo Cut Paste/.temp")
-        )
-        addCandidate(
-            pos().pkgs("com.morningshine.autocutpaste").locs(SDCARD)
-                .prefixFree("DCIM/Auto Photo Cut Paste/.temp/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testGenderEditor() = runTest {
-        addCandidate(neg().pkgs("com.morningshine.autocutpaste").locs(SDCARD).prefixFree("GenderEditor/temp"))
-        addCandidate(pos().pkgs("com.morningshine.autocutpaste").locs(SDCARD).prefixFree("GenderEditor/temp/something"))
-        confirm(create())
-    }
-
-    @Test fun testGuruVideoMaker() = runTest {
-        addCandidate(
-            neg().pkgs("videoeditor.videomaker.videoeditorforyoutube").locs(PUBLIC_DATA)
-                .prefixFree("Video.Guru/.disk_cache")
-        )
-        addCandidate(
-            pos().pkgs("videoeditor.videomaker.videoeditorforyoutube").locs(PUBLIC_DATA)
-                .prefixFree("Video.Guru/.disk_cache/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testMagicAirbrush() = runTest {
-        addCandidate(neg().pkgs("com.magicv.airbrush").locs(SDCARD).prefixFree("AirBrush/.cache"))
-        addCandidate(pos().pkgs("com.magicv.airbrush").locs(SDCARD).prefixFree("AirBrush/.cache/something"))
-        confirm(create())
-    }
-
-    @Test fun testBodyEditor() = runTest {
+    @Test fun `Likee app cache directories`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.cache").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.cache/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.bg").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.bg/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.filter").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.filter/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.font").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.font/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.log").locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.log/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.sticker").locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.sticker/something")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            neg().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.tattooTemp")
-                .locs(SDCARD)
-        )
-        addCandidate(
-            pos().pkgs("breastenlarger.bodyeditor.photoeditor").prefixFree("Body Editor/.tattooTemp/something")
-                .locs(SDCARD)
-        )
+        neg("video.like", SDCARD, "video.like/nerv-cacheg")
+        pos("video.like", SDCARD, "video.like/nerv-cache/something")
+        neg("video.like", PUBLIC_DATA, "video.like/files/kk")
+        pos("video.like", PUBLIC_DATA, "video.like/files/kk/something")
+        neg("video.like", PUBLIC_DATA, "video.like/files/xlog")
+        pos("video.like", PUBLIC_DATA, "video.like/files/xlog/test")
         confirm(create())
     }
 
-    @Test fun testCutPasteFramesTemp() = runTest {
-        addCandidate(
-            neg().pkgs("com.zmobileapps.cutpasteframes").locs(SDCARD).prefixFree("DCIM/Cut Paste Frames/.temp")
-        )
-        addCandidate(
-            pos().pkgs("com.zmobileapps.cutpasteframes").locs(SDCARD)
-                .prefixFree("DCIM/Cut Paste Frames/.temp/something")
-        )
+    @Test fun `Luumi app cache directories`() = runTest {
+        addDefaultNegatives()
+        neg("photo.editor.photoeditor.filtersforpictures", SDCARD, "Lumii/.cache")
+        pos("photo.editor.photoeditor.filtersforpictures", SDCARD, "Lumii/.cache/something")
+        neg("photo.editor.photoeditor.filtersforpictures", SDCARD, "Lumii/.tattooTemp")
+        pos("photo.editor.photoeditor.filtersforpictures", SDCARD, "Lumii/.tattooTemp/something")
         confirm(create())
     }
 
-    @Test fun testBeautyPlus() = runTest {
-        addCandidate(neg().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.videocache"))
-        addCandidate(
-            pos().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.videocache/something")
-        )
-        addCandidate(neg().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.temp"))
-        addCandidate(pos().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.temp/something"))
-        addCandidate(neg().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.cache"))
-        addCandidate(pos().pkgs("com.commsource.beautyplus").locs(SDCARD).prefixFree("BeautyPlus/.cache/something"))
+    @Test fun `Photo Editor Pro cache directories`() = runTest {
+        addDefaultNegatives()
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.brush")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.brush/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.bg")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.bg/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.neon")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.neon/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.mosaic")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.mosaic/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.lightfx")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.lightfx/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.filter")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.filter/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.edited_photo")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.edited_photo/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.eraser")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.eraser/something")
+        neg("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.sticker")
+        pos("photo.editor.photoeditor.photoeditorpro", SDCARD, "Photo Editor/.sticker/something")
         confirm(create())
     }
 
-    @Test fun testAutoCutCut() = runTest {
-        addCandidate(neg().pkgs("com.vyroai.AutoCutCut").locs(SDCARD).prefixFree("Pictures/something"))
-        addCandidate(neg().pkgs("com.vyroai.AutoCutCut").locs(SDCARD).prefixFree("Pictures/.WebImages"))
-        addCandidate(pos().pkgs("com.vyroai.AutoCutCut").locs(SDCARD).prefixFree("Pictures/.WebImages/something"))
+    @Test fun `Auto Photo Cut Paste temp directory`() = runTest {
+        addDefaultNegatives()
+        neg("com.morningshine.autocutpaste", SDCARD, "DCIM/Auto Photo Cut Paste/.temp")
+        pos("com.morningshine.autocutpaste", SDCARD, "DCIM/Auto Photo Cut Paste/.temp/something")
         confirm(create())
     }
 
-    @Test fun testRemoveR() = runTest {
-        addCandidate(neg().pkgs("remove.unwanted.object").locs(SDCARD).prefixFree("removertemp"))
-        addCandidate(pos().pkgs("remove.unwanted.object").locs(SDCARD).prefixFree("removertemp/something"))
+    @Test fun `Gender Editor temp directory`() = runTest {
+        addDefaultNegatives()
+        neg("com.morningshine.autocutpaste", SDCARD, "GenderEditor/temp")
+        pos("com.morningshine.autocutpaste", SDCARD, "GenderEditor/temp/something")
         confirm(create())
     }
 
-    @Test fun testB612() = runTest {
-        addCandidate(
-            neg().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/music")
-        )
-        addCandidate(
-            neg().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/image")
-        )
-        addCandidate(
-            neg().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/filter")
-        )
-        addCandidate(
-            neg().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/sticker")
-        )
-        addCandidate(
-            pos().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/music/something")
-        )
-        addCandidate(
-            pos().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/image/something")
-        )
-        addCandidate(
-            pos().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/filter/something")
-        )
-        addCandidate(
-            pos().pkgs("com.linecorp.b612.android").locs(PUBLIC_DATA)
-                .prefixFree("com.linecorp.b612.android/files/sticker/something")
-        )
+    @Test fun `Guru Video Maker disk cache`() = runTest {
+        addDefaultNegatives()
+        neg("videoeditor.videomaker.videoeditorforyoutube", PUBLIC_DATA, "Video.Guru/.disk_cache")
+        pos("videoeditor.videomaker.videoeditorforyoutube", PUBLIC_DATA, "Video.Guru/.disk_cache/something")
         confirm(create())
     }
 
-    @Test fun testZCamera() = runTest {
-        addCandidate(neg().pkgs("com.jb.zcamera").locs(SDCARD).prefixFree("ZCamera/image/cache"))
-        addCandidate(pos().pkgs("com.jb.zcamera").locs(SDCARD).prefixFree("ZCamera/image/cache/something"))
+    @Test fun `Magic Airbrush cache directory`() = runTest {
+        addDefaultNegatives()
+        neg("com.magicv.airbrush", SDCARD, "AirBrush/.cache")
+        pos("com.magicv.airbrush", SDCARD, "AirBrush/.cache/something")
         confirm(create())
     }
 
-    @Test fun testInstagramLive() = runTest {
-        addCandidate(neg().pkgs("com.instagram.android").locs(SDCARD).prefixFree(".InstagramLive/"))
-        addCandidate(neg().pkgs("com.instagram.android").locs(SDCARD).prefixFree(".InstagramLive/files"))
-        addCandidate(
-            pos().pkgs("com.instagram.android").locs(SDCARD)
-                .prefixFree(".InstagramLive/tmp_live_18025560862282799_thumb.jpg")
-        )
+    @Test fun `Body Editor cache directories`() = runTest {
+        addDefaultNegatives()
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.cache")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.cache/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.bg")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.bg/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.filter")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.filter/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.font")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.font/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.log")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.log/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.sticker")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.sticker/something")
+        neg("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.tattooTemp")
+        pos("breastenlarger.bodyeditor.photoeditor", SDCARD, "Body Editor/.tattooTemp/something")
+        confirm(create())
+    }
+
+    @Test fun `Cut Paste Frames temp directory`() = runTest {
+        addDefaultNegatives()
+        neg("com.zmobileapps.cutpasteframes", SDCARD, "DCIM/Cut Paste Frames/.temp")
+        pos("com.zmobileapps.cutpasteframes", SDCARD, "DCIM/Cut Paste Frames/.temp/something")
+        confirm(create())
+    }
+
+    @Test fun `BeautyPlus cache directories`() = runTest {
+        addDefaultNegatives()
+        neg("com.commsource.beautyplus", SDCARD, "BeautyPlus/.videocache")
+        pos("com.commsource.beautyplus", SDCARD, "BeautyPlus/.videocache/something")
+        neg("com.commsource.beautyplus", SDCARD, "BeautyPlus/.temp")
+        pos("com.commsource.beautyplus", SDCARD, "BeautyPlus/.temp/something")
+        neg("com.commsource.beautyplus", SDCARD, "BeautyPlus/.cache")
+        pos("com.commsource.beautyplus", SDCARD, "BeautyPlus/.cache/something")
+        confirm(create())
+    }
+
+    @Test fun `AutoCutCut web images directory`() = runTest {
+        addDefaultNegatives()
+        neg("com.vyroai.AutoCutCut", SDCARD, "Pictures/something")
+        neg("com.vyroai.AutoCutCut", SDCARD, "Pictures/.WebImages")
+        pos("com.vyroai.AutoCutCut", SDCARD, "Pictures/.WebImages/something")
+        confirm(create())
+    }
+
+    @Test fun `RemoveR temp directory`() = runTest {
+        addDefaultNegatives()
+        neg("remove.unwanted.object", SDCARD, "removertemp")
+        pos("remove.unwanted.object", SDCARD, "removertemp/something")
+        confirm(create())
+    }
+
+    @Test fun `B612 app directories`() = runTest {
+        addDefaultNegatives()
+        neg("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/music")
+        neg("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/image")
+        neg("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/filter")
+        neg("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/sticker")
+        pos("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/music/something")
+        pos("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/image/something")
+        pos("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/filter/something")
+        pos("com.linecorp.b612.android", PUBLIC_DATA, "com.linecorp.b612.android/files/sticker/something")
+        confirm(create())
+    }
+
+    @Test fun `ZCamera image cache`() = runTest {
+        addDefaultNegatives()
+        neg("com.jb.zcamera", SDCARD, "ZCamera/image/cache")
+        pos("com.jb.zcamera", SDCARD, "ZCamera/image/cache/something")
+        confirm(create())
+    }
+
+    @Test fun `Instagram Live temp files`() = runTest {
+        addDefaultNegatives()
+        neg("com.instagram.android", SDCARD, ".InstagramLive/")
+        neg("com.instagram.android", SDCARD, ".InstagramLive/files")
+        pos("com.instagram.android", SDCARD, ".InstagramLive/tmp_live_18025560862282799_thumb.jpg")
         confirm(create())
     }
 
@@ -1944,134 +1512,115 @@ class HiddenFilterTest : BaseFilterTest() {
         confirm(create())
     }
 
-    @Test fun testJustShot() = runTest {
-        addCandidate(neg().pkgs("com.ufotosoft.justshot").locs(SDCARD).prefixFree("AlbumCache"))
-        addCandidate(pos().pkgs("com.ufotosoft.justshot").locs(SDCARD).prefixFree("AlbumCache/something"))
-        confirm(create())
-    }
-
-    @Test fun test2Accounts() = runTest {
-        addCandidate(
-            neg().pkgs("com.excelliance.multiaccount").locs(SDCARD).prefixFree(".dygameres.apps/game_res/3rd/icon")
-        )
-        addCandidate(
-            pos().pkgs("com.excelliance.multiaccount").locs(SDCARD)
-                .prefixFree(".dygameres.apps/game_res/3rd/icon/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testMagiCut() = runTest {
-        addCandidate(neg().pkgs("com.energysh.onlinecamera1").locs(SDCARD).prefixFree("newone.pnga"))
-        addCandidate(neg().pkgs("com.energysh.onlinecamera1").locs(SDCARD).prefixFree("newone.png/something"))
-        addCandidate(neg().pkgs("com.energysh.onlinecamera1").locs(SDCARD).prefixFree("newone"))
-        addCandidate(pos().pkgs("com.energysh.onlinecamera1").locs(SDCARD).prefixFree("newone.png"))
-        confirm(create())
-    }
-
-    @Test fun testZBeautyCamera() = runTest {
-        addCandidate(neg().pkgs("com.jb.beautycam").locs(SDCARD).prefixFree("ZBeautyCamera/image/cache"))
-        addCandidate(pos().pkgs("com.jb.beautycam").locs(SDCARD).prefixFree("ZBeautyCamera/image/cache/something"))
-        confirm(create())
-    }
-
-    @Test fun testMeizuDataMigration() = runTest {
-        addCandidate(
-            neg().pkgs("com.meizu.datamigration").locs(PUBLIC_DATA)
-                .prefixFree("com.meizu.datamigration/files/blacklist")
-        )
-        addCandidate(
-            pos().pkgs("com.meizu.datamigration").locs(PUBLIC_DATA)
-                .prefixFree("com.meizu.datamigration/files/blacklist/BLACK_LIST_CACHE")
-        )
-        confirm(create())
-    }
-
-    @Test fun testMeizuMusicCover() = runTest {
-        addCandidate(
-            neg().pkgs("com.meizu.media.music").locs(PUBLIC_DATA).prefixFree("com.meizu.media.music/notify_cover")
-        )
-        addCandidate(
-            pos().pkgs("com.meizu.media.music").locs(PUBLIC_DATA)
-                .prefixFree("com.meizu.media.music/notify_cover/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testPhotoResizer() = runTest {
-        addCandidate(neg().pkgs("com.zmobileapps.photoresizer").locs(SDCARD).prefixFree("temp.jpg"))
-        addCandidate(neg().pkgs("com.zmobileapps.photoresizer").locs(SDCARD).prefixFree(".test.jpg"))
-        addCandidate(pos().pkgs("com.zmobileapps.photoresizer").locs(SDCARD).prefixFree(".temp.jpg"))
-        confirm(create())
-    }
-
-    @Test fun testUCMobile() = runTest {
-        addCandidate(
-            neg().pkgs("com.meizu.media.music").locs(PUBLIC_DATA).prefixFree("com.meizu.media.music/notify_cover")
-        )
-        addCandidate(
-            pos().pkgs("com.meizu.media.music").locs(PUBLIC_DATA)
-                .prefixFree("com.meizu.media.music/notify_cover/something")
-        )
-        confirm(create())
-    }
-
-    @Test fun testInstashot() = runTest {
-        addCandidate(
-            neg().pkgs("com.camerasideas.instashot").locs(PUBLIC_DATA)
-                .prefixFree("com.camerasideas.instashot/files/inshot/.log")
-        )
-        addCandidate(
-            pos().pkgs("com.camerasideas.instashot").locs(PUBLIC_DATA)
-                .prefixFree("com.camerasideas.instashot/files/inshot/.log/123")
-        )
-        addCandidate(
-            pos().pkgs("com.camerasideas.instashot").locs(PUBLIC_DATA)
-                .prefixFree("com.camerasideas.instashot/files/.temp.jpg")
-        )
-        confirm(create())
-    }
-
-    @Test fun testFightBattle() = runTest {
-        addCandidate(neg().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle"))
-        addCandidate(pos().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle/.temp.jpg"))
-        addCandidate(pos().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle/.temp1.jpg"))
-        addCandidate(pos().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle/.temp2.jpg"))
-        addCandidate(pos().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle/.smalltemp.jpg"))
-        addCandidate(pos().pkgs("best.photo.app.fightbattle").locs(SDCARD).prefixFree("FightBattle/.smalltemp1.jpg"))
-        confirm(create())
-    }
-
-    @Test fun testMIUIGalleryDiskCache() = runTest {
-        addCandidate(neg().pkgs("com.miui.gallery").locs(PUBLIC_DATA).prefixFree("com.miui.gallery/files/gallery_disk"))
-        addCandidate(
-            pos().pkgs("com.miui.gallery").locs(PUBLIC_DATA)
-                .prefixFree("com.miui.gallery/files/gallery_disk_cache/small_size/a800e51a74e4a3383ed8bf47f2d5a33e016c0dbbbf8043bf7b422274f79ced5a.0")
-        )
-        confirm(create())
-    }
-
-    @Test fun testTinnyGIFMaker() = runTest {
+    @Test fun `JustShot album cache`() = runTest {
         addDefaultNegatives()
-        addCandidate(neg().pkgs("com.tinny.gifmaker").locs(SDCARD).prefixFree("TinnyGIFMaker/GIF/.temp"))
-        addCandidate(pos().pkgs("com.tinny.gifmaker").locs(SDCARD).prefixFree("TinnyGIFMaker/GIF/.temp/file"))
+        neg("com.ufotosoft.justshot", SDCARD, "AlbumCache")
+        pos("com.ufotosoft.justshot", SDCARD, "AlbumCache/something")
         confirm(create())
     }
 
-    @Test fun testViskyGallery() = runTest {
+    @Test fun `2Accounts game resources`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.visky.gallery").locs(SDCARD)
-                .prefixFree(".Android/.data/com.visky.gallery.data/.data/.secure/.cache")
+        neg("com.excelliance.multiaccount", SDCARD, ".dygameres.apps/game_res/3rd/icon")
+        pos("com.excelliance.multiaccount", SDCARD, ".dygameres.apps/game_res/3rd/icon/something")
+        confirm(create())
+    }
+
+    @Test fun `MagiCut temp files`() = runTest {
+        addDefaultNegatives()
+        neg("com.energysh.onlinecamera1", SDCARD, "newone.pnga")
+        neg("com.energysh.onlinecamera1", SDCARD, "newone.png/something")
+        neg("com.energysh.onlinecamera1", SDCARD, "newone")
+        pos("com.energysh.onlinecamera1", SDCARD, "newone.png")
+        confirm(create())
+    }
+
+    @Test fun `ZBeautyCamera image cache`() = runTest {
+        addDefaultNegatives()
+        neg("com.jb.beautycam", SDCARD, "ZBeautyCamera/image/cache")
+        pos("com.jb.beautycam", SDCARD, "ZBeautyCamera/image/cache/something")
+        confirm(create())
+    }
+
+    @Test fun `Meizu Data Migration blacklist`() = runTest {
+        addDefaultNegatives()
+        neg("com.meizu.datamigration", PUBLIC_DATA, "com.meizu.datamigration/files/blacklist")
+        pos("com.meizu.datamigration", PUBLIC_DATA, "com.meizu.datamigration/files/blacklist/BLACK_LIST_CACHE")
+        confirm(create())
+    }
+
+    @Test fun `Meizu Music cover cache`() = runTest {
+        addDefaultNegatives()
+        neg("com.meizu.media.music", PUBLIC_DATA, "com.meizu.media.music/notify_cover")
+        pos("com.meizu.media.music", PUBLIC_DATA, "com.meizu.media.music/notify_cover/something")
+        confirm(create())
+    }
+
+    @Test fun `Photo Resizer temp files`() = runTest {
+        addDefaultNegatives()
+        neg("com.zmobileapps.photoresizer", SDCARD, "temp.jpg")
+        neg("com.zmobileapps.photoresizer", SDCARD, ".test.jpg")
+        pos("com.zmobileapps.photoresizer", SDCARD, ".temp.jpg")
+        confirm(create())
+    }
+
+    @Test fun `UC Mobile notify cover`() = runTest {
+        addDefaultNegatives()
+        neg("com.meizu.media.music", PUBLIC_DATA, "com.meizu.media.music/notify_cover")
+        pos("com.meizu.media.music", PUBLIC_DATA, "com.meizu.media.music/notify_cover/something")
+        confirm(create())
+    }
+
+    @Test fun `Instashot log and temp files`() = runTest {
+        addDefaultNegatives()
+        neg("com.camerasideas.instashot", PUBLIC_DATA, "com.camerasideas.instashot/files/inshot/.log")
+        pos("com.camerasideas.instashot", PUBLIC_DATA, "com.camerasideas.instashot/files/inshot/.log/123")
+        pos("com.camerasideas.instashot", PUBLIC_DATA, "com.camerasideas.instashot/files/.temp.jpg")
+        confirm(create())
+    }
+
+    @Test fun `Fight Battle temp files`() = runTest {
+        addDefaultNegatives()
+        neg("best.photo.app.fightbattle", SDCARD, "FightBattle")
+        pos("best.photo.app.fightbattle", SDCARD, "FightBattle/.temp.jpg")
+        pos("best.photo.app.fightbattle", SDCARD, "FightBattle/.temp1.jpg")
+        pos("best.photo.app.fightbattle", SDCARD, "FightBattle/.temp2.jpg")
+        pos("best.photo.app.fightbattle", SDCARD, "FightBattle/.smalltemp.jpg")
+        pos("best.photo.app.fightbattle", SDCARD, "FightBattle/.smalltemp1.jpg")
+        confirm(create())
+    }
+
+    @Test fun `MIUI Gallery disk cache`() = runTest {
+        addDefaultNegatives()
+        neg("com.miui.gallery", PUBLIC_DATA, "com.miui.gallery/files/gallery_disk")
+        pos(
+            "com.miui.gallery",
+            PUBLIC_DATA,
+            "com.miui.gallery/files/gallery_disk_cache/small_size/a800e51a74e4a3383ed8bf47f2d5a33e016c0dbbbf8043bf7b422274f79ced5a.0"
         )
-        addCandidate(
-            pos().pkgs("com.visky.gallery").locs(SDCARD)
-                .prefixFree(".Android/.data/com.visky.gallery.data/.data/.secure/.cache/file")
+        pos(
+            "com.miui.gallery",
+            PUBLIC_DATA,
+            "com.miui.gallery/files/gallery_disk_cache/a800e51a74e4a3383ed8bf47f2d5a33e016c0dbbbf8043bf7b422274f79ced5a.0"
         )
         confirm(create())
     }
 
-    @Test fun testMIUIGallery() = runTest {
+    @Test fun `Tinny GIF Maker disk cache`() = runTest {
+        addDefaultNegatives()
+        neg("videoeditor.videomaker.videoeditorforyoutube", PUBLIC_DATA, "Video.Guru/.disk_cache")
+        pos("videoeditor.videomaker.videoeditorforyoutube", PUBLIC_DATA, "Video.Guru/.disk_cache/something")
+        confirm(create())
+    }
+
+    @Test fun `Visky Gallery secure cache`() = runTest {
+        addDefaultNegatives()
+        neg("com.visky.gallery", SDCARD, ".Android/.data/com.visky.gallery.data/.data/.secure/.cache")
+        pos("com.visky.gallery", SDCARD, ".Android/.data/com.visky.gallery.data/.data/.secure/.cache/file")
+        confirm(create())
+    }
+
+    @Test fun `MIUI Gallery temp and cache`() = runTest {
         addDefaultNegatives()
         neg("com.miui.gallery", SDCARD, "DCIM/Creative/temp")
         pos("com.miui.gallery", SDCARD, "DCIM/Creative/temp/file")
@@ -2080,42 +1629,23 @@ class HiddenFilterTest : BaseFilterTest() {
         confirm(create())
     }
 
-    @Test fun testHuaweiThemeManager() = runTest {
+    @Test fun `Huawei Theme Manager cache`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.huawei.android.thememanager").locs(SDCARD).prefixFree("Huawei/Themes/something")
-        )
-        addCandidate(
-            pos().pkgs("com.huawei.android.thememanager").locs(SDCARD)
-                .prefixFree("Huawei/Themes/.cache/6ba49cfe32916e890491ee101f97424d.thumb")
-        )
-        addCandidate(
-            pos().pkgs("com.huawei.android.thememanager").locs(SDCARD)
-                .prefixFree("Huawei/Themes/.cache/Explorer.hwt/preview/icon_small.jpg")
-        )
-        addCandidate(
-            pos().pkgs("com.huawei.android.thememanager").locs(SDCARD)
-                .prefixFree("Huawei/Themes/.cache/Explorer.hwt")
-        )
+        neg("com.huawei.android.thememanager", SDCARD, "Huawei/Themes/something")
+        pos("com.huawei.android.thememanager", SDCARD, "Huawei/Themes/.cache/6ba49cfe32916e890491ee101f97424d.thumb")
+        pos("com.huawei.android.thememanager", SDCARD, "Huawei/Themes/.cache/Explorer.hwt/preview/icon_small.jpg")
+        pos("com.huawei.android.thememanager", SDCARD, "Huawei/Themes/.cache/Explorer.hwt")
         confirm(create())
     }
 
-    @Test fun testFaceMoji() = runTest {
+    @Test fun `FaceMoji HTTP cache`() = runTest {
         addDefaultNegatives()
-        addCandidate(
-            neg().pkgs("com.facemoji.lite.xiaomi").locs(PUBLIC_DATA)
-                .prefixFree("com.facemoji.lite.xiaomi/files/okhttp_cache")
-        )
-        addCandidate(
-            pos().pkgs("com.facemoji.lite.xiaomi").locs(PUBLIC_DATA)
-                .prefixFree("com.facemoji.lite.xiaomi/files/okhttp_cache1798737084")
-        )
-        addCandidate(
-            pos().pkgs("com.facemoji.lite.xiaomi").locs(PUBLIC_DATA)
-                .prefixFree("com.facemoji.lite.xiaomi/files/okhttp_cacheany")
-        )
+        neg("com.facemoji.lite.xiaomi", PUBLIC_DATA, "com.facemoji.lite.xiaomi/files/okhttp_cache")
+        pos("com.facemoji.lite.xiaomi", PUBLIC_DATA, "com.facemoji.lite.xiaomi/files/okhttp_cache1798737084")
+        pos("com.facemoji.lite.xiaomi", PUBLIC_DATA, "com.facemoji.lite.xiaomi/files/okhttp_cacheany")
         confirm(create())
     }
+
 
     @Test fun `vimages cache`() = runTest {
         addDefaultNegatives()
@@ -2169,6 +1699,310 @@ class HiddenFilterTest : BaseFilterTest() {
         neg("com.lazada.android", PUBLIC_DATA, "com.lazada.android/files/AVFSCache")
         pos("com.lazada.android", PUBLIC_DATA, "com.lazada.android/files/AVFSCache/laz_homepage_module")
         pos("com.lazada.android", PUBLIC_DATA, "com.lazada.android/files/AVFSCache/some/random/file")
+        confirm(create())
+    }
+
+    @Test fun `agricultural bank of china`() = runTest {
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/image")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/imageX")
+        pos("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/image/file")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/nebulaDownload/downloads")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/nebulaDownload/downloadsX")
+        pos("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/nebulaDownload/downloads/file")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/image")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/imageX")
+        neg("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/imageX/file")
+        pos("com.android.bankabc", PUBLIC_DATA, "com.android.bankabc/files/image/file")
+        confirm(create())
+    }
+
+    @Test fun `alipay caches`() = runTest {
+        neg("com.eg.android.AlipayGphone", PRIVATE_DATA, "com.eg.android.AlipayGphone/app_alipay_msp_disk_cache")
+        pos(
+            "com.eg.android.AlipayGphone",
+            PRIVATE_DATA,
+            "com.eg.android.AlipayGphone/app_alipay_msp_disk_cache/deleteme"
+        )
+        neg("com.eg.android.AlipayGphone", PRIVATE_DATA, "com.eg.android.AlipayGphone/files/cashier_templates")
+        pos("com.eg.android.AlipayGphone", PRIVATE_DATA, "com.eg.android.AlipayGphone/files/cashier_templates/deleteme")
+        neg("com.eg.android.AlipayGphone", PRIVATE_DATA, "com.eg.android.AlipayGphone/files/ccdn/caches/packages")
+        pos(
+            "com.eg.android.AlipayGphone",
+            PRIVATE_DATA,
+            "com.eg.android.AlipayGphone/files/ccdn/caches/packages/deleteme"
+        )
+        neg("com.eg.android.AlipayGphone", PRIVATE_DATA, "com.eg.android.AlipayGphone/files/ccdn/caches/resources")
+        pos(
+            "com.eg.android.AlipayGphone",
+            PRIVATE_DATA,
+            "com.eg.android.AlipayGphone/files/ccdn/caches/resources/deleteme"
+        )
+
+        neg(
+            "com.eg.android.AlipayGphone",
+            PUBLIC_DATA,
+            "com.eg.android.AlipayGphone/files/multimedia/1a2b3c4d5e6f7g8h9i0jklmnopqrstuvwx/ef/"
+        )
+        pos(
+            "com.eg.android.AlipayGphone",
+            PUBLIC_DATA,
+            "com.eg.android.AlipayGphone/files/multimedia/1a2b3c4d5e6f7g8h9i0jklmnopqrstuvwx/ef/deleteme"
+        )
+
+        neg("com.eg.android.AlipayGphone", SDCARD, "alipay/com.eg.android.AlipayGphone/nebulaDownload/downloads/")
+        pos(
+            "com.eg.android.AlipayGphone",
+            SDCARD,
+            "alipay/com.eg.android.AlipayGphone/nebulaDownload/downloads/deleteme"
+        )
+
+        neg("com.eg.android.AlipayGphone", SDCARD, "alipay/com.eg.android.AlipayGphone/openplatform/downloads/")
+        pos("com.eg.android.AlipayGphone", SDCARD, "alipay/com.eg.android.AlipayGphone/openplatform/downloads/deleteme")
+
+        neg("com.eg.android.AlipayGphone", SDCARD, "alipay/multimedia/1a2b3c4d5e6f7g8h9i0jklmnopqrstuvwx/1f/")
+        pos("com.eg.android.AlipayGphone", SDCARD, "alipay/multimedia/1a2b3c4d5e6f7g8h9i0jklmnopqrstuvwx/1f/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `jing dong caches`() = runTest {
+        neg("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/custom_theme_pics")
+        pos("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/custom_theme_pics/deleteme")
+        neg("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/jingdongbannerBgVideo")
+        pos("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/jingdongbannerBgVideo/deleteme")
+        neg("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/jingdonghomeSkuVideo")
+        pos("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/jingdonghomeSkuVideo/deleteme")
+        neg("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/start_image")
+        pos("com.jingdong.app.mall", PRIVATE_DATA, "com.jingdong.app.mall/files/start_image/deleteme")
+
+        neg("com.jingdong.app.mall", PUBLIC_DATA, "com.jingdong.app.mall/files/image")
+        pos("com.jingdong.app.mall", PUBLIC_DATA, "com.jingdong.app.mall/files/image/deleteme")
+
+        neg("com.jingdong.app.mall", SDCARD, "JDIM/cache")
+        pos("com.jingdong.app.mall", SDCARD, "JDIM/cache/image/deleteme")
+        neg("com.jingdong.app.mall", SDCARD, "JDIM/cache/image/.nomedia")
+
+        confirm(create())
+    }
+
+    @Test fun `netease cloudmusic hidden caches`() = runTest {
+        neg("com.netease.cloudmusic", PRIVATE_DATA, "com.netease.cloudmusic/files/NetworkCache")
+        pos("com.netease.cloudmusic", PRIVATE_DATA, "com.netease.cloudmusic/files/NetworkCache/deleteme")
+        neg("com.netease.cloudmusic", PRIVATE_DATA, "com.netease.cloudmusic/files/sailfish")
+        pos("com.netease.cloudmusic", PRIVATE_DATA, "com.netease.cloudmusic/files/sailfish/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `seazon feedme feedly`() = runTest {
+        neg("com.seazon.feedme", PUBLIC_DATA, "com.seazon.feedme/files/providers/Feedly/cache")
+        pos("com.seazon.feedme", PUBLIC_DATA, "com.seazon.feedme/files/providers/Feedly/cache/deleteme")
+        neg("com.seazon.feedme", PUBLIC_DATA, "com.seazon.feedme/files/providers/Feedly/states")
+        pos("com.seazon.feedme", PUBLIC_DATA, "com.seazon.feedme/files/providers/Feedly/states/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `suing dot com`() = runTest {
+        neg("com.suning.mobile.ebuy", PUBLIC_DATA, "com.suning.mobile.ebuy/files/Pictures/cache")
+        pos("com.suning.mobile.ebuy", PUBLIC_DATA, "com.suning.mobile.ebuy/files/Pictures/cache/deleteme")
+
+        neg("com.suning.mobile.ebuy", SDCARD, "oneplayer/.local")
+        pos("com.suning.mobile.ebuy", SDCARD, "oneplayer/.local/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `Xianyu cache`() = runTest {
+        neg("com.taobao.idlefish", PUBLIC_DATA, "com.taobao.idlefish/files/AVFSCache")
+        pos("com.taobao.idlefish", PUBLIC_DATA, "com.taobao.idlefish/files/AVFSCache/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `Taobao cache`() = runTest {
+        neg("com.taobao.taobao", PRIVATE_DATA, "com.taobao.taobao/app_zcache")
+        pos("com.taobao.taobao", PRIVATE_DATA, "com.taobao.taobao/app_zcache/deleteme")
+
+        neg("com.taobao.taobao", PRIVATE_DATA, "com.taobao.taobao/files/AVFSCache")
+        pos("com.taobao.taobao", PRIVATE_DATA, "com.taobao.taobao/files/AVFSCache/deleteme")
+
+        neg("com.taobao.taobao", PUBLIC_DATA, "com.taobao.taobao/files/AVFSCache")
+        pos("com.taobao.taobao", PUBLIC_DATA, "com.taobao.taobao/files/AVFSCache/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `qq downloader`() = runTest {
+        neg("com.tencent.android.qqdownloader", PUBLIC_DATA, "com.tencent.android.qqdownloader/files/tassistant/apk")
+        pos(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/apk/deleteme"
+        )
+
+        neg("com.tencent.android.qqdownloader", PUBLIC_DATA, "com.tencent.android.qqdownloader/files/tassistant/gif")
+        pos(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/gif/deleteme"
+        )
+
+        neg(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/mediaCache"
+        )
+        pos(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/mediaCache/deleteme"
+        )
+
+        neg("com.tencent.android.qqdownloader", PUBLIC_DATA, "com.tencent.android.qqdownloader/files/tassistant/pic")
+        pos(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/pic/deleteme"
+        )
+
+        neg("com.tencent.android.qqdownloader", PUBLIC_DATA, "com.tencent.android.qqdownloader/files/tassistant/video")
+        pos(
+            "com.tencent.android.qqdownloader",
+            PUBLIC_DATA,
+            "com.tencent.android.qqdownloader/files/tassistant/video/deleteme"
+        )
+
+        confirm(create())
+    }
+
+    @Test fun `qq chat`() = runTest {
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/.info")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/.info/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/ae/camera/capture")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/ae/camera/capture/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/opensdk_tmp")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/opensdk_tmp/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/QWallet/.tmp")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/QWallet/.tmp/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/tbs/TbsReaderTemp")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/tbs/TbsReaderTemp/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/tencent/MobileQQ/.pendant")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/tencent/MobileQQ/.pendant/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/uploader")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/files/uploader/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/qzone")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/qzone/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/mini/files")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/mini/files/deletem")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/.emotionsm")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/.emotionsm/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/.gift")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/.gift/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/pddata/app/offline")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/pddata/app/offline/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/photo")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/photo/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/Scribble/ScribbleCache")
+        pos(
+            "com.tencent.mobileqq",
+            PUBLIC_DATA,
+            "com.tencent.mobileqq/Tencent/MobileQQ/Scribble/ScribbleCache/deleteme"
+        )
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/shortvideo")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/shortvideo/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/tencent/MobileQQ/webso/offline")
+        pos(
+            "com.tencent.mobileqq",
+            PUBLIC_DATA,
+            "com.tencent.mobileqq/Tencent/MobileQQ/tencent/MobileQQ/webso/offline/deleteme"
+        )
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/thumb")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/MobileQQ/thumb/deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/QQfile_recv/")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/QQfile_recv/.deleteme")
+        neg("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/Qzone/.AppCenterImgCache")
+        pos("com.tencent.mobileqq", PUBLIC_DATA, "com.tencent.mobileqq/Tencent/Qzone/.AppCenterImgCache/deleteme")
+        neg(
+            "com.tencent.mobileqq",
+            PUBLIC_DATA,
+            "com.tencent.mobileqq/Tencent/TMAssistantSDK/Download/com.tencent.mobileqq"
+        )
+        pos(
+            "com.tencent.mobileqq",
+            PUBLIC_DATA,
+            "com.tencent.mobileqq/Tencent/TMAssistantSDK/Download/com.tencent.mobileqq/deleteme"
+        )
+
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp/Cache")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp/Cache/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp_qzone/Cache")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp_qzone/Cache/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp_tool/Cache")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ArkApp_tool/Cache/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/far")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/far/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/fdmon")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/fdmon/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/gvideo")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/gvideo/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/pddata/app/offline")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/pddata/app/offline/deleteme")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/ShadowPlugin_ilive-pluginapngCache")
+        pos(
+            "com.tencent.mobileqq",
+            PRIVATE_DATA,
+            "com.tencent.mobileqq/files/ShadowPlugin_ilive-pluginapngCache/deleteme"
+        )
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/tempFil")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/tempFile")
+        neg("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/WebOfflineRes")
+        pos("com.tencent.mobileqq", PRIVATE_DATA, "com.tencent.mobileqq/files/WebOfflineRes/deleteme")
+
+        confirm(create())
+    }
+
+    @Test fun `SHAREit caches`() = runTest {
+        val pkgs = setOf(
+            "com.lenovo.anyshare.gps",
+            "com.lenovo.anyshare",
+            "shareit.lite",
+            "shareit.premium",
+        )
+        pkgs.forEach {
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit/.caches")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit/.caches/anything")
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit Lite/.caches")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit Lite/.caches/anything")
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit Premium/.caches")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit Premium/.caches/anything")
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit/.status")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit/.status/anything")
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit Lite/.status")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit Lite/.status/anything")
+            neg(it, PUBLIC_DATA, "$it/files/SHAREit Premium/.status")
+            pos(it, PUBLIC_DATA, "$it/files/SHAREit Premium/.status/anything")
+            neg(it, SDCARD, "SHAREit/.caches")
+            pos(it, SDCARD, "SHAREit/.caches/anything")
+            neg(it, SDCARD, "SHAREit Lite/.caches")
+            pos(it, SDCARD, "SHAREit Lite/.caches/anything")
+            neg(it, SDCARD, "SHAREit Premium/.caches")
+            pos(it, SDCARD, "SHAREit Premium/.caches/anything")
+            neg(it, SDCARD, "SHAREit/.status")
+            pos(it, SDCARD, "SHAREit/.status/anything")
+            neg(it, SDCARD, "SHAREit Lite/.status")
+            pos(it, SDCARD, "SHAREit Lite/.status/anything")
+            neg(it, SDCARD, "SHAREit Premium/.status")
+            pos(it, SDCARD, "SHAREit Premium/.status/anything")
+        }
+        confirm(create())
+    }
+
+
+    @Test fun `samsung cloud tmp`() = runTest {
+        neg("com.samsung.android.scloud", SDCARD, "scloud/tmp")
+        pos("com.samsung.android.scloud", SDCARD, "sdcloud/tmp/deleteme")
+
         confirm(create())
     }
 }

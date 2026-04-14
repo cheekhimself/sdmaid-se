@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.IBinder.DeathRecipient
 import android.os.RemoteException
 import androidx.annotation.Keep
+import androidx.core.content.ContextCompat
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.log
@@ -26,8 +27,9 @@ import java.lang.ref.WeakReference
  */
 //@SuppressWarnings({"unused", "WeakerAccess", "Convert2Diamond", "TryWithIdenticalCatches"})
 @Keep
-abstract class RootConnectionReceiver constructor(private val pairingCode: String) {
+abstract class RootConnectionReceiver(private val pairingCode: String) {
 
+    private val tag = logTag("Root", "Connection", "Receiver", pairingCode)
     private val handlerThread: HandlerThread by lazy {
         HandlerThread("javaroot:RootConnectionReceiver#$pairingCode")
     }
@@ -62,19 +64,19 @@ abstract class RootConnectionReceiver constructor(private val pairingCode: Strin
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == null || intent.action != BROADCAST_ACTION) {
-                log(TAG, WARN) { "Received unexpected intent: $intent" }
+                log(tag, WARN) { "Received unexpected intent: $intent" }
                 return
             }
 
             val bundle = intent.getBundleExtra(BROADCAST_EXTRA)
             if (bundle == null) {
-                log(TAG, WARN) { "Intent is missing a bundle" }
+                log(tag, WARN) { "Intent is missing a bundle" }
                 return
             }
 
             val code = bundle.getString(BROADCAST_CODE)
             if (code != this@RootConnectionReceiver.pairingCode) {
-                log(TAG, ERROR) { "Received invalid code, $code instead of ${this@RootConnectionReceiver.pairingCode}" }
+                log(tag, ERROR) { "Received invalid code, $code instead of ${this@RootConnectionReceiver.pairingCode}" }
                 return
             }
 
@@ -90,9 +92,9 @@ abstract class RootConnectionReceiver constructor(private val pairingCode: Strin
             synchronized(binderSync) {
                 binder = received
                 internalIpc = RootConnection.Stub.asInterface(binder).also {
-                    log(TAG) { "Saved internalIpc=$it" }
+                    log(tag) { "Saved internalIpc=$it" }
                     try {
-                        log(TAG) { "hello($self)" }
+                        log(tag) { "hello($self)" }
                         // we send over our own Binder that the other end can linkToDeath with
                         it.hello(self)
 
@@ -101,7 +103,7 @@ abstract class RootConnectionReceiver constructor(private val pairingCode: Strin
                             synchronized(binderSync) { doOnConnect() }
                         }
                     } catch (e: RemoteException) {
-                        log(TAG, ERROR) { "hello() failed: $it <-> $self" }
+                        log(tag, ERROR) { "hello() failed: $it <-> $self" }
                     }
                 }
 
@@ -122,7 +124,7 @@ abstract class RootConnectionReceiver constructor(private val pairingCode: Strin
         }
 
         this.contextRef = WeakReference(context)
-        context.registerReceiver(receiver, filter, null, handler)
+        ContextCompat.registerReceiver(context, receiver, filter, null, handler, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     /**
@@ -307,8 +309,6 @@ abstract class RootConnectionReceiver constructor(private val pairingCode: Strin
     }
 
     companion object {
-        private val TAG = logTag("Root", "Connection", "Receiver")
-
         const val BROADCAST_ACTION = "eu.darken.sdmse.common.root.service.internal.RootIPCReceiver.BROADCAST"
         const val BROADCAST_EXTRA = "eu.darken.sdmse.common.root.service.internal.RootIPCReceiver.BROADCAST.EXTRA"
         const val BROADCAST_BINDER = "binder"

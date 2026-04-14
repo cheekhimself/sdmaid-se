@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   lint-vital:
     name: Lint vitals
@@ -15,10 +18,12 @@ jobs:
         flavor: [ Foss,Gplay ]
         variant: [ Beta,Release ]
         module: [ app ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
@@ -33,10 +38,12 @@ jobs:
         flavor: [ Foss,Gplay ]
         variant: [ Debug ]
         module: [ app ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
@@ -48,14 +55,66 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [ Debug,Beta,Release ]
-        flavor: [ test,testFoss,testGplay ]
-    runs-on: ubuntu-latest
+        variant: [ Debug ]
+        flavor: [ testFoss,testGplay ]
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
       - name: Test modules
         run: ./gradlew ${{ matrix.flavor }}${{ matrix.variant }}UnitTest
+
+      - name: Upload test results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        if: always()
+        with:
+          name: test-results-${{ matrix.flavor }}-${{ matrix.variant }}
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**/*
+          retention-days: 1
+
+  test-library-modules:
+    name: Library unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [ testCommonModules, testToolModules ]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Setup project and build environment
+        uses: ./.github/actions/common-setup
+
+      - name: Test library modules
+        run: ./gradlew ${{ matrix.task }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        if: always()
+        with:
+          name: test-results-${{ matrix.task }}
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**/*
+          retention-days: 1
+
+  check-fastlane-metadata:
+    name: Fastlane metadata
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Validate metadata lengths
+        run: bash fastlane/check_metadata_length.sh

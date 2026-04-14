@@ -1,27 +1,44 @@
 package eu.darken.sdmse.main.ui.dashboard
 
+import android.content.ActivityNotFoundException
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.text.format.Formatter
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import eu.darken.sdmse.common.navigation.routes.DashboardRoute
 import dagger.hilt.android.AndroidEntryPoint
 import eu.darken.sdmse.R
+import eu.darken.sdmse.common.ByteFormatter
+import eu.darken.sdmse.common.EdgeToEdgeHelper
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
+import eu.darken.sdmse.common.debug.logging.log
+import eu.darken.sdmse.common.debug.recorder.ui.ShortRecordingDialog
 import eu.darken.sdmse.common.easterEggProgressMsg
+import eu.darken.sdmse.common.error.asErrorDialogBuilder
 import eu.darken.sdmse.common.getColorForAttr
 import eu.darken.sdmse.common.lists.differ.update
 import eu.darken.sdmse.common.lists.setupDefaults
+import eu.darken.sdmse.common.navigation.getColorForAttr
 import eu.darken.sdmse.common.navigation.getQuantityString2
+import eu.darken.sdmse.common.navigation.getSpanCount
+import eu.darken.sdmse.common.navigation.routes.UpgradeRoute
+import eu.darken.sdmse.common.navigation.safeNavigate
+import eu.darken.sdmse.main.ui.navigation.SettingsRoute
+import eu.darken.sdmse.squeezer.ui.SqueezerSetupRoute
+import eu.darken.sdmse.common.theming.Theming
 import eu.darken.sdmse.common.uix.Fragment3
 import eu.darken.sdmse.common.viewbinding.viewBinding
 import eu.darken.sdmse.databinding.DashboardFragmentBinding
 import eu.darken.sdmse.deduplicator.ui.PreviewDeletionDialog
 import eu.darken.sdmse.main.ui.settings.general.OneClickOptionsDialog
 import javax.inject.Inject
+import eu.darken.sdmse.common.ui.R as UiR
 
 @AndroidEntryPoint
 class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
@@ -31,26 +48,39 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
 
     @Inject lateinit var dashAdapter: DashboardAdapter
     @Inject lateinit var oneClickOptions: OneClickOptionsDialog
+    @Inject lateinit var previewDialog: PreviewDeletionDialog
+    @Inject lateinit var theming: Theming
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ui.list.setupDefaults(dashAdapter, dividers = false, fastscroll = false)
+        EdgeToEdgeHelper(requireActivity()).apply {
+            insetsPadding(ui.root, left = true, right = true)
+            insetsPadding(ui.list, top = true)
+            insetsPadding(ui.mainAction, bottom = true)
+        }
 
-        vm.listItems.observe2(ui) {
-            listProgress.isVisible = it.isEmpty()
-            list.isVisible = it.isNotEmpty()
-            dashAdapter.update(it)
+        ui.list.setupDefaults(
+            dashAdapter,
+            verticalDividers = false,
+            fastscroll = false,
+            layouter = GridLayoutManager(context, getSpanCount(), GridLayoutManager.VERTICAL, false)
+        )
+
+        vm.listState.observe2(ui) { state ->
+            mascotOverlay.isVisible = state.items.isEmpty() || state.isEasterEgg
+            list.isVisible = state.items.isNotEmpty()
+            dashAdapter.update(state.items)
         }
 
         ui.bottomBar.apply {
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_action_upgrade -> {
-                        DashboardFragmentDirections.goToUpgradeFragment().navigate()
+                        safeNavigate(UpgradeRoute())
                         true
                     }
 
                     R.id.menu_action_settings -> {
-                        DashboardFragmentDirections.actionDashboardFragmentToSettingsContainerFragment().navigate()
+                        safeNavigate(SettingsRoute)
                         true
                     }
 
@@ -58,6 +88,8 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
                 }
             }
         }
+
+
         vm.bottomBarState.observe2(ui) { state ->
             if (state.activeTasks > 0 || state.queuedTasks > 0) {
                 bottomBarTextLeft.apply {
@@ -67,9 +99,11 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
                 }
             } else if (state.totalItems > 0 || state.totalSize > 0L) {
                 bottomBarTextLeft.apply {
-                    text = requireContext().getString(
-                        eu.darken.sdmse.common.R.string.x_space_can_be_freed,
-                        Formatter.formatShortFileSize(requireContext(), state.totalSize)
+                    val (formatted, quantity) = ByteFormatter.formatSize(context, state.totalSize)
+                    text = getQuantityString2(
+                        eu.darken.sdmse.common.R.plurals.x_space_can_be_freed,
+                        quantity,
+                        formatted,
                     )
                     append("\n")
                     append(getQuantityString2(eu.darken.sdmse.common.R.plurals.result_x_items, state.totalItems))
@@ -80,6 +114,11 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
                 bottomBarTextLeft.text = ""
             }
 
+            bottomBar.findViewById<View>(R.id.menu_action_settings).let {
+                it.isFocusable = true
+                it.isFocusableInTouchMode = false
+                it.nextFocusUpId = R.id.main_action
+            }
             bottomBar.menu?.findItem(R.id.menu_action_upgrade)?.let {
                 it.isVisible = state.upgradeInfo?.isPro != true
             }
@@ -87,6 +126,7 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
             mainAction.apply {
                 isInvisible = !state.isReady
                 isEnabled = state.actionState != DashboardViewModel.BottomBarState.Action.WORKING
+                ui.mainAction.nextFocusDownId = R.id.menu_action_settings
 
                 setOnClickListener {
                     if (state.actionState == DashboardViewModel.BottomBarState.Action.DELETE) {
@@ -112,15 +152,17 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
 
             when (state.actionState) {
                 DashboardViewModel.BottomBarState.Action.SCAN -> {
-                    mainAction.setImageResource(R.drawable.ic_layer_search_24)
-                    mainAction.imageTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorOnPrimaryContainer))
-                    mainAction.backgroundTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorPrimaryContainer))
+                    mainAction.setImageResource(UiR.drawable.ic_layer_search_24)
+                    mainAction.imageTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorOnPrimaryContainer)
+                    )
+                    mainAction.backgroundTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorPrimaryContainer)
+                    )
                 }
 
                 DashboardViewModel.BottomBarState.Action.DELETE -> {
-                    mainAction.setImageResource(R.drawable.ic_baseline_delete_sweep_24)
+                    mainAction.setImageResource(UiR.drawable.ic_baseline_delete_sweep_24)
                     mainAction.imageTintList = ColorStateList.valueOf(
                         requireContext().getColorForAttr(com.google.android.material.R.attr.colorOnError)
                     )
@@ -130,7 +172,7 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
                 }
 
                 DashboardViewModel.BottomBarState.Action.ONECLICK -> {
-                    mainAction.setImageResource(R.drawable.ic_delete_alert_24)
+                    mainAction.setImageResource(UiR.drawable.ic_delete_alert_24)
                     mainAction.imageTintList = ColorStateList.valueOf(
                         requireContext().getColorForAttr(com.google.android.material.R.attr.colorOnError)
                     )
@@ -141,18 +183,22 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
 
                 DashboardViewModel.BottomBarState.Action.WORKING -> {
                     mainAction.setImageDrawable(null)
-                    mainAction.imageTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorOnSecondaryContainer))
-                    mainAction.backgroundTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorSecondaryContainer))
+                    mainAction.imageTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorOnSecondaryContainer)
+                    )
+                    mainAction.backgroundTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorSecondaryContainer)
+                    )
                 }
 
                 DashboardViewModel.BottomBarState.Action.WORKING_CANCELABLE -> {
-                    mainAction.setImageResource(R.drawable.ic_cancel)
-                    mainAction.imageTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorOnTertiaryContainer))
-                    mainAction.backgroundTintList =
-                        ColorStateList.valueOf(getColorForAttr(com.google.android.material.R.attr.colorTertiaryContainer))
+                    mainAction.setImageResource(UiR.drawable.ic_cancel)
+                    mainAction.imageTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorOnTertiaryContainer)
+                    )
+                    mainAction.backgroundTintList = ColorStateList.valueOf(
+                        getColorForAttr(com.google.android.material.R.attr.colorTertiaryContainer)
+                    )
                 }
             }
         }
@@ -161,33 +207,33 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
             when (event) {
                 is DashboardEvents.CorpseFinderDeleteConfirmation -> MaterialAlertDialogBuilder(requireContext()).apply {
                     setTitle(eu.darken.sdmse.common.R.string.general_delete_confirmation_title)
-                    setMessage(R.string.corpsefinder_delete_all_confirmation_message)
+                    setMessage(eu.darken.sdmse.corpsefinder.R.string.corpsefinder_delete_all_confirmation_message)
                     setPositiveButton(eu.darken.sdmse.common.R.string.general_delete_action) { _, _ -> vm.confirmCorpseDeletion() }
                     setNegativeButton(eu.darken.sdmse.common.R.string.general_cancel_action) { _, _ -> }
-                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showCorpseFinderDetails() }
+                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showCorpseFinder() }
                 }.show()
 
                 is DashboardEvents.SystemCleanerDeleteConfirmation -> MaterialAlertDialogBuilder(requireContext()).apply {
                     setTitle(eu.darken.sdmse.common.R.string.general_delete_confirmation_title)
-                    setMessage(R.string.systemcleaner_delete_all_confirmation_message)
+                    setMessage(eu.darken.sdmse.systemcleaner.R.string.systemcleaner_delete_all_confirmation_message)
                     setPositiveButton(eu.darken.sdmse.common.R.string.general_delete_action) { _, _ -> vm.confirmFilterContentDeletion() }
                     setNegativeButton(eu.darken.sdmse.common.R.string.general_cancel_action) { _, _ -> }
-                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showSystemCleanerDetails() }
+                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showSystemCleaner() }
                 }.show()
 
                 is DashboardEvents.AppCleanerDeleteConfirmation -> MaterialAlertDialogBuilder(requireContext()).apply {
                     setTitle(eu.darken.sdmse.common.R.string.general_delete_confirmation_title)
-                    setMessage(R.string.appcleaner_delete_all_confirmation_message)
+                    setMessage(eu.darken.sdmse.appcleaner.R.string.appcleaner_delete_all_confirmation_message)
                     setPositiveButton(eu.darken.sdmse.common.R.string.general_delete_action) { _, _ -> vm.confirmAppJunkDeletion() }
                     setNegativeButton(eu.darken.sdmse.common.R.string.general_cancel_action) { _, _ -> }
-                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showAppCleanerDetails() }
+                    setNeutralButton(eu.darken.sdmse.common.R.string.general_show_details_action) { _, _ -> vm.showAppCleaner() }
                 }.show()
 
-                is DashboardEvents.DeduplicatorDeleteConfirmation -> PreviewDeletionDialog(requireContext()).show(
+                is DashboardEvents.DeduplicatorDeleteConfirmation -> previewDialog.show(
                     mode = PreviewDeletionDialog.Mode.All(clusters = event.clusters ?: emptyList()),
                     onPositive = { vm.confirmDeduplicatorDeletion() },
                     onNegative = { },
-                    onNeutral = { vm.showDeduplicatorDetails() },
+                    onNeutral = { vm.showDeduplicator() },
                 )
 
                 DashboardEvents.SetupDismissHint -> {
@@ -202,22 +248,57 @@ class DashboardFragment : Fragment3(R.layout.dashboard_fragment) {
                         .show()
                 }
 
-                is DashboardEvents.TaskResult -> Snackbar
-                    .make(
-                        requireView(),
-                        event.result.primaryInfo.get(requireContext()),
-                        Snackbar.LENGTH_LONG
-                    )
-                    .setAnchorView(ui.mainAction)
-                    .show()
+                is DashboardEvents.TaskResult -> {} // No snackbar, results shown on cards
 
-                DashboardEvents.TodoHint -> MaterialAlertDialogBuilder(requireContext()).apply {
+                is DashboardEvents.TodoHint -> MaterialAlertDialogBuilder(requireContext()).apply {
                     setMessage(eu.darken.sdmse.common.R.string.general_todo_msg)
                 }.show()
+
+                is DashboardEvents.OpenIntent -> try {
+                    startActivity(event.intent)
+                } catch (e: ActivityNotFoundException) {
+                    e.asErrorDialogBuilder(requireActivity()).show()
+                }
+
+                is DashboardEvents.SqueezerSetup -> {
+                    safeNavigate(SqueezerSetupRoute)
+                }
+
+                is DashboardEvents.ShowShortRecordingWarning -> ShortRecordingDialog(
+                    context = requireContext(),
+                    onContinue = {},
+                    onStopAnyway = { vm.confirmStopRecording() },
+                ).show()
+
+                is DashboardEvents.ShowUnknownFolders -> {
+                    val header = "Scanned ${event.scannedCount} dirs, skipped ${event.skippedCount}"
+                    val body = if (event.unknownPaths.isEmpty()) {
+                        "No unknown folders found."
+                    } else {
+                        "Found ${event.unknownPaths.size} unknown folder(s):\n\n${event.unknownPaths.joinToString("\n")}"
+                    }
+                    MaterialAlertDialogBuilder(requireContext()).apply {
+                        setTitle("Unknown Folders")
+                        setMessage("$header\n\n$body")
+                        setPositiveButton(android.R.string.ok) { _, _ -> }
+                    }.show()
+                }
+
             }
         }
 
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val navController = findNavController()
+        val curDest = navController.currentDestination
+        log(tag) { "onResume(): currentDestination=${curDest?.label} (${curDest?.id?.let { "0x${Integer.toHexString(it)}" } ?: "null"})" }
+        if (curDest != null && curDest.route != DashboardRoute::class.qualifiedName) {
+            log(tag, WARN) { "Dashboard resumed but currentDestination is ${curDest.label}, recovering" }
+            navController.popBackStack(DashboardRoute, false)
+        }
     }
 
 }

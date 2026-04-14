@@ -37,6 +37,21 @@
             app:fragment="eu.darken.sdmse.deduplicator.ui.settings.DeduplicatorSettingsFragment"
             app:summary="@string/deduplicator_explanation_short"
             app:title="@string/deduplicator_tool_name" />
+        <Preference
+            android:icon="@drawable/ic_apps"
+            app:fragment="eu.darken.sdmse.appcontrol.ui.settings.AppControlSettingsFragment"
+            app:summary="@string/appcontrol_explanation_short"
+            app:title="@string/appcontrol_tool_name" />
+        <Preference
+            android:icon="@drawable/ic_image_compress_24"
+            app:fragment="eu.darken.sdmse.squeezer.ui.settings.SqueezerSettingsFragment"
+            app:summary="@string/squeezer_explanation_short"
+            app:title="@string/squeezer_tool_name" />
+        <Preference
+            android:icon="@drawable/ic_baseline_swipe_24"
+            app:fragment="eu.darken.sdmse.swiper.ui.settings.SwiperSettingsFragment"
+            app:summary="@string/swiper_tool_description"
+            app:title="@string/swiper_tool_name" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/general_device_label">
@@ -45,6 +60,11 @@
             app:fragment="eu.darken.sdmse.main.ui.settings.general.GeneralSettingsFragment"
             app:summary="@string/general_settings_desc"
             app:title="@string/general_settings_label" />
+        <Preference
+            android:icon="@drawable/chart_box_outline_24"
+            app:fragment="eu.darken.sdmse.stats.ui.settings.StatsSettingsFragment"
+            app:summary="@string/stats_settings_desc"
+            app:title="@string/stats_label" />
         <Preference
             android:icon="@drawable/ic_alarm_check_24"
             android:key="scheduler.settings"
@@ -82,7 +102,7 @@
             app:summary="v?.?.?">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://github.com/d4rken-org/sdmaid-se/releases" />
+                android:data="https://sdmse.darken.eu/changelog" />
         </eu.darken.sdmse.common.preferences.IntentPreference>
 
         <Preference

@@ -9,19 +9,22 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import dagger.hilt.android.AndroidEntryPoint
 import eu.darken.sdmse.R
+import eu.darken.sdmse.common.EdgeToEdgeHelper
 import eu.darken.sdmse.common.uix.Fragment2
+import eu.darken.sdmse.common.uix.ToolbarHost
 import eu.darken.sdmse.common.viewbinding.viewBinding
 import eu.darken.sdmse.databinding.SettingsFragmentBinding
 import kotlinx.parcelize.Parcelize
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment2(R.layout.settings_fragment),
-    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
+    ToolbarHost {
 
     private val vm: SettingsViewModel by viewModels()
     private val ui: SettingsFragmentBinding by viewBinding()
 
-    val toolbar: Toolbar
+    override val toolbar: Toolbar
         get() = ui.toolbar
 
     private val screens = ArrayList<Screen>()
@@ -29,10 +32,16 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
     @Parcelize
     data class Screen(
         val fragmentClass: String,
-        val screenTitle: String?
+        val screenTitle: String?,
+        val screenSubtitle: String? = null,
     ) : Parcelable
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        EdgeToEdgeHelper(requireActivity()).apply {
+            insetsPadding(ui.root, left = true, right = true)
+            insetsPadding(ui.appbarlayout, top = true)
+        }
+
         childFragmentManager.addOnBackStackChangedListener {
             val backStackCnt = childFragmentManager.backStackEntryCount
             val newScreenInfo = when {
@@ -45,6 +54,7 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
                         screenTitle = getString(eu.darken.sdmse.common.R.string.general_settings_title)
                     )
                 }
+
                 else -> {
                     // We added the current fragment to the stack, the new fragment's infos were already set, do nothing.
                     null
@@ -63,13 +73,16 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
                     .commit()
             }
         } else {
+            @Suppress("DEPRECATION")
             savedInstanceState.getParcelableArrayList<Screen>(BKEY_SCREEN_INFOS)?.let {
                 screens.addAll(it)
             }
-            screens.lastOrNull()?.let { setCurrentScreenInfo(it) }
         }
 
-        ui.toolbar.setNavigationOnClickListener { requireActivity().onBackPressed() }
+        // Always restore toolbar title from current screen state (handles NavComponent view recreation)
+        screens.lastOrNull()?.let { setCurrentScreenInfo(it) }
+
+        ui.toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
         super.onViewCreated(view, savedInstanceState)
     }
@@ -82,7 +95,8 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
         val screenInfo = Screen(
             fragmentClass = pref.fragment!!,
-            screenTitle = pref.title?.toString()
+            screenTitle = pref.title?.toString(),
+            screenSubtitle = ui.toolbar.title?.toString(),
         )
 
         val args = Bundle().apply {
@@ -90,6 +104,7 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
             putString(BKEY_SCREEN_TITLE, screenInfo.screenTitle)
         }
 
+        @Suppress("DEPRECATION")
         val fragment = childFragmentManager.fragmentFactory
             .instantiate(this::class.java.classLoader!!, pref.fragment!!)
             .apply {
@@ -112,6 +127,7 @@ class SettingsFragment : Fragment2(R.layout.settings_fragment),
     private fun setCurrentScreenInfo(info: Screen) {
         ui.toolbar.apply {
             title = info.screenTitle
+            subtitle = info.screenSubtitle
         }
     }
 

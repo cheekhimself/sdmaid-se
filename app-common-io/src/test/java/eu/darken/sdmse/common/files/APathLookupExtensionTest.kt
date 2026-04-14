@@ -13,10 +13,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import testhelpers.BaseTest
+import testhelpers.TestApplication
 import java.time.Instant
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [33], application = TestApplication::class)
 class APathLookupExtensionTest : BaseTest() {
     private val treeUri = "content://com.android.externalstorage.documents/tree/primary%3A"
 
@@ -141,5 +142,19 @@ class APathLookupExtensionTest : BaseTest() {
             lookup3,
             lookup4
         )
+    }
+
+    @Test fun `filterDistinctRoots performance`() {
+        val targets = mutableSetOf<LocalPathLookup>()
+        (1..8000).forEach {
+            LocalPathLookup(
+                lookedUp = LocalPath.build("parentA", "parentB", "file$it"),
+                fileType = FileType.FILE,
+                size = 0,
+                modifiedAt = Instant.EPOCH,
+                target = null,
+            ).run { targets.add(this) }
+        }
+        targets.filterDistinctRoots().size shouldBe 8000
     }
 }

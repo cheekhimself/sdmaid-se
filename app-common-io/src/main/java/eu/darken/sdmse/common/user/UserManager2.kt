@@ -5,8 +5,9 @@ import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.darken.sdmse.common.adb.AdbManager
+import eu.darken.sdmse.common.adb.canUseAdbNow
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
-import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
@@ -22,17 +23,16 @@ class UserManager2 @Inject constructor(
     @ApplicationContext private val context: Context,
     private val userManager: UserManager,
     private val rootManager: RootManager,
+    private val adbManager: AdbManager,
     private val shellOps: ShellOps,
 ) {
 
     suspend fun currentUser(): UserProfile2 = UserProfile2(
         handle = if (!hasMultiUserSupport) UserHandle2(handleId = 0) else Process.myUserHandle().toUserHandle2(),
-        label = "Owner",
     )
 
     suspend fun systemUser(): UserProfile2 = UserProfile2(
         handle = UserHandle2(handleId = -1),
-        label = "System",
         isRunning = true,
     )
 
@@ -43,16 +43,27 @@ class UserManager2 @Inject constructor(
     suspend fun allUsers(): Set<UserProfile2> {
         val profiles = mutableSetOf<UserProfile2>()
 
-        if (rootManager.canUseRootNow()) {
-            val shellResult = shellOps.execute(ShellOpsCmd("pm list users"), mode = ShellOps.Mode.ROOT)
-            if (shellResult.isSuccess) {
+        val shellMode = when {
+            rootManager.canUseRootNow() -> ShellOps.Mode.ROOT
+            adbManager.canUseAdbNow() -> ShellOps.Mode.ADB
+            else -> null
+        }
+
+        log(TAG) { "allUsers(): shellMode=$shellMode" }
+
+        if (shellMode != null) {
+            try {
+                val shellResult = shellOps.execute(ShellOpsCmd("pm list users"), shellMode)
+                log(TAG) { "allUser() result: $shellResult" }
+                if (!shellResult.isSuccess) throw IllegalStateException("allUser() failed: ")
+
                 shellResult.output
                     .mapNotNull { userListRegex.matchEntire(it) }
                     .mapNotNull { match ->
                         try {
                             UserProfile2(
                                 handle = UserHandle2(match.groupValues[1].toInt()),
-                                label = match.groupValues[2],
+                                label = match.groupValues[2]?.takeIf { it != "null" },
                                 code = match.groupValues[3],
                                 isRunning = match.groupValues[4] == "running",
                             )
@@ -62,16 +73,14 @@ class UserManager2 @Inject constructor(
                         }
                     }
                     .run { profiles.addAll(this) }
+            } catch (e: Exception) {
+                log(TAG, ERROR) { "allUsers(): Lookup failed ${e.asLog()}" }
             }
         }
 
         if (profiles.isEmpty()) {
             userManager.userProfiles
-                .map {
-                    UserProfile2(
-                        handle = it.toUserHandle2(),
-                    )
-                }
+                .map { UserProfile2(handle = it.toUserHandle2()) }
                 .run { profiles.addAll(this) }
         }
 
@@ -81,6 +90,8 @@ class UserManager2 @Inject constructor(
 
         return profiles
     }
+
+    suspend fun otherUsers() = allUsers() - currentUser()
 
     suspend fun isAdminUser(userHandle: UserHandle2): Boolean = !hasMultiUserSupport || userHandle.handleId == 0
 
@@ -94,13 +105,7 @@ class UserManager2 @Inject constructor(
     }
 
     private fun UserHandle.toUserHandle2(): UserHandle2 {
-        var id: Int? = try {
-            val getIdentifier = this.javaClass.getMethod("getIdentifier")
-            getIdentifier.invoke(this) as Int
-        } catch (e: Exception) {
-            log(TAG, WARN) { "toUserHandle2(): Failed to use reflective access on getIdentifier: ${e.asLog()} " }
-            null
-        }
+        var id: Int? = getIdentifier()
 
         if (id == null) id = userManager.getSerialNumberForUser(this).toInt()
 
@@ -112,7 +117,7 @@ class UserManager2 @Inject constructor(
 
     companion object {
 
-        private val TAG = logTag("UserManager2")
+        internal val TAG = logTag("UserManager2")
     }
 
 }

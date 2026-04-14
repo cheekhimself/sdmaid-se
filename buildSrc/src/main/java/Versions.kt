@@ -1,38 +1,25 @@
 object Versions {
-    object Gradle {
-        const val buildTools = "7.2.1"
-    }
-
     object Kotlin {
-        const val core = "1.8.20"
-        const val coroutines = "1.6.4"
+        const val core = "2.2.10"
+        const val coroutines = "1.10.2"
+        const val serialization = "1.8.1"
     }
 
     object Dagger {
-        const val core = "2.44.2"
-    }
-
-    object Moshi {
-        const val core = "1.14.0"
-    }
-
-    object Coil {
-        const val core = "2.4.0"
+        const val core = "2.59.2"
     }
 
     object AndroidX {
-        const val core = ""
-
         object Navigation {
-            const val core = "2.5.3"
+            const val core = "2.9.7"
         }
 
-        object WorkManager {
-            const val core = "2.7.1"
+        object Media3 {
+            const val core = "1.6.0"
         }
     }
 
     object Desugar {
-        const val core = "1.1.5"
+        const val core = "2.1.5"
     }
 }

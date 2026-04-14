@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/DashboardCardItem"
+    style="@style/BaseCardItem"
     android:layout_width="match_parent"
+    android:focusable="false"
     android:layout_height="wrap_content"
     android:backgroundTint="?colorSecondaryContainer">
 
@@ -18,7 +19,8 @@
             android:src="@drawable/ic_baseline_stars_24"
             app:layout_constraintBottom_toBottomOf="@id/title"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/title" />
+            app:layout_constraintTop_toTopOf="@id/title"
+            app:tint="?colorOnSecondaryContainer" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title"
@@ -47,7 +49,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/upgrade_action"
-            style="@style/DashboardCardButton.Filled.Tonal"
+            style="@style/DashboardCardButton.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

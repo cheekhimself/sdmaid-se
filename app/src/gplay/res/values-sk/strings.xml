@@ -3,11 +3,19 @@
     <string name="app_name_upgraded">SD Maid SE Pro</string>
     <string name="app_name_upgrade_postfix">Pro</string>
     <string name="upgrade_feature_requires_pro">Vyžaduje SD Maid SE Pro</string>
-    <string name="upgrades_dashcard_title">Inovujte SD Maid</string>
-    <string name="upgrades_dashcard_body">SD Maid Pro ponúka lepšie výsledky, viac funkcií a možností pre náročných používateľov.</string>
+    <string name="upgrades_dashcard_title">Inovovať SD Maid SE</string>
+    <string name="upgrades_dashcard_body">SD Maid SE Pro ponúka lepšie výsledky, viac funkcií a možností pre pokročilých používateľov.</string>
     <string name="upgrades_dashcard_upgrade_action">Inovovať</string>
     <string name="upgrades_gplay_unavailable_error_title">Google Play nie je k dispozícii</string>
     <string name="upgrades_gplay_unavailable_error_description">SD Maid sa nemôže pripojiť k službe Google Play. Je Google Play nainštalovaný a aktuálny? Je váš účet Google prihlásený? Skúste vymazať vyrovnávaciu pamäť aplikácie Google Play a reštartujte zariadenie.</string>
+    <string name="upgrades_gplay_billing_error_label">Problém s Google Play</string>
+    <string name="upgrades_gplay_billing_error_description">Vyskytol sa problém so službou Google Play. Skúste to znova neskôr alebo reštartujte zariadenie.\n\nPodrobnosti: %s</string>
+    <string name="upgrades_gplay_internal_error_title">Chyba Google Play</string>
+    <string name="upgrades_gplay_internal_error_description">Vyskytla sa interná chyba Google Play. Skúste nasledovné:\n\n• Reštartujte zariadenie\n• Vymažte vyrovnávaciu pamäť Google Play Store\n• Skúste to znova neskôr</string>
+    <string name="upgrades_gplay_network_error_title">Chyba pripojenia</string>
+    <string name="upgrades_gplay_network_error_description">Nepodarilo sa pripojiť ku Google Play. Skontrolujte svoje internetové pripojenie a skúste to znova.</string>
+    <string name="upgrades_gplay_already_owned_error_title">Už zakúpené</string>
+    <string name="upgrades_gplay_already_owned_error_description">Použite možnosť \"Obnoviť nákup\" na obnovenie vášho nákupu. Ak problém pretrváva, skúste vymazať vyrovnávaciu pamäť Google Play a reštartovať zariadenie.</string>
     <string name="upgrades_no_purchases_found_check_account">Nenašli sa žiadne nákupy. Používate správny účet?</string>
     <string name="upgrade_screen_title">Získajte SD Maid SE Pro</string>
     <string name="upgrade_screen_preamble">SD Maid nemá žiadne reklamy a nepredáva používateľské údaje. Moja práca je financovaná vami ❤️.</string>
@@ -21,9 +29,9 @@
     <string name="upgrade_screen_iap_action">Jednorazový nákup</string>
     <string name="upgrade_screen_iap_action_hint">Jednorazový nákup stojí %s.</string>
     <string name="upgrade_screen_thanks_toast">Ste najlepší! ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">Spoločne sme sa dostali do prvého vydania! Ďakujem, že mi pomáhate! Vývoj bude samozrejme pokračovať, ale ak chcete, teraz môžete prejsť na stabilnejšie zostavy. Urobte to tak, že sa odhlásite z testovania v službe Google Play.</string>
-    <string name="nudge_betagoodbye_hint">Malá poznámka: Hodnotenia udelené počas testovania sú viditeľné iba pre mňa, ocenil by som, keby ste SD Maid mohli udeliť verejné hodnotenie, ak ste spokojní.</string>
-    <string name="nudge_betagoodbye_positive_action">Odhlásiť sa</string>
-    <string name="nudge_betagoodbye_negative_action">Pokračujte v testovaní</string>
+    <string name="upgrade_screen_restore_purchase_action">Obnoviť nákup</string>
+    <string name="upgrade_screen_restore_purchase_message">Vaša licencia je platná pre všetky zariadenia s tým istým účtom Google.</string>
+    <string name="upgrade_screen_restore_troubleshooting_msg">Tipy na riešenie problémov s licenciou:</string>
+    <string name="upgrade_screen_restore_sync_patience_hint">Synchronizácia Obchodu Play môže chvíľu trvať. Skúste reštartovať, vymazať vyrovnávaciu pamäť Google Play alebo jednoducho počkajte.</string>
+    <string name="upgrade_screen_restore_multiaccount_hint">Viaceré účty môžu zmiasť Google Play. Odhláste sa z iných účtov alebo nainštalujte prostredníctvom webovej stránky Google Play, čo si vynúti priradenie ku konkrétnemu účtu.</string>
 </resources>

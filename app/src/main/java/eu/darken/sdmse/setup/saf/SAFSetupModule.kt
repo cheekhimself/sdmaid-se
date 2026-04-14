@@ -5,20 +5,24 @@ import android.content.Intent
 import android.content.UriPermission
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.core.content.pm.PackageInfoCompat
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import eu.darken.sdmse.R
-import eu.darken.sdmse.common.DeviceDetective
 import eu.darken.sdmse.common.areas.DataAreaManager
 import eu.darken.sdmse.common.ca.CaString
 import eu.darken.sdmse.common.ca.toCaString
 import eu.darken.sdmse.common.coroutine.AppScope
-import eu.darken.sdmse.common.debug.logging.Logging.Priority.*
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.device.DeviceDetective
+import eu.darken.sdmse.common.device.RomType
 import eu.darken.sdmse.common.dropLastColon
 import eu.darken.sdmse.common.files.GatewaySwitch
 import eu.darken.sdmse.common.files.exists
@@ -34,10 +38,14 @@ import eu.darken.sdmse.common.rngString
 import eu.darken.sdmse.common.storage.PathMapper
 import eu.darken.sdmse.common.storage.StorageEnvironment
 import eu.darken.sdmse.common.storage.StorageManager2
+import eu.darken.sdmse.common.user.UserManager2
 import eu.darken.sdmse.setup.SetupModule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,30 +61,40 @@ class SAFSetupModule @Inject constructor(
     private val gatewaySwitch: GatewaySwitch,
     private val deviceDetective: DeviceDetective,
     private val pkgOps: PkgOps,
+    private val userManager: UserManager2,
 ) : SetupModule {
 
     private val refreshTrigger = MutableStateFlow(rngString)
-    override val state = refreshTrigger
+    override val state: Flow<SetupModule.State> = refreshTrigger
         .mapLatest {
-            State(
+            @Suppress("USELESS_CAST")
+            Result(
                 paths = getAccessObjects(),
-            )
+            ) as SetupModule.State
         }
+        .onStart { emit(Loading()) }
         .replayingShare(appScope)
 
-    private suspend fun getAccessObjects(): List<State.PathAccess> {
-        val requestObjects = mutableListOf<State.PathAccess>()
+    private suspend fun getAccessObjects(): List<Result.PathAccess> {
+        val requestObjects = mutableListOf<Result.PathAccess>()
+
+        val currentUriPerms = contentResolver.persistedUriPermissions
+        log(TAG) { "persistedUriPermissions:\n${currentUriPerms.joinToString("\n")}" }
+
+        val allUsers = userManager.allUsers()
+        log(TAG, VERBOSE) { "allUsers:\n${allUsers.joinToString("\n")}" }
+
+        val storageVolumes = storageManager2.storageVolumes
+        log(TAG, VERBOSE) { "storageVolumes:\n${storageVolumes.joinToString("\n")}" }
 
         // Android TV doesn't have the DocumentsUI app necessary to grant us permissions
-        if (deviceDetective.isAndroidTV()) {
+        if (deviceDetective.getROMType() == RomType.ANDROID_TV) {
             log(TAG) { "Skipping SAF setup as this is an Android TV device." }
             return requestObjects
         }
 
-        val currentUriPerms = contentResolver.persistedUriPermissions
-
         if (!hasApiLevel(30)) {
-            storageManager2.storageVolumes
+            storageVolumes
                 .filter {
                     if (it.directory == null) {
                         log(TAG, INFO) { "Storage not backed by a path: $it" }
@@ -123,7 +141,7 @@ class SAFSetupModule @Inject constructor(
                         }
                     }
 
-                    State.PathAccess(
+                    Result.PathAccess(
                         label = label,
                         safPath = safPath,
                         localPath = targetPath,
@@ -140,8 +158,46 @@ class SAFSetupModule @Inject constructor(
          * On Android 13 this trick no longer works :(
          */
         if (hasApiLevel(30) && !hasApiLevel(33)) {
-            val documentsPkg = pkgOps.queryAppInfos("com.google.android.documentsui".toPkgId())
-            log(TAG) { "Files-DocumentsUI: $documentsPkg" }
+            var anyRestricted = false
+            var foundAnyPackage = false
+
+            for (pkgName in DOCUMENTS_UI_PACKAGES) {
+                val pkg = pkgOps.queryPkg(
+                    id = pkgName.toPkgId(),
+                    flags = 0,
+                    userHandle = userManager.currentUser().handle,
+                ) ?: continue
+
+                foundAnyPackage = true
+
+                log(TAG) { "Files-DocumentsUI ($pkgName): appInfos=$pkg" }
+                log(TAG) { "Files-DocumentsUI ($pkgName): targetSdkVersion=${pkg.applicationInfo?.targetSdkVersion}" }
+                log(TAG) { "Files-DocumentsUI ($pkgName): versionName=${pkg.versionName}" }
+                val versionCode = PackageInfoCompat.getLongVersionCode(pkg)
+                log(TAG) { "Files-DocumentsUI ($pkgName): versionCode=$versionCode" }
+
+                val hasKnownMarker = (pkg.applicationInfo?.targetSdkVersion ?: 0) >= 34
+                // Commit 901f1d6044aade190bb943ccc18d26244132648e with changes first seen in tag 'aml_doc_331120000'
+                // Version code threshold is specific to Google's DocumentsUI
+                val isTooNew = pkgName == "com.google.android.documentsui" && versionCode >= 331120000L
+                val pkgIsRestricted = hasKnownMarker || isTooNew
+
+                log(TAG) { "Files-DocumentsUI ($pkgName): isRestricted=$pkgIsRestricted (hasKnownMarker=$hasKnownMarker, isTooNew=$isTooNew)" }
+
+                if (pkgIsRestricted) {
+                    anyRestricted = true
+                    break  // Early exit - any restricted package means overall restricted
+                }
+            }
+
+            // Restricted if: any package is restricted OR no packages found at all
+            val isRestricted = anyRestricted || !foundAnyPackage
+
+            if (!foundAnyPackage) {
+                log(TAG) { "Files-DocumentsUI: No DocumentsUI package found, assuming restricted" }
+            }
+
+            log(TAG) { "Files-DocumentsUI: is restricted? $isRestricted" }
 
             storageEnvironment.externalDirs
                 .map { baseDir ->
@@ -149,7 +205,7 @@ class SAFSetupModule @Inject constructor(
 
                     // The newer `Files` app if updates through Google Play system updates, no longer supports selecting this
                     // https://cs.android.com/android/platform/superproject/main/+/main:packages/apps/DocumentsUI/src/com/android/documentsui/picker/ActionHandler.java;l=84;bpv=1;bpt=0;drc=901f1d6044aade190bb943ccc18d26244132648e;dlc=306a2b606a1f01498d2d83a1d8362962f114e6e8
-                    if ((documentsPkg?.targetSdkVersion ?: 0) < 34) {
+                    if (!isRestricted) {
                         viableTargets.add(baseDir.child("Android", "data"))
                         viableTargets.add(baseDir.child("Android", "obb"))
                     }
@@ -184,7 +240,7 @@ class SAFSetupModule @Inject constructor(
                         putExtra(DocumentsContract.EXTRA_INITIAL_URI, navTreeUri)
                     }
 
-                    State.PathAccess(
+                    Result.PathAccess(
                         label = when (safPath.name) {
                             "obb" -> R.string.data_area_public_app_assets_official_label.toCaString()
                             else -> R.string.data_area_public_app_data_official_label.toCaString()
@@ -200,7 +256,7 @@ class SAFSetupModule @Inject constructor(
         // TODO provide some more elaborate lookups for TV boxes that struggle with this?
         // See https://commonsware.com/blog/2017/12/27/storage-access-framework-missing-action.html
 
-        log(TAG) { "Generated: $requestObjects" }
+        log(TAG) { "Generated:\n${requestObjects.joinToString("\n")}" }
         return requestObjects
     }
 
@@ -225,12 +281,17 @@ class SAFSetupModule @Inject constructor(
         refreshTrigger.value = rngString
     }
 
-    data class State(
-        val paths: List<PathAccess>,
-    ) : SetupModule.State {
+    data class Loading(
+        override val startAt: Instant = Instant.now(),
+    ) : SetupModule.State.Loading {
+        override val type: SetupModule.Type = SetupModule.Type.SAF
+    }
 
-        override val type: SetupModule.Type
-            get() = SetupModule.Type.SAF
+    data class Result(
+        val paths: List<PathAccess>,
+    ) : SetupModule.State.Current {
+
+        override val type: SetupModule.Type = SetupModule.Type.SAF
 
         override val isComplete: Boolean = paths.all { it.hasAccess }
 
@@ -245,6 +306,7 @@ class SAFSetupModule @Inject constructor(
         }
     }
 
+
     @Module @InstallIn(SingletonComponent::class)
     abstract class DIM {
         @Binds @IntoSet abstract fun mod(mod: SAFSetupModule): SetupModule
@@ -252,5 +314,9 @@ class SAFSetupModule @Inject constructor(
 
     companion object {
         private val TAG = logTag("Setup", "SAF", "Module")
+        private val DOCUMENTS_UI_PACKAGES = listOf(
+            "com.google.android.documentsui",  // Google/GMS variant
+            "com.android.documentsui",          // AOSP variant
+        )
     }
 }

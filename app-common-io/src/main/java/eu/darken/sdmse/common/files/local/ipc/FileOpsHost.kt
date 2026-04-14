@@ -1,5 +1,7 @@
 package eu.darken.sdmse.common.files.local.ipc
 
+import eu.darken.sdmse.common.coroutine.AppScope
+import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.debug.Bugs
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
@@ -10,42 +12,41 @@ import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.files.Ownership
 import eu.darken.sdmse.common.files.Permissions
 import eu.darken.sdmse.common.files.asFile
+import eu.darken.sdmse.common.files.core.local.createSymlink
+import eu.darken.sdmse.common.files.core.local.deleteRecursivelySafe
+import eu.darken.sdmse.common.files.core.local.listFiles2
+import eu.darken.sdmse.common.files.local.DirectLocalWalker
 import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.files.local.LocalPathLookup
 import eu.darken.sdmse.common.files.local.LocalPathLookupExtended
-import eu.darken.sdmse.common.files.local.createSymlink
-import eu.darken.sdmse.common.files.local.listFiles2
 import eu.darken.sdmse.common.files.local.performLookup
 import eu.darken.sdmse.common.files.local.performLookupExtended
 import eu.darken.sdmse.common.files.local.setOwnership
 import eu.darken.sdmse.common.files.local.setPermissions
 import eu.darken.sdmse.common.funnel.IPCFunnel
 import eu.darken.sdmse.common.ipc.IpcHostModule
+import eu.darken.sdmse.common.ipc.RemoteFileHandle
 import eu.darken.sdmse.common.ipc.RemoteInputStream
-import eu.darken.sdmse.common.ipc.RemoteOutputStream
-import eu.darken.sdmse.common.ipc.remoteInputStream
-import eu.darken.sdmse.common.ipc.toRemoteOutputStream
+import eu.darken.sdmse.common.ipc.fileHandle
+import eu.darken.sdmse.common.ipc.remoteFileHandle
 import eu.darken.sdmse.common.pkgs.pkgops.LibcoreTool
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * ROOT-side
+ */
 class FileOpsHost @Inject constructor(
+    @AppScope private val appScope: CoroutineScope,
+    private val dispatcherProvider: DispatcherProvider,
     private val libcoreTool: LibcoreTool,
-    private val ipcFunnel: IPCFunnel
+    private val ipcFunnel: IPCFunnel,
 ) : FileOpsConnection.Stub(), IpcHostModule {
 
-    override fun listFiles(path: LocalPath): List<LocalPath> = try {
-        if (Bugs.isTrace) log(TAG, VERBOSE) { "listFiles($path)..." }
-        path.asFile().listFiles2()
-            .map { LocalPath.build(it) }
-            .onEach { if (Bugs.isTrace) log(TAG, VERBOSE) { "$it" } }
-            .also { if (Bugs.isTrace) log(TAG, VERBOSE) { "listFiles($path) done: ${it.size} items" } }
-    } catch (e: Exception) {
-        log(TAG, ERROR) { "listFiles(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
-    }
+    private fun listFiles(path: LocalPath): List<LocalPath> = path.asFile().listFiles2().map { LocalPath.build(it) }
 
     override fun listFilesStream(path: LocalPath): RemoteInputStream = try {
         if (Bugs.isTrace) log(TAG, VERBOSE) { "listFilesStream($path)..." }
@@ -54,7 +55,7 @@ class FileOpsHost @Inject constructor(
         result.toRemoteInputStream()
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookupFiles(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun lookUp(path: LocalPath): LocalPathLookup = try {
@@ -64,20 +65,7 @@ class FileOpsHost @Inject constructor(
         }
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookUp(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
-    }
-
-    override fun lookupFiles(path: LocalPath): List<LocalPathLookup> = try {
-        if (Bugs.isTrace) log(TAG, VERBOSE) { "lookupFiles($path)..." }
-        listFiles(path)
-            .mapIndexed { index, item ->
-                if (Bugs.isTrace) log(TAG, VERBOSE) { "Looking up $index: $item" }
-                item.performLookup()
-            }
-            .also { if (Bugs.isTrace) log(TAG, VERBOSE) { "lookupFiles($path) done: ${it.size} items" } }
-    } catch (e: Exception) {
-        log(TAG, ERROR) { "lookupFiles(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun lookupFilesStream(path: LocalPath): RemoteInputStream = try {
@@ -90,7 +78,7 @@ class FileOpsHost @Inject constructor(
         lookups.toRemoteInputStream()
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookupFiles(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun lookUpExtended(path: LocalPath): LocalPathLookupExtended = try {
@@ -100,7 +88,7 @@ class FileOpsHost @Inject constructor(
         }
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookUpExtended(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun lookupFilesExtended(path: LocalPath): List<LocalPathLookupExtended> = try {
@@ -113,7 +101,22 @@ class FileOpsHost @Inject constructor(
             .also { if (Bugs.isTrace) log(TAG, VERBOSE) { "lookupFilesExtended($path) done: ${it.size} items" } }
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookupFilesExtended(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
+    }
+
+    override fun walkStream(path: LocalPath, pathDoesNotContain: List<String>): RemoteInputStream = try {
+        if (Bugs.isTrace) log(TAG, VERBOSE) { "walkStream($path)..." }
+        runBlocking {
+            DirectLocalWalker(
+                start = path,
+                onFilter = { lookup ->
+                    pathDoesNotContain.none { lookup.path.contains(it) }
+                },
+            ).toRemoteInputStream(appScope + dispatcherProvider.IO)
+        }
+    } catch (e: Exception) {
+        log(TAG, ERROR) { "walkStream(path=$path) failed\n${e.asLog()}" }
+        throw e.wrapToPropagate()
     }
 
     override fun lookupFilesExtendedStream(path: LocalPath): RemoteInputStream = try {
@@ -126,23 +129,23 @@ class FileOpsHost @Inject constructor(
         lookups.toRemoteInputStream()
     } catch (e: Exception) {
         log(TAG, ERROR) { "lookupFilesExtendedStream(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
-    override fun readFile(path: LocalPath): RemoteInputStream = try {
-        if (Bugs.isTrace) log(TAG, VERBOSE) { "readFile($path)..." }
-        FileInputStream(path.asFile()).remoteInputStream()
+    override fun du(path: LocalPath): Long = try {
+        if (Bugs.isTrace) log(TAG, VERBOSE) { "du($path)..." }
+        runBlocking { path.asFile().walkTopDown().map { it.length() }.sum() }
     } catch (e: Exception) {
-        log(TAG, ERROR) { "readFile(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        log(TAG, ERROR) { "exists(path=$path) failed\n${e.asLog()}" }
+        throw e.wrapToPropagate()
     }
 
-    override fun writeFile(path: LocalPath): RemoteOutputStream = try {
-        if (Bugs.isTrace) log(TAG, VERBOSE) { "writeFile($path)..." }
-        FileOutputStream(path.asFile()).toRemoteOutputStream()
+    override fun file(path: LocalPath, readWrite: Boolean): RemoteFileHandle = try {
+        if (Bugs.isTrace) log(TAG, VERBOSE) { "file($path, $readWrite)..." }
+        path.asFile().fileHandle(readWrite).remoteFileHandle()
     } catch (e: Exception) {
-        log(TAG, ERROR) { "writeFile(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        log(TAG, ERROR) { "file(path=$path) failed\n${e.asLog()}" }
+        throw e.wrapToPropagate()
     }
 
     override fun mkdirs(path: LocalPath): Boolean = try {
@@ -150,7 +153,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().mkdirs()
     } catch (e: Exception) {
         log(TAG, ERROR) { "mkdirs(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun createNewFile(path: LocalPath): Boolean = try {
@@ -172,7 +175,7 @@ class FileOpsHost @Inject constructor(
         file.createNewFile()
     } catch (e: Exception) {
         log(TAG, ERROR) { "mkdirs(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun canRead(path: LocalPath): Boolean = try {
@@ -180,7 +183,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().canRead()
     } catch (e: Exception) {
         log(TAG, ERROR) { "path(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun canWrite(path: LocalPath): Boolean = try {
@@ -188,7 +191,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().canWrite()
     } catch (e: Exception) {
         log(TAG, ERROR) { "canWrite(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun exists(path: LocalPath): Boolean = try {
@@ -196,15 +199,30 @@ class FileOpsHost @Inject constructor(
         path.asFile().exists()
     } catch (e: Exception) {
         log(TAG, ERROR) { "exists(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
-    override fun delete(path: LocalPath): Boolean = try {
-        if (Bugs.isTrace) log(TAG, VERBOSE) { "exists($path)..." }
-        path.asFile().delete()
+    override fun delete(path: LocalPath, recursive: Boolean, dryRun: Boolean): Boolean = try {
+        log(TAG, VERBOSE) { "delete($path,recursive=$recursive,dryRun=$dryRun)..." }
+        val javaFile = path.asFile()
+
+        var success = when {
+            dryRun -> javaFile.canWrite()
+            recursive -> javaFile.deleteRecursivelySafe()
+            else -> javaFile.delete()
+        }
+
+        if (!success) {
+            success = !javaFile.exists()
+            if (success) log(TAG, WARN) { "Tried to delete file, but it's already gone: $path" }
+        }
+
+        if (!success) log(TAG, WARN) { "Failed to delete: $path (canWrite=${javaFile.canWrite()})" }
+
+        success
     } catch (e: Exception) {
-        log(TAG, ERROR) { "delete(path=$path) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        log(TAG, ERROR) { "delete(path=$path,recursive=$recursive,dryRun=$dryRun) failed\n${e.asLog()}" }
+        throw e.wrapToPropagate()
     }
 
     override fun createSymlink(linkPath: LocalPath, targetPath: LocalPath): Boolean = try {
@@ -212,7 +230,7 @@ class FileOpsHost @Inject constructor(
         linkPath.asFile().createSymlink(targetPath.asFile())
     } catch (e: Exception) {
         log(TAG, ERROR) { "createSymlink(linkPath=$linkPath, targetPath=$targetPath) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun setModifiedAt(path: LocalPath, modifiedAt: Long): Boolean = try {
@@ -220,7 +238,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().setLastModified(modifiedAt)
     } catch (e: Exception) {
         log(TAG, ERROR) { "setModifiedAt(path=$path, modifiedAt=$modifiedAt) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun setPermissions(path: LocalPath, permissions: Permissions): Boolean = try {
@@ -228,7 +246,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().setPermissions(permissions)
     } catch (e: Exception) {
         log(TAG, ERROR) { "setModifiedAt(path=$path, permissions=$permissions) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
+        throw e.wrapToPropagate()
     }
 
     override fun setOwnership(path: LocalPath, ownership: Ownership): Boolean = try {
@@ -236,12 +254,7 @@ class FileOpsHost @Inject constructor(
         path.asFile().setOwnership(ownership)
     } catch (e: Exception) {
         log(TAG, ERROR) { "setModifiedAt(path=$path, ownership=$ownership) failed\n${e.asLog()}" }
-        throw wrapPropagating(e)
-    }
-
-    private fun wrapPropagating(e: Exception): Exception {
-        return if (e is UnsupportedOperationException) e
-        else UnsupportedOperationException(e)
+        throw e.wrapToPropagate()
     }
 
     companion object {

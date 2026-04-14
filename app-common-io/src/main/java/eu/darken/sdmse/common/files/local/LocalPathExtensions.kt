@@ -10,6 +10,7 @@ import eu.darken.sdmse.common.files.Permissions
 import eu.darken.sdmse.common.files.ReadException
 import eu.darken.sdmse.common.files.Segments
 import eu.darken.sdmse.common.files.asFile
+import eu.darken.sdmse.common.files.core.local.readLink
 import eu.darken.sdmse.common.funnel.IPCFunnel
 import eu.darken.sdmse.common.pkgs.pkgops.LibcoreTool
 import java.io.File
@@ -37,15 +38,14 @@ fun LocalPath.toCrumbs(): List<LocalPath> {
 }
 
 fun LocalPath.performLookup(): LocalPathLookup {
-    val type = file.getAPathFileType() ?: throw ReadException(this, "Does not exist or can't be read")
+    val type = file.getAPathFileType() ?: throw ReadException("Does not exist or can't be read", this)
 
     return LocalPathLookup(
         fileType = type,
         lookedUp = this,
         size = file.length(),
         modifiedAt = Instant.ofEpochMilli(file.lastModified()),
-
-        target = file.readLink()?.let { LocalPath.Companion.build(it) }
+        target = file.readLink()?.let { LocalPath.build(it) }
     )
 }
 
@@ -83,13 +83,14 @@ fun LocalPath.performLookupExtended(
 }
 
 fun LocalPath.isAncestorOf(child: LocalPath): Boolean {
-    val parentPath = this.asFile().absolutePath
-    val childPath = child.asFile().absolutePath
+    val parentPath = this.asFile().path
+    val childPath = child.asFile().path
 
-    return when (parentPath) {
-        childPath -> false
-        File.separator -> childPath.startsWith(parentPath)
-        else -> childPath.startsWith(parentPath + File.separator)
+    return when {
+        parentPath.length >= childPath.length -> false
+        !childPath.startsWith(parentPath) -> false
+        parentPath == File.separator -> true
+        else -> childPath[parentPath.length] == File.separatorChar
     }
 }
 
@@ -105,10 +106,12 @@ fun LocalPath.startsWith(prefix: LocalPath): Boolean {
         prefix.segments.size == 1 -> {
             segments.first().startsWith(prefix.segments.first())
         }
+
         segments.size == prefix.segments.size -> {
             val match = prefix.segments.dropLast(1) == segments.dropLast(1)
             match && segments.last().startsWith(prefix.segments.last())
         }
+
         else -> {
             val match = prefix.segments.dropLast(1) == segments.dropLast(segments.size - prefix.segments.size + 1)
             match && segments[prefix.segments.size - 1].startsWith(prefix.segments.last())
@@ -120,3 +123,17 @@ fun LocalPath.removePrefix(prefix: LocalPath, overlap: Int = 0): Segments {
     if (!startsWith(prefix)) throw IllegalArgumentException("$prefix is not a prefix of $this")
     return segments.drop(prefix.segments.size - overlap)
 }
+
+private val WELL_KNOWN_ANDROID_SUBDIRS = setOf("data", "obb", "media")
+
+/**
+ * Returns true if this path is under an uncommon `Android/` subdirectory,
+ * i.e. not `data`, `obb`, or `media`.
+ */
+val LocalPath.isUncommonAndroidDir: Boolean
+    get() {
+        val segs = segments
+        val idx = segs.indexOf("Android")
+        if (idx < 0 || idx + 1 >= segs.size) return false
+        return segs[idx + 1] !in WELL_KNOWN_ANDROID_SUBDIRS
+    }

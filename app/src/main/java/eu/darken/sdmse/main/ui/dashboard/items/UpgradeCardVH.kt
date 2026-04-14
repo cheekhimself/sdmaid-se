@@ -20,8 +20,8 @@ class UpgradeCardVH(parent: ViewGroup) :
         payloads: List<Any>
     ) -> Unit = binding { item ->
 
-        upgradeAction.setOnClickListener { root.performClick() }
-        root.setOnClickListener { item.onUpgrade() }
+        root.setOnClickListener { upgradeAction.performClick() }
+        upgradeAction.setOnClickListener { item.onUpgrade() }
     }
 
     data class Item(

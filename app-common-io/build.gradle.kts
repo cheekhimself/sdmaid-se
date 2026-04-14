@@ -1,28 +1,26 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    id("projectConfig")
 }
 
 apply(plugin = "dagger.hilt.android.plugin")
+apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
 android {
-    namespace = "${ProjectConfig.packageName}.common.io"
+    namespace = "${projectConfig.packageName}.common.io"
 
-    setupLibraryDefaults()
+    setupLibraryDefaults(projectConfig)
 
     setupModuleBuildTypes()
 
     buildFeatures {
-        viewBinding = true
         aidl = true
     }
 
     setupCompileOptions()
 
-    setupKotlinOptions()
 
     testOptions {
         unitTests {
@@ -30,27 +28,31 @@ android {
         }
         tasks.withType<Test> {
             useJUnitPlatform()
-            setupTestLogging()
+            setupTests()
         }
     }
 }
+
+setupKotlinOptions()
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:${Versions.Desugar.core}")
     implementation(project(":app-common"))
     implementation(project(":app-common-root"))
-    implementation(project(":app-common-shizuku"))
+    implementation(project(":app-common-adb"))
     implementation(project(":app-common-shell"))
 
     addAndroidCore()
+    implementation("androidx.documentfile:documentfile:1.1.0")
     addAndroidUI()
     addDI()
     addCoroutines()
     addSerialization()
-    addIO()
+    addIOApi()
 
     addTesting()
     testImplementation(project(":app-common-test"))
-    testImplementation("org.robolectric:robolectric:4.9.1")
-    testImplementation("androidx.test.ext:junit:1.1.4")
+    testImplementation(project(":app-common-coil"))
+    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("androidx.test.ext:junit:1.3.0")
 }

@@ -23,9 +23,10 @@ class DefaultCachesPrivateTest : BaseFilterTest() {
 
     private fun create() = DefaultCachesPrivateFilter(
         environment = storageEnvironment,
+        gatewaySwitch = gatewaySwitch,
     )
 
-    @Test fun testDefaultFilter() = runTest {
+    @Test fun `test default filter`() = runTest {
         neg("com.tumblr", Type.PRIVATE_DATA, "com.tumblr", "files", "test")
         pos("com.tumblr", Type.PRIVATE_DATA, "com.tumblr", "cache", ".nomedia")
         pos(

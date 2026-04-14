@@ -1,27 +1,21 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    id("projectConfig")
 }
 
 apply(plugin = "dagger.hilt.android.plugin")
+apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
 android {
-    namespace = "${ProjectConfig.packageName}.common"
+    namespace = "${projectConfig.packageName}.common"
 
-    setupLibraryDefaults()
+    setupLibraryDefaults(projectConfig)
 
     setupModuleBuildTypes()
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     setupCompileOptions()
-
-    setupKotlinOptions()
 
     testOptions {
         unitTests {
@@ -29,26 +23,24 @@ android {
         }
         tasks.withType<Test> {
             useJUnitPlatform()
-            setupTestLogging()
+            setupTests()
         }
     }
 }
+
+setupKotlinOptions()
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:${Versions.Desugar.core}")
     testImplementation(project(":app-common-test"))
 
     addAndroidCore()
-    addAndroidUI()
     addDI()
     addCoroutines()
     addSerialization()
+    api("androidx.navigation:navigation-common:${Versions.AndroidX.Navigation.core}")
     addIO()
     addTesting()
 
-    implementation("io.coil-kt:coil:${Versions.Coil.core}")
-
-    implementation("com.airbnb.android:lottie:3.5.0")
-
-    implementation("com.github.d4rken.rxshell:core:v3.0.0")
+    implementation("io.github.z4kn4fein:semver:3.0.0")
 }

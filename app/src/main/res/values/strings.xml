@@ -6,16 +6,41 @@
     <string name="dashboard_settings_oneclick_summary">Start scan and deletion for all tools with a tap on the dashboard\'s action button, no extra confirmations.</string>
     <string name="dashboard_settings_oneclick_tools_title">One-Tap Tools</string>
     <string name="dashboard_settings_oneclick_tools_desc">Which tools should be included in one-tap operations?</string>
+    <string name="dashboard_card_config_title">Dashboard cards</string>
+    <string name="dashboard_card_config_desc">Configure which cards are shown and their order</string>
+    <string name="dashboard_card_config_header_title">Drag to reorder, toggle to show/hide</string>
 
-    <string name="debug_debuglog_size_label">Size</string>
-    <string name="debug_debuglog_size_compressed_label">Compressed size</string>
-    <string name="debug_notification_channel_label">Debug notifications</string>
     <string name="debug_debuglog_file_label">Recorded log file</string>
     <string name="debug_debuglog_recording_progress">Recording debug log</string>
     <string name="debug_debuglog_record_action">Record debug log</string>
     <string name="debug_debuglog_stop_action">Stop recording</string>
     <string name="debug_debuglog_sensitive_information_message">The generated file contains sensitive information (e.g. file names and installed apps). Only share it with trusted parties.</string>
-    <string name="settings_debuglog_explanation">This feature records everything the app is doing into a shareable file. The generated file contains sensitive information (e.g. file names and installed apps). Only share it with trusted parties (e.g. a developer that is troubleshooting an issue).</string>
+    <string name="debug_debuglog_screen_title">Debug Log</string>
+    <string name="debug_debuglog_screen_discard_action">Discard</string>
+    <string name="debug_debuglog_screen_session_path_label">Session Path</string>
+    <string name="debug_debuglog_screen_log_files_label">Log Files</string>
+    <plurals name="debug_debuglog_screen_log_files_ready">
+        <item quantity="one">%1$d file ready (%2$s) · %3$s</item>
+        <item quantity="other">%1$d files ready (%2$s) · %3$s</item>
+    </plurals>
+    <string name="settings_debuglog_explanation">This feature records everything the app is doing into a shareable file. The generated file contains sensitive information (e.g. file names and installed apps). Only share it with trusted parties (e.g. a developer troubleshooting an issue).</string>
+    <string name="debug_debuglog_short_recording_title">Very short recording</string>
+    <string name="debug_debuglog_short_recording_desc">The recording was very short. Debug logs are recordings, not snapshots — reproduce the issue while recording is active for the log to be useful.</string>
+    <string name="debug_debuglog_short_recording_continue_action">Continue recording</string>
+    <string name="debug_debuglog_short_recording_stop_action">Stop anyway</string>
+    <string name="debug_debuglog_screen_failed_title">Session Failed</string>
+    <string name="debug_debuglog_screen_failed_empty_log_desc">The debug log file was empty. Try recording again and reproduce the issue while recording.</string>
+    <string name="debug_debuglog_screen_failed_missing_log_desc">The debug log file is missing. The recording may have been interrupted.</string>
+    <string name="debug_debuglog_screen_failed_corrupt_zip_desc">The compressed archive is corrupted. Try recording again.</string>
+    <string name="debug_debuglog_screen_failed_zip_error_desc">Compression failed. Check available storage and try again.</string>
+    <string name="debug_debuglog_sessions_zipping_label">Compressing…</string>
+    <string name="debug_debuglog_sessions_failed_empty_log_label">Failed: empty log</string>
+    <string name="debug_debuglog_sessions_failed_missing_log_label">Failed: missing log</string>
+    <string name="debug_debuglog_sessions_failed_corrupt_zip_label">Failed: corrupt archive</string>
+    <string name="debug_debuglog_sessions_failed_zip_error_label">Failed: compression error</string>
+    <string name="debug_debuglog_sessions_delete_confirmation_message">Delete this debug log session?</string>
+    <string name="support_contact_post_send_message">Message sent successfully?</string>
+    <string name="debug_debuglog_sessions_stop_action">Stop</string>
 
     <string name="tasks_activity_notification_channel_label">Active tasks</string>
     <string name="tasks_activity_working_notification_title">SD Maid is working</string>
@@ -29,6 +54,8 @@
     </plurals>
     <string name="tasks_result_notification_channel_label">Task results</string>
     <string name="tasks_result_subtext">Task result</string>
+    <string name="tasks_timeout_error_label">Task timed out</string>
+    <string name="tasks_timeout_error_desc">The task took too long and was stopped. Please try again.</string>
 
     <string name="onboarding_welcome_title">Welcome</string>
     <string name="onboarding_welcome_body1">SD Maid SE manages files, apps and storage.</string>
@@ -58,11 +85,8 @@
 
     <string name="settings_privacy_policy_label">Privacy policy</string>
     <string name="settings_privacy_policy_desc">Handling data responsibly.</string>
-    <string name="settings_licenses_label">Licenses</string>
     <string name="settings_category_other_label">Other</string>
 
-    <string name="settings_category_filter_generic">Generic filter</string>
-    <string name="settings_category_filter_specific">Specific filter</string>
     <string name="settings_sponsor_development_title">Sponsor development</string>
     <string name="settings_sponsor_development_summary">Become a patron and make continued development possible.</string>
 
@@ -84,6 +108,9 @@
     <string name="ui_previews_title">File previews</string>
     <string name="ui_previews_summary">Display file previews in all tools (e.g. image and video thumbnails).</string>
 
+    <string name="ui_language_override_label">App language</string>
+    <string name="ui_language_override_desc">Select a different language for SD Maid, independent of your system\'s default language. Currently: %s</string>
+
     <string name="settings_support_label">Support</string>
     <string name="settings_support_description">Read documentation, report issues, chat with others or record debug logs.</string>
     <string name="documentation_label">Documentation</string>
@@ -93,11 +120,59 @@
     <string name="support_installid_desc">Automatic error reports are anonymous. Share your install ID if the developer needs to find your error reports.</string>
     <string name="support_debuglog_label">Debug log</string>
     <string name="support_debuglog_desc">Record everything the app is doing into a text file that you can share.</string>
+    <string name="support_debuglog_folder_label">Debug log folder</string>
+    <plurals name="support_debuglog_folder_desc">
+        <item quantity="one">%1$d file using %2$s</item>
+        <item quantity="other">%1$d files using %2$s</item>
+    </plurals>
+    <string name="support_debuglog_folder_empty_desc">No debug logs stored</string>
+    <string name="support_debuglog_folder_delete_confirmation_title">Delete all debug logs?</string>
+    <string name="support_debuglog_folder_delete_confirmation_message">This will permanently delete all stored debug log sessions. This action cannot be undone.</string>
     <string name="discord_label">Discord</string>
     <string name="discord_description">A place to hang out in and ask questions.</string>
 
+    <string name="support_contact_label">Contact developer</string>
+    <string name="support_contact_desc">Fill out a form to send the developer an email.</string>
+    <string name="support_contact_welcome">I read every message myself and do my best to reply, but since I work on this alone, it can take a little time. Thanks for your patience.</string>
+    <string name="support_contact_footer">Your message will be sent via email. Device and setup information is attached automatically. You can attach screenshots or a video to the email. Some parts of the email will be in English so the developer can easily understand it.</string>
+    <string name="support_contact_category_label">Category</string>
+    <string name="support_contact_category_bug_label">Bug report</string>
+    <string name="support_contact_category_feature_label">Feature request</string>
+    <string name="support_contact_category_question_label">Question</string>
+    <string name="support_contact_tool_label">Related tool</string>
+    <string name="support_contact_tool_appcleaner_label">AppCleaner</string>
+    <string name="support_contact_tool_corpsefinder_label">CorpseFinder</string>
+    <string name="support_contact_tool_systemcleaner_label">SystemCleaner</string>
+    <string name="support_contact_tool_deduplicator_label">Deduplicator</string>
+    <string name="support_contact_tool_analyzer_label">Analyzer</string>
+    <string name="support_contact_tool_appcontrol_label">AppControl</string>
+    <string name="support_contact_tool_scheduler_label">Scheduler</string>
+    <string name="support_contact_tool_general_label">General</string>
+    <string name="support_contact_description_label">Description</string>
+    <string name="support_contact_description_bug_hint">Describe what happened and how to reproduce the issue. Please be specific (minimum 20 words).</string>
+    <string name="support_contact_description_feature_hint">Describe the feature you would like to see. Please be specific (minimum 20 words).</string>
+    <string name="support_contact_description_question_hint">Describe your question in detail. Please be specific (minimum 20 words).</string>
+    <string name="support_contact_expected_label">Expected behavior</string>
+    <string name="support_contact_expected_hint">Describe what you expected to happen (minimum 10 words).</string>
+    <plurals name="support_contact_word_count">
+        <item quantity="one">%1$d / %2$d word</item>
+        <item quantity="other">%1$d / %2$d words</item>
+    </plurals>
+    <string name="support_contact_debuglog_label">Debug log</string>
+    <string name="support_contact_debuglog_zip_error">Failed to compress debug log</string>
+    <string name="support_contact_debuglog_picker_hint">Attach an existing debug log, or record a new one.</string>
+    <string name="support_contact_debuglog_picker_empty">No debug logs found. Record one first.</string>
+        <string name="support_contact_send_action">Open email app</string>
+    <string name="support_contact_no_email_app">No email app found on this device.</string>
+
     <string name="changelog_label">Changelog</string>
     <string name="settings_acknowledgements_label">Acknowledgements</string>
+    <string name="settings_acknowledgements_category_translations_title">Translations</string>
+    <string name="settings_acknowledgements_category_translations_subtitle">Who translated this?</string>
+    <string name="settings_acknowledgements_category_thanks_title">Thanks</string>
+    <string name="settings_acknowledgements_category_thanks_subtitle">Special thanks to our friends.</string>
+    <string name="settings_acknowledgements_category_licenses_title">Licenses</string>
+    <string name="settings_acknowledgements_category_licenses_subtitle">Software used by SD Maid.</string>
 
     <string name="setup_label">Setup</string>
     <string name="setup_incomplete_card_title">Setup is incomplete</string>
@@ -105,8 +180,11 @@
     <string name="setup_incomplete_card_healing_in_progress_body">SD Maid is trying to fix setup issues.</string>
     <string name="setup_incomplete_card_dismiss_action">Dismiss</string>
     <string name="setup_incomplete_card_continue_action">Continue setup</string>
-    <string name="setup_title">Setup</string>
     <string name="setup_forcedshow_summary">Show setup screen again, including already completed items.</string>
+    <string name="setup_checking_card_body">Verifying setup completion and functionality.</string>
+
+    <string name="general_error_setup_require_label">Setup is incomplete</string>
+    <string name="general_error_setup_require_msg">Further set up is required to use this feature. Complete the remaining setup steps.</string>
 
     <string name="setup_saf_card_title">Storage access framework</string>
     <string name="setup_saf_card_body">Improve results by granting SD Maid access to additional areas.</string>
@@ -120,6 +198,8 @@
 
     <string name="setup_root_card_title">Root access</string>
     <string name="setup_root_card_body">Should SD Maid use root access if it is available? Root access can be used to check additional system folders and private application data.</string>
+    <string name="setup_root_state_ready_label">Root access is ready.</string>
+    <string name="setup_root_state_waiting_label">Waiting for root access.</string>
     <string name="setup_root_enable_root_use_label">Use root access if available</string>
     <string name="setup_root_disable_root_use_label">Don\'t use root access</string>
     <string name="setup_root_card_body2">Only available on rooted devices. If you didn\'t make this modification, then your device is not rooted and this setting has no effect.</string>
@@ -127,6 +207,7 @@
     <string name="setup_shizuku_card_title">Shizuku</string>
     <string name="setup_shizuku_card_body">Allow SD Maid to use Shizuku where possible to improve results and enable features.</string>
     <string name="setup_shizuku_card_body2">This setting has no effect if the Shizuku app is not set up on your device.</string>
+    <string name="setup_shizuku_card_root_info">Shizuku in combination with root access does not enable additional features, but it improves reliability. SD Maid will use it as fallback method.</string>
     <string name="setup_shizuku_state_ready_label">Shizuku link is ready.</string>
     <string name="setup_shizuku_state_waiting_label">Waiting for link with Shizuku.</string>
     <string name="setup_shizuku_enable_shizuku_use_label">Use Shizuku if available</string>
@@ -134,6 +215,7 @@
 
     <string name="setup_dismiss_hint">You can find the setup screen again via the settings menu.</string>
     <string name="setup_permission_granted_label">Permission granted</string>
+    <string name="setup_permission_error_label">Permission error</string>
 
     <string name="setup_usagestats_title">Usage statistics</string>
     <string name="setup_usagestats_body">The usage statistics permission grants access to more app details. SD Maid uses it to determine additional cache sizes.</string>
@@ -142,8 +224,6 @@
     <string name="setup_notification_title">Notifications</string>
     <string name="setup_notification_body">Allow SD Maid to post notifications to inform you about on-going operations or important events.</string>
     <string name="setup_notification_hint">Notifications are used sparingly 🤞</string>
-
-    <string name="setup_feature_requires_additional_setup_x">This feature requires completing additional setup items: %s</string>
 
     <string name="setup_acs_card_title">Accessibility service</string>
     <string name="setup_acs_card_body">The accessibility service allows SD Maid to interact with your screen and automate tedious actions, e.g. tapping \"Clear cache\" on multiple screens.</string>
@@ -157,10 +237,16 @@
     <string name="setup_acs_state_stopped_hint_miui">If the service keeps getting disabled after a while, try enabling the "Auto Start" option for SD Maid in the system settings.</string>
     <string name="setup_acs_consent_positive_action">Enable service and grant access</string>
     <string name="setup_acs_consent_negative_action">Don\'t use accessibility service</string>
-    <string name="setup_acs_allow_hint">If you see a little icon on the screen edge, then you accidentally enabled the "shortcut" option.</string>
+    <string name="setup_acs_allow_hint">The accessibility shortcut or button for SD Maid SE is enabled. Open your device\'s Accessibility settings and disable the shortcut/button option to prevent an unwanted icon on the screen edge.</string>
     <string name="setup_acs_disallow_hint">If you change your mind, you can alter this option again by going into settings and restarting the setup.</string>
     <string name="setup_acs_appops_restriction_title">Restricted settings</string>
     <string name="setup_acs_appops_restriction_body">Can\'t enable SD Maids accessibility service? Android 13+ may apply restrictions to apps not installed via Google Play. Lift these restrictions from the system\'s detail page for SD Maid. The option is in the context menu in the top right corner.</string>
+
+    <string name="setup_inventory_card_title">App inventory</string>
+    <string name="setup_inventory_card_body">SD Maid needs to know which apps you have to find files that don\'t belong to any installed apps.</string>
+    <string name="setup_inventory_card_extra">Look for a permission called \"App list\" or \"Query all packages\".</string>
+
+    <string name="setup_inventory_invalid_message">The system provided an invalid list of installed apps (e.g. too few or some were missing). Go to system settings and allow SD Maid access to \"App list\".</string>
 
     <string name="dataarea_warningcard_empty_message">SD Maid didn\'t find any data areas that can be scanned. Did you complete the setup?</string>
     <string name="dataarea_warningcard_label">Data areas</string>
@@ -170,331 +256,14 @@
     <string name="debug_mode_explanation">Enable test options and more verbose output. App will run slower and perform differently.</string>
     <string name="debug_bugreporter_label">Automatic bug reports</string>
     <string name="debug_bugreporter_summary">Automatically reports issues, e.g. details on the app crashes so I can figure out why and fix it.</string>
-
-    <string name="settings_category_tools_label">Tools</string>
-    <string name="settings_category_filter">Filter</string>
-    <string name="settings_category_risklevel">Risk level</string>
-
-    <string name="corpsefinder_tool_name">CorpseFinder</string>
-    <string name="corpsefinder_explanation_short">Data belonging to already removed apps.</string>
-    <string name="corpsefinder_settings_summary">Adjust scan filters and risk levels.</string>
-    <string name="corpsefinder_settings_risk_keeper_title">Include desirable remnants</string>
-    <string name="corpsefinder_settings_risk_keeper_summary">Files that you might want to keep, even if the app is uninstalled, e.g. photos you took or backups you created.</string>
-    <string name="corpsefinder_settings_risk_common_title">Include common names</string>
-    <string name="corpsefinder_settings_risk_common_summary">Data with commonly used names, e.g. a folder \"Notes\" is owned by too many unknown apps.</string>
-    <string name="corpsefinder_watcher_title">Uninstall watcher</string>
-    <string name="corpsefinder_watcher_summary">Automatically scan for remnants when an app removed.</string>
-    <string name="corpsefinder_watcher_autodelete_title">Automatic deletion</string>
-    <string name="corpsefinder_watcher_autodelete_summary">Automatically delete any remnants related to the uninstalled app.</string>
-    <plurals name="corpsefinder_watcher_notification_scan_result">
-        <item quantity="one">%1$d remnant found after uninstalling %2$s.</item>
-        <item quantity="other">%1$d remnants found after uninstalling %2$s.</item>
-    </plurals>
-    <plurals name="corpsefinder_watcher_notification_delete_result">
-        <item quantity="one">Clean up successful (%1$s): Freed %2$s and removed %3$d item.</item>
-        <item quantity="other">Clean up successful (%1$s): Freed %2$s and removed %3$d items.</item>
-    </plurals>
-    <string name="corpsefinder_watcher_notification_delete_action">Delete remnants</string>
-
-    <string name="corpsefinder_filter_publicmedia_label">Public media</string>
-    <string name="corpsefinder_filter_publicmedia_summary">Public media files, e.g. files received via messenger apps.</string>
-    <string name="corpsefinder_filter_publicobb_label">OBB resources</string>
-    <string name="corpsefinder_filter_publicobb_summary">Additional app resources, e.g. game assets.</string>
-    <string name="corpsefinder_filter_publicdata_label">Public app data</string>
-    <string name="corpsefinder_filter_publicdata_summary">Non-sensitive app data, e.g. map caches.</string>
-    <string name="corpsefinder_filter_sdcard_label">SD card</string>
-    <string name="corpsefinder_filter_sdcard_summary">General public storage, internal and external (e.g. SD cards).</string>
-    <string name="corpsefinder_filter_privatedata_label">Private app data</string>
-    <string name="corpsefinder_filter_privatedata_summary">Private app data, e.g. credentials, app settings but also browser caches.</string>
-    <string name="corpsefinder_filter_dalvik_label">Dalvik cache</string>
-    <string name="corpsefinder_filter_dalvik_summary">Cached app execution data.</string>
-    <string name="corpsefinder_filter_applib_label">App libraries</string>
-    <string name="corpsefinder_filter_applib_summary">App related library data.</string>
-    <string name="corpsefinder_filter_appsource_label">App sources</string>
-    <string name="corpsefinder_filter_appsource_summary">App installation data, i.e. where APKs go.</string>
-    <string name="corpsefinder_filter_appsource_private_label">Private app sources</string>
-    <string name="corpsefinder_filter_appsource_private_summary">Restricted app installation data, e.g. protected third party apps.</string>
-    <string name="corpsefinder_filter_appasec_label">Encrypted app resources</string>
-    <string name="corpsefinder_filter_appasec_summary">Encrypted app resources, e.g. game assets.</string>
-    <string name="corpsefinder_filter_app2sd_summary">Data moved to external storage by App2Sd mods.</string>
-    <string name="corpsefinder_filter_app2sd_label">App2SD</string>
-    <plurals name="corpsefinder_result_x_corpses_found">
-        <item quantity="one">%d app remnant discovered</item>
-        <item quantity="other">%d app remnants discovered</item>
-    </plurals>
-    <string name="corpsefinder_delete_all_confirmation_message">Delete all app remnants?</string>
-    <string name="corpsefinder_owners_label">Owners</string>
-    <string name="corpsefinder_corpse_hints_label">Notice</string>
-    <string name="corpsefinder_owner_unknown">Unknown owner</string>
-    <string name="corpsefinder_corpse_hint_keeper">This item may contain data you want to keep despite it\'s owner being uninstalled, e.g. photos or backups.</string>
-    <string name="corpsefinder_corpse_hint_common">This item has a very common name and could belong to still installed apps that SD Maid doesn\'t know.</string>
-
-    <string name="systemcleaner_tool_name">SystemCleaner</string>
-    <string name="systemcleaner_explanation_short">Superfluous data that doesn\'t belong to any specific app.</string>
-    <plurals name="systemcleaner_result_x_items_found">
-        <item quantity="one">%d filter match</item>
-        <item quantity="other">%d filter matches</item>
-    </plurals>
-    <string name="systemcleaner_filter_custom_label">Custom filter</string>
-    <string name="systemcleaner_filter_custom_manage_label">Manage custom filters</string>
-    <string name="systemcleaner_filter_custom_manage_summary">Create, delete, import and export your custom filters.</string>
-    <string name="systemcleaner_filter_logfiles_label">Log files</string>
-    <string name="systemcleaner_filter_logfiles_summary">Log files (*.log) from all over the device.</string>
-    <string name="systemcleaner_filter_advertisements_label">Ad files</string>
-    <string name="systemcleaner_filter_advertisements_summary">Files that have been created for or by advertisements.</string>
-    <string name="systemcleaner_filter_anr_label">ANR errors</string>
-    <string name="systemcleaner_filter_anr_summary">Traces from \'application not responding\' events.</string>
-    <string name="systemcleaner_filter_emptydirectories_label">Empty directories</string>
-    <string name="systemcleaner_filter_emptydirectories_summary">Empty directories from all over the device. Nested directories may require multiple passes.</string>
-    <string name="systemcleaner_filter_superfluosapks_label">Superfluous APKs</string>
-    <string name="systemcleaner_filter_superfluosapks_summary">Setup files that are older or equal to app versions that are already installed.</string>
-    <string name="systemcleaner_filter_lostdir_label">LOST.DIR folders</string>
-    <string name="systemcleaner_filter_lostdir_summary">Temporary files that are created when transferring data between Android devices.</string>
-    <string name="systemcleaner_filter_linuxfiles_label">Linux files</string>
-    <string name="systemcleaner_filter_linuxfiles_summary">Files and folders that are created when storage has been connected to a linux computer.</string>
-    <string name="systemcleaner_filter_macfiles_label">Mac files</string>
-    <string name="systemcleaner_filter_macfiles_summary">Files and folders that are created when browsing storage with Apple\'s finder app.</string>
-    <string name="systemcleaner_filter_windowsfiles_label">Windows files</string>
-    <string name="systemcleaner_filter_windowsfiles_summary">"Data that the Windows file explorer can create on connected storage. "</string>
-    <string name="systemcleaner_filter_thumbnails_label">Thumbnail images</string>
-    <string name="systemcleaner_filter_thumbnails_summary">Cached previews for images and videos.</string>
-    <string name="systemcleaner_filter_tempfiles_label">Temporary files</string>
-    <string name="systemcleaner_filter_tempfiles_summary">Temporary files, usually short lived caches for active operations.</string>
-    <string name="systemcleaner_filter_analytics_label">Analytics files</string>
-    <string name="systemcleaner_filter_analytics_summary">Data related to analytics and bug tracking.</string>
-    <string name="systemcleaner_filter_downloadcache_label">Download cache</string>
-    <string name="systemcleaner_filter_downloadcache_summary">System cache folder used for various things (e.g. OTA updates).</string>
-    <string name="systemcleaner_filter_localtmp_label">Local temporary files</string>
-    <string name="systemcleaner_filter_localtmp_summary">System related temporary files (e.g. from Android Studio).</string>
-    <string name="systemcleaner_filter_datalogger_label">System log files</string>
-    <string name="systemcleaner_filter_datalogger_summary">System service specific log files.</string>
-    <string name="systemcleaner_filter_logdropbox_label">Log drop box</string>
-    <string name="systemcleaner_filter_logdropbox_summary">An area for the system to drop log files into.</string>
-    <string name="systemcleaner_filter_recenttasks_label">Recent tasks</string>
-    <string name="systemcleaner_filter_recenttasks_summary">Data related to the tasks history in the system\'s task switcher.</string>
-    <string name="systemcleaner_filter_tombstones_label">System crash residue</string>
-    <string name="systemcleaner_filter_tombstones_summary">If native processes crash (e.g. games), then files are created here.</string>
-    <string name="systemcleaner_filter_usagestats_label">Usage stats</string>
-    <string name="systemcleaner_filter_usagestats_summary">Files related to application usage stats.</string>
-    <string name="systemcleaner_delete_all_confirmation_message">Delete all filter contents?</string>
-
-    <string name="systemcleaner_customfilter_label">Custom filter</string>
-    <string name="systemcleaner_customfilter_create_action">Create custom filter</string>
-    <string name="systemcleaner_customfilter_create_hint">Create a custom filter to delete extra files that are unique to your device and use-cases.</string>
-    <string name="systemcleaner_editor_remove_confirmation_message">Remove this filter?</string>
-    <string name="systemcleaner_editor_unsaved_confirmation_message">You have unsaved changes!</string>
-    <string name="systemcleaner_customfilter_editor_label_label">Filter label</string>
-    <string name="systemcleaner_customfilter_editor_warning">Custom filters can be risky. Check your scan results before deleting!</string>
-    <string name="systemcleaner_customfilter_editor_areas_label">Data areas</string>
-    <string name="systemcleaner_customfilter_editor_areas_explanation">If no area is selected, then all accessible data areas will be scanned and matched.</string>
-    <string name="systemcleaner_customfilter_editor_filetypes_label">File type restrictions</string>
-    <string name="systemcleaner_customfilter_editor_filetypes_files_label">Files</string>
-    <string name="systemcleaner_customfilter_editor_filetypes_directories_label">Directories</string>
-    <string name="systemcleaner_customfilter_editor_filetypes_hint">If no type is selected, then all types will be matched.</string>
-    <string name="systemcleaner_customfilter_editor_path_label">Path criteria</string>
-    <string name="systemcleaner_customfilter_editor_path_explanation">The target path needs to match at least one entry (e.g. \"Downloads/oldapks/game-\"). Long press entries for more options.</string>
-    <string name="systemcleaner_customfilter_editor_name_label">Name criteria</string>
-    <string name="systemcleaner_customfilter_editor_name_explanation">The target name must contain at least one of the keywords (e.g. \"-receipt\"). Long press entries for more options.</string>
-    <string name="systemcleaner_customfilter_editor_exclusions_label">Exclusions</string>
-    <string name="systemcleaner_customfilter_editor_exclusions_explanation">The result will be excluded if the path matches any entry (e.g. \"DCIM\"). Long press entries for more options.</string>
-    <string name="systemcleaner_customfilter_editor_segments_matching_mode_label">Path comparison mode</string>
-    <string name="systemcleaner_customfilter_editor_segments_matching_mode_start_label">Path starts with keywords</string>
-    <string name="systemcleaner_customfilter_editor_segments_matching_mode_contains_label">Path contains keywords</string>
-    <string name="systemcleaner_customfilter_editor_segments_matching_mode_end_label">Path ends with keywords</string>
-    <string name="systemcleaner_customfilter_editor_segments_matching_mode_equal_label">Path is equal to keywords</string>
-    <string name="systemcleaner_customfilter_editor_name_matching_mode_label">Name comparison mode</string>
-    <string name="systemcleaner_customfilter_editor_name_matching_mode_start_label">Name starts with keyword</string>
-    <string name="systemcleaner_customfilter_editor_name_matching_mode_contains_label">Name contains keyword</string>
-    <string name="systemcleaner_customfilter_editor_name_matching_mode_end_label">Name ends with keyword</string>
-    <string name="systemcleaner_customfilter_editor_name_matching_mode_equal_label">Name is equal to keyword</string>
-    <string name="systemcleaner_customfilter_last_edit">Last edit: %s</string>
-    <string name="systemcleaner_customfilter_editor_livesearch_label">Live search</string>
-    <string name="systemcleaner_customfilter_import_action">Import new filter</string>
-    <string name="systemcleaner_customfilter_export_action">Export selected filter</string>
-
-    <string name="appcleaner_tool_name">AppCleaner</string>
-    <string name="appcleaner_explanation_short">Expendable data belonging to specific apps.</string>
-    <string name="appcleaner_filter_defaultcachespublic_label">Public default caches</string>
-    <string name="appcleaner_filter_defaultcachespublic_summary">Default public app caches. Accessible under Android/data on older Android versions. Deleted when tapping "Clear cache" in the system settings.</string>
-    <string name="appcleaner_filter_defaultcachesprivate_label">Private default caches</string>
-    <string name="appcleaner_filter_defaultcachesprivate_summary">Default private app caches. Deleted when tapping "Clear cache" in the system settings.</string>
-    <string name="appcleaner_include_systemapps_label">Include system apps</string>
-    <string name="appcleaner_include_systemapps_summary">Include system apps in the scan.</string>
-    <string name="appcleaner_include_runningapps_label">Include running apps</string>
-    <string name="appcleaner_include_runningapps_summary">Include apps that are currently running which may cause interference.</string>
-    <string name="appcleaner_include_inaccessible_label">Include inaccessible caches</string>
-    <string name="appcleaner_include_inaccessible_summary">Include data that can\'t be accessed directly but can be deleted via system settings and automated using an accessibility service. </string>
-    <string name="appcleaner_include_multiuser_label">Include other users</string>
-    <string name="appcleaner_include_multiuser_summary">Include apps from other user profiles on this device.</string>
-    <string name="appcleaner_include_minimumsize_label">Minimum size</string>
-    <string name="appcleaner_include_minimumsize_summary">Skip apps where the sum of expendable data is below the minimum.</string>
-    <string name="appcleaner_include_minimumage_label">Minimum age</string>
-    <string name="appcleaner_include_minimumage_summary">Skip files that are younger than the minimum age.</string>
-    <string name="appcleaner_automation_romtype_detection_label">Operating system detection</string>
-    <string name="appcleaner_automation_romtype_detection_summary">Accessibility based automation may fail if SD Maid doesn\'t detect your OS correctly. Use this setting to override the detected OS.</string>
-    <string name="appcleaner_automation_romtype_auto_label">Automatic (default)</string>
-    <string name="appcleaner_filter_codecache_label">Code cache</string>
-    <string name="appcleaner_filter_codecache_summary">JVM code cache. Blocks of bytecode compiled into native code.</string>
-    <string name="appcleaner_filter_advertisement_label">Advertisement data</string>
-    <string name="appcleaner_filter_advertisement_summary">Files related to advertisements, e.g. cached media.</string>
-    <string name="appcleaner_filter_bugreporting_label">Bug reporting</string>
-    <string name="appcleaner_filter_bugreporting_summary">Bug reporting related data, e.g. error logs or crash dumps.</string>
-    <string name="appcleaner_filter_analytics_label">Analytics</string>
-    <string name="appcleaner_filter_analytics_summary">Analytics related data, e.g. cached stats for what you tap in an app.</string>
-    <string name="appcleaner_filter_hiddencaches_label">Hidden caches</string>
-    <string name="appcleaner_filter_hiddencaches_summary">General purpose caches stored outside of the system\'s reach.</string>
-    <string name="appcleaner_filter_thumbnails_label">Media thumbnails</string>
-    <string name="appcleaner_filter_thumbnails_summary">Image, video and audio preview thumbnail pictures.</string>
-    <string name="appcleaner_filter_gamefiles_label">Game files</string>
-    <string name="appcleaner_filter_gamefiles_summary">Game related resources that the game would reload on next launch if necessary.</string>
-    <string name="appcleaner_filter_offlinecache_label">Offline cache</string>
-    <string name="appcleaner_filter_offlinecache_summary">Files stored for use when offline, e.g. map tiles.</string>
-    <string name="appcleaner_filter_recyclebins_label">Recycle bins</string>
-    <string name="appcleaner_filter_recyclebins_summary">Files that have been deleted but put into a special folder to allow to restore them.</string>
-    <string name="appcleaner_filter_webview_label">Webview files</string>
-    <string name="appcleaner_filter_webview_summary">Files cached by Webview instances used within apps.</string>
-    <string name="appcleaner_filter_whatsapp_backups_label">WhatsApp backups</string>
-    <string name="appcleaner_filter_whatsapp_backups_summary">Delete extra copies of WhatsApp backups and only keep the latest.</string>
-    <string name="appcleaner_filter_whatsapp_received_summary">WhatsApp received files</string>
-    <string name="appcleaner_filter_whatsapp_received_label">Files you received from people via WhatsApp.</string>
-    <string name="appcleaner_filter_whatsapp_sent_label">WhatsApp sent files</string>
-    <string name="appcleaner_filter_whatsapp_sent_summary">Files sent from WhatsApp to others.</string>
-    <string name="appcleaner_filter_telegram_label">Telegram media files</string>
-    <string name="appcleaner_filter_telegram_summary">Files received or send through Telegram.</string>
-    <string name="appcleaner_filter_threema_label">Threema</string>
-    <string name="appcleaner_filter_threema_summary">Files received through Threema.</string>
-    <string name="appcleaner_filter_wechat_label">WeChat</string>
-    <string name="appcleaner_filter_wechat_summary">Sent or received files in conversations and WeChat moments.</string>
-    <string name="appcleaner_filter_viber_label">Viber</string>
-    <string name="appcleaner_filter_viber_summary">Cached media files that are downloaded again when viewed in chat.</string>
-    <string name="appcleaner_delete_all_confirmation_message">Delete expendable items for all apps?</string>
-    <plurals name="appcleaner_result_x_items_found">
-        <item quantity="one">%d expendable item found</item>
-        <item quantity="other">%d expendable items found</item>
-    </plurals>
-    <string name="appcleaner_automation_loading">Preparing automation via accessibility service</string>
-    <string name="appcleaner_automation_title">AppCleaner automation</string>
-    <string name="appcleaner_automation_subtitle_default_caches">Clearing default caches…</string>
-    <string name="appcleaner_item_caches_inaccessible_title">Default caches</string>
-    <string name="appcleaner_item_caches_inaccessible_body">Public and private default caches. Not directly accessible, but can be deleted indirectly (e.g. via accessibility service).</string>
-    <string name="appcleaner_automation_unavailable_title">Accessibility service unavailable</string>
-    <string name="appcleaner_automation_unavailable_body">Clearing inaccessible caches requires SD Maid\'s accessibility service, but it was unavailable. If you don\'t want to use it: Disable the option "Include inaccessible caches".</string>
-    <string name="appcleaner_junk_userprofile_label">User</string>
-    <string name="appcleaner_delete_confirmation_message_x">Delete expendable files for %s?</string>
-    <plurals name="appcleaner_delete_confirmation_message_selected_x_items">
-        <item quantity="one">Delete expendable files for %d selected app?</item>
-        <item quantity="other">Delete expendable files for %d selected apps?</item>
-    </plurals>
-    <string name="appcleaner_progress_shizuku_deleting_caches">Deleting caches by using Shizuku</string>
-
-    <string name="deduplicator_tool_name">Deduplicator</string>
-    <string name="deduplicator_explanation_short">Find duplicate data on your device.</string>
-    <plurals name="deduplicator_result_x_clusters_found">
-        <item quantity="one">%d duplicate set found</item>
-        <item quantity="other">%d duplicate sets found</item>
-    </plurals>
-    <string name="deduplicator_protection_deleteall_allowed_title">Make \"Delete all\" possible</string>
-    <string name="deduplicator_protection_deleteall_allowed_summary">Show options that allow you to delete all files in a set of duplicates so that no file is left over.</string>
-    <string name="deduplicator_skip_minsize_title">Minimum size</string>
-    <string name="deduplicator_skip_minsize_description">Skip files that are below the minimum size.</string>
-    <string name="deduplicator_skip_uncommon_title">Skip uncommon file types</string>
-    <string name="deduplicator_skip_uncommon_description">Only include common media files, documents and archives.</string>
-    <string name="deduplicator_detection_method_label">Detection method</string>
-    <string name="deduplicator_detection_method_checksum_title">Content checksum</string>
-    <string name="deduplicator_detection_method_checksum_summary">Determine duplicates by calculating checksums for files. Files with matching checksums have the exact same content.</string>
-    <string name="deduplicator_detection_method_phash_title">Perceptual hash</string>
-    <string name="deduplicator_detection_method_phash_summary">Find similar files by analyzing content features and comparing perceptual hash values.</string>
-    <string name="deduplicator_occupied_space_label">Occupied storage</string>
-    <string name="deduplicator_x_space_occupied_by_duplicates_msg">%s are occupied by duplicates</string>
-    <string name="deduplicator_file_size_label">File size</string>
-    <string name="deduplicator_average_size_label">Average size</string>
-    <string name="deduplicator_cluster_x_label">Cluster %s</string>
-    <string name="deduplicator_delete_confirmation_message">Delete all but one copy in all sets of duplicate files?</string>
-    <string name="deduplicator_delete_single_set_confirmation_message">Delete all but one copy in this set of duplicate files?</string>
-    <string name="deduplicator_delete_single_set_keep_none_confirmation_message">Delete all files in this set of duplicate files? No file is left over!</string>
-    <string name="deduplicator_delete_multiple_sets_confirmation_message">Delete all but one copy in each selected set of duplicate files?</string>
-    <string name="deduplicator_delete_multiple_sets_keep_none_confirmation_message">Delete all files in each selected set of duplicate files? No file is left over!</string>
-    <string name="deduplicator_delete_all_toggle_msg">Delete all copies. No file is left over!</string>
-    <string name="deduplicator_progress_comparing_files">Comparing files</string>
-    <string name="deduplicator_details_cluster_title">Set of duplicates</string>
-    <string name="deduplicator_matches_exact_label">Exact copies</string>
-    <string name="deduplicator_matches_similar_label">Similar files</string>
-
-
-    <string name="appcontrol_tool_name">AppControl</string>
-    <string name="appcontrol_explanation_short">Apps installed on your device.</string>
-    <plurals name="appcontrol_x_apps_detected_label">
-        <item quantity="one">%d app detected</item>
-        <item quantity="other">%d apps detected</item>
-    </plurals>
-    <string name="appcontrol_toggle_app_selection_action">Toggle apps</string>
-    <string name="appcontrol_toggle_app_enable_action">Enable app</string>
-    <string name="appcontrol_toggle_app_disable_action">Disable app</string>
-    <string name="appcontrol_toggle_app_enable_description">Enabling an app allows it to run and may make it visible in your launcher if it has an activity.</string>
-    <string name="appcontrol_toggle_app_disable_description">Disabling an app prevents it from running and hides it from menus. There is no data loss.</string>
-    <string name="appcontrol_appstore_open_title">Open in app store</string>
-    <string name="appcontrol_appstore_open_description">Open this app in the app store it was installed from.</string>
-    <string name="appcontrol_systemsettings_open_title">Show settings</string>
-    <string name="appcontrol_systemsettings_open_description">Open your device\'s system settings for this app.</string>
-    <string name="appcontrol_app_launch_title">Launch app</string>
-    <string name="appcontrol_app_uninstall_description">Uninstall this app from your device.</string>
-    <string name="appcontrol_app_launch_description">Launch this app\'s primary activity.</string>
-    <string name="appcontrol_app_exclude_add_title">Exclude app</string>
-    <string name="appcontrol_app_exclude_add_description">Exclude this app from other operations in SD Maid.</string>
-    <string name="appcontrol_app_exclude_edit_title">Edit exclusion</string>
-    <string name="appcontrol_app_exclude_edit_description">This app is currently excluded from one or more tools.</string>
-    <string name="appcontrol_tag_user">User</string>
-    <string name="appcontrol_tag_active">Recently active</string>
-    <string name="appcontrol_tag_system">System</string>
-    <string name="appcontrol_tag_enabled">Enabled</string>
-    <string name="appcontrol_tag_disabled">Disabled</string>
-    <string name="appcontrol_progress_enabling_package">Enabling app</string>
-    <string name="appcontrol_progress_disabling_package">Disabling app</string>
-    <string name="appcontrol_list_filteroptions_label">Filter options</string>
-    <string name="appcontrol_list_sortmode_name_label">App name</string>
-    <string name="appcontrol_list_sortmode_updated_label">Last updated</string>
-    <string name="appcontrol_list_sortmode_installed_label">First installed</string>
-    <string name="appcontrol_list_sortmode_packagename_label">Packagename</string>
-    <string name="appcontrol_progress_uninstalling_app">Uninstalling app</string>
-
-    <string name="analyzer_tool_name">StorageAnalyzer</string>
-    <string name="analyzer_explanation_short">Find out what is taking up space on your device.</string>
-    <string name="analyzer_progress_scanning_device">Searching for storage devices</string>
-    <string name="analyzer_progress_scanning_storage">Scanning storage</string>
-    <string name="analyzer_progress_scanning_apps">Scanning apps</string>
-    <string name="analyzer_progress_scanning_userfiles">Searching user files</string>
-    <string name="analyzer_progress_scanning_system">Scanning system data</string>
-    <string name="analyzer_device_storage_title">Device storage</string>
-    <plurals name="analyzer_space_available">
-        <item quantity="one">%s available</item>
-        <item quantity="other">%s available</item>
-    </plurals>
-    <plurals name="analyzer_space_used">
-        <item quantity="one">%s used</item>
-        <item quantity="other">%s used</item>
-    </plurals>
-    <string name="analyzer_content_access_opaque">No direct access available</string>
-    <string name="analyzer_storage_type_primary_title">Primary storage</string>
-    <string name="analyzer_storage_type_primary_description">The primary storage of your device. Contains the internal SD card, private storage for apps and system data.</string>
-    <string name="analyzer_storage_type_secondary_title">Secondary storage</string>
-    <string name="analyzer_storage_type_secondary_description">A secondary storage, usually a removable SD card. Contains media files and data from apps that support it.</string>
-    <string name="analyzer_storage_content_title">Storage content</string>
-    <string name="analyzer_storage_content_type_app_label">Apps</string>
-    <string name="analyzer_storage_content_type_app_description">Space occupied by installed apps and their data (i.e. application files, data and caches).</string>
-    <string name="analyzer_storage_content_type_app_setup_incomplete_hint">Permissions are missing</string>
-    <string name="analyzer_storage_content_type_media_label">User files</string>
-    <string name="analyzer_storage_content_type_media_description">Captured pictures, recorded videos or downloaded data. Any data that doesn\'t belong to a specific app.</string>
-    <string name="analyzer_storage_content_type_system_label">System data</string>
-    <string name="analyzer_storage_content_type_system_description">System apps and system data. Apps and data from other users, if several user accounts are set on this device.</string>
-    <string name="analyzer_storage_content_app_code_label">App code</string>
-    <string name="analyzer_storage_content_app_code_description">Application files, libraries and resources. This space can only be freed by uninstalling the app.</string>
-    <string name="analyzer_storage_content_app_data_label">App data</string>
-    <string name="analyzer_storage_content_app_data_description">Data, settings and caches.</string>
-    <string name="analyzer_storage_content_app_media_label">App media</string>
-    <string name="analyzer_storage_content_app_media_description">Media files from this app, e.g. received WhatsApp photos.</string>
-    <string name="analyzer_storage_content_app_extra_label">Extra app files</string>
-    <string name="analyzer_storage_content_app_extra_description">Extra data that this app has placed outside of the default paths, e.g. photos or downloads.</string>
-    <string name="analyzer_app_details_app_occupies_x_on_y">This app occupies %1$s on \"%2$s\".</string>
+    <!-- Debug card (dashboard) -->
+    <string name="debug_card_title">Debug mode is enabled</string>
+    <string name="debug_card_trace_mode_label">Enable trace mode</string>
+    <string name="debug_card_dryrun_mode_label">Dry-run mode (disable deletion)</string>
+    <string name="debug_card_areas_reload_action">Reload data areas</string>
+    <string name="debug_card_pkgs_reload_action">Reload apps</string>
+    <string name="debug_card_root_test_action">Test root</string>
+    <string name="debug_card_shizuku_test_action">Test Shizuku</string>
 
     <string name="data_area_public_app_data_official_label">Default public app data</string>
     <string name="data_area_public_app_assets_official_label">Default public app assets</string>
@@ -504,80 +273,8 @@
     <string name="data_areas_description">Data areas represent locations on your device that are accessible to SD Maid. Different data areas may be available depending on your Android version and the permissions that have been granted.</string>
     <string name="data_areas_short_summary">Areas that SD Maid can access based on the currently granted permissions.</string>
 
-    <string name="exclusion_manager_title">Exclusion manager</string>
-    <string name="exclusion_manager_desc">Manage file and app exclusions.</string>
-    <string name="exclusion_explanation_body1">Exclude files and apps from SD Maid\'s operations.</string>
-    <string name="exclusion_add_new_hint">Add new exclusions by first letting SD Maid search and then using the context menu on the result you want to exclude.</string>
-    <string name="exclusion_create_action">Create exclusion</string>
-    <string name="exclusion_edit_action">Edit exclusion</string>
-    <string name="exclusion_type_package">App exclusion</string>
-    <string name="exclusion_type_path">Path exclusion</string>
-    <string name="exclusion_type_segment">Segment exclusion</string>
-    <string name="exclusion_tags_alltools">All tools</string>
-    <string name="exclusion_target_label">Exclusion target</string>
-    <string name="exclusion_option_allow_partial">Allow partial matches</string>
-    <string name="exclusion_option_ignore_casing">Ignore casing</string>
-    <string name="exclusion_editor_affected_tools_label">Affected tools</string>
-    <string name="exclusion_editor_path_explanation">A path exclusion prevents SD Maid from further processing any matching paths. This applies to files, directories and sub-directories.</string>
-    <string name="exclusion_editor_pkg_explanation">An app exclusion prevents SD Maid from processing any matching packages.</string>
-    <string name="exclusion_editor_segment_explanation">A segment based exclusion is similar to a path exclusion but allows for partial matches. Example: \"DCIM/Camera\" excludes \"/sdcard/DCIM/Camera/photo.png\".</string>
-    <string name="exclusion_editor_remove_confirmation_message">Remove this exclusion?</string>
-    <string name="exclusion_editor_unsaved_confirmation_message">You have unsaved changes!</string>
-
-    <string name="exclusion_create_pkg_hint">Use the AppControl tool to create app exclusions.</string>
-    <string name="exclusion_create_path_hint">Use the StorageAnalyzer tool to create path exclusions.</string>
-    <plurals name="exclusion_x_new_exclusions">
-        <item quantity="one">One exclusion created</item>
-        <item quantity="other">%d exclusions created</item>
-    </plurals>
-
-    <string name="automation_accessibility_service_description">Users with special accessibility needs can enable this service to allow SD Maid to automate tasks that would otherwise require tedious manual user interaction (e.g. cache deletion).\n\nExample: If you instruct SD Maid to stop multiple apps then SD Maid can use this service to open each apps settings screen, find the \'Force Stop\' button and tap it.\n\nSD Maid will always prominently show when using this service and provide an easy way for the user to cancel any interaction immediately.\n\nNo actions will be performed without prior user approval. This service can be disabled again at any time without adverse effects.</string>
-    <string name="automation_screenoverlay_explanation">SD Maid is interacting with your device. It\'s not possible to use the screen at the same time. Wait until the operation is finished or cancel it.</string>
-    <string name="automation_active_title">SD Maid is working</string>
-    <string name="automation_error_no_consent_title">Automation error</string>
-    <string name="automation_error_no_consent_body">Accessibility service is not set up. Complete the setup and give consent.</string>
-    <string name="automation_error_not_enabled_title">Service isn\'t enabled</string>
-    <string name="automation_error_not_enabled_body">Accessibility service is disabled. Turn it on again.</string>
-    <string name="automation_error_not_running_title">Service isn\'t running</string>
-    <string name="automation_error_not_running_body">Accessibility service is not running. Try rebooting the device.</string>
-    <string name="automation_error_screen_unavailable_title">Screen unavailable</string>
-    <string name="automation_error_screen_unavailable_body">The operation was aborted because the screen became unavailable (e.g. display off or lockscreen active).</string>
-
     <string name="history_label">History</string>
     <string name="history_description">A chronological list of recent actions and affected data.</string>
-
-    <string name="scheduler_label">Scheduler</string>
-    <string name="scheduler_execution_label">Next execution (approximately)</string>
-    <string name="scheduler_execution_last_label">Last execution</string>
-    <string name="scheduler_settings_label">Scheduler</string>
-    <string name="scheduler_settings_summary">Adjust scheduler related settings.</string>
-    <string name="scheduler_new_schedule_action">Create schedule</string>
-    <string name="scheduler_schedule_name_label">Schedule name</string>
-    <string name="scheduler_schedule_toggle_enabled">Schedule is enabled</string>
-    <string name="scheduler_schedule_toggle_disabled">Schedule is disabled</string>
-    <string name="scheduler_edit_schedule_action">Edit schedule</string>
-    <string name="scheduler_schedule_time_label">Approximate time</string>
-    <string name="scheduler_schedule_repeat_label">Repeat interval in days</string>
-    <string name="scheduler_schedule_default_name">Default schedule</string>
-    <string name="scheduler_current_schedule_x_at_x">%1$s around %2$s</string>
-    <string name="scheduler_schedule_next_at_x">Planned for %s</string>
-    <string name="scheduler_schedule_last_at_x">Last executed at %s</string>
-    <plurals name="scheduler_schedule_repeat_x_days">
-        <item quantity="one">Daily</item>
-        <item quantity="other">Every %d days</item>
-    </plurals>
-    <string name="scheduler_schedule_repeat_interval">Repeat interval</string>
-    <string name="scheduler_inaccurate_execution_hint">Expected execution times are approximations. Schedules may be delayed or expedited if it conserves battery.</string>
-    <string name="scheduler_no_active_schedules_subtitle">No active schedules</string>
-    <string name="scheduler_setting_nopowersaving_title">Skip on low battery</string>
-    <string name="scheduler_setting_nopowersaving_summary">If the device is in power-saving mode, the scheduled execution will be skipped.</string>
-    <string name="scheduler_setting_charging_title">Skip when not charging</string>
-    <string name="scheduler_setting_charging_summary">If the device is not charging, the scheduled execution will be skipped.</string>
-    <string name="scheduler_setting_automation_title">Accessibility service</string>
-    <string name="scheduler_setting_automation_summary">Include actions that use an accessibility service. This requires that SD Maid can interact with your screen (i.e. it\'s unlocked) when the tasks are executed.</string>
-    <string name="scheduler_notification_channel_label">Scheduler</string>
-    <string name="scheduler_notification_title">Scheduled task</string>
-    <string name="scheduler_notification_message">Executing: \"%s\"</string>
 
     <string name="updates_dashcard_title">Update available</string>
     <string name="updates_dashcard_body">An update is available. You have %1$s and the latest version is %2$s.</string>
@@ -592,4 +289,32 @@
 
     <string name="updatecheck_setting_enabled_label">Update check</string>
     <string name="updatecheck_setting_enabled_explanation">Allow SD Maid to check for updates to let you know if a newer version is available.</string>
+    <string name="device_settings_category">Device</string>
+
+    <string name="beta_version_indicator_desc">Pre-release versions display a litte ribbon on the start screen. They are updated more frequently, might have more features, but could also have more bugs.</string>
+
+    <string name="review_app_review_action">Review</string>
+    <string name="review_app_dismiss_action">Maybe later</string>
+    <string name="review_app_body">Would you like to leave SD Maid a review?️ ❤️</string>
+
+    <string name="anniversary_card_title">Happy SD Maid Anniversary ❤️</string>
+    <string name="anniversary_card_install_date">With you since %s</string>
+    <plurals name="anniversary_card_body">
+        <item quantity="one">Already %1$d year together. Thanks for trusting SD Maid to keep your Android clean and tidy. Freed space: %2$s</item>
+        <item quantity="other">%1$d years strong. Your device stays clean and tidy with SD Maid. Freed space: %2$s</item>
+    </plurals>
+    <string name="anniversary_share_title">Share your SD Maid anniversary</string>
+    <plurals name="anniversary_share_text">
+        <item quantity="one">%1$d year with SD Maid — Freed space: %2$s. Keeping your Android clean and tidy. #SDMaid\nTry it: %3$s</item>
+        <item quantity="other">%1$d years with SD Maid — Freed space: %2$s. Keeping your Android clean and tidy. #SDMaid\nTry it: %3$s</item>
+    </plurals>
+    <string name="shortcut_onetap_short">Scan + Delete</string>
+    <string name="shortcut_onetap_long">Scan and delete in one action</string>
+
+    <string name="shortcuts_settings_category">Shortcuts</string>
+    <string name="shortcuts_onetap_enabled_title">One-tap shortcut</string>
+    <string name="shortcuts_onetap_enabled_summary">Show \"Scan + Delete\" shortcut when long-pressing the app icon. Uses the same tools as one-tap dashboard.</string>
+
+    <string name="analyzer_storage_trend_delta_in_7d">%s in 7 days</string>
+    <!-- Shorter versions for side-by-side display -->
 </resources>

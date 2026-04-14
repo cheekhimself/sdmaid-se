@@ -3,11 +3,19 @@
     <string name="app_name_upgraded">SD Maid SE Pro</string>
     <string name="app_name_upgrade_postfix">Pro</string>
     <string name="upgrade_feature_requires_pro">Requer SD Maid SE Pro</string>
-    <string name="upgrades_dashcard_title">Atualizar SD Maid</string>
-    <string name="upgrades_dashcard_body">O SD Maid Pro oferece melhores resultados, mais recursos e opções para usuários avançados.</string>
+    <string name="upgrades_dashcard_title">Atualize o SD Maid SE</string>
+    <string name="upgrades_dashcard_body">O SD Maid SE Pro oferece melhores resultados, mais recursos e opções para usuários avançados.</string>
     <string name="upgrades_dashcard_upgrade_action">Atualizar</string>
     <string name="upgrades_gplay_unavailable_error_title">O Google Play está indisponível</string>
     <string name="upgrades_gplay_unavailable_error_description">O SD Maid não pode se conectar ao Google Play. O Google Play está instalado e atualizado? Sua Conta Google está conectada? Tente limpar o cache do aplicativo Google Play e reiniciar o seu dispositivo.</string>
+    <string name="upgrades_gplay_billing_error_label">Problema do Google Play</string>
+    <string name="upgrades_gplay_billing_error_description">Houve um problema com o Google Play. Por favor, tente novamente mais tarde ou reinicie o seu dispositivo.\n\nDetalhes: %s</string>
+    <string name="upgrades_gplay_internal_error_title">Erro do Google Play</string>
+    <string name="upgrades_gplay_internal_error_description">Ocorreu um erro interno do Google Play. Por favor, tente o seguinte:\n\n• Reinicie o seu dispositivo\n• Limpe o cache da Google Play Store\n• Tente novamente mais tarde</string>
+    <string name="upgrades_gplay_network_error_title">Erro de conexão</string>
+    <string name="upgrades_gplay_network_error_description">Não foi possível conectar ao Google Play. Verifique sua conexão com a internet e tente novamente.</string>
+    <string name="upgrades_gplay_already_owned_error_title">Já adquirido</string>
+    <string name="upgrades_gplay_already_owned_error_description">Use a opção \"Restaurar a compra\" para restaurar sua compra. Se o problema persistir, tente limpar o cache do Google Play e reiniciar o seu dispositivo.</string>
     <string name="upgrades_no_purchases_found_check_account">Nenhuma compra encontrada. Você está usando a conta certa?</string>
     <string name="upgrade_screen_title">Obtenha o SD Maid SE Pro</string>
     <string name="upgrade_screen_preamble">O SD Maid não tem anúncios e não vende dados de usuários. Meu trabalho é financiado por você ❤️.</string>
@@ -21,9 +29,9 @@
     <string name="upgrade_screen_iap_action">Compra de uma só vez</string>
     <string name="upgrade_screen_iap_action_hint">A compra única custa %s.</string>
     <string name="upgrade_screen_thanks_toast">Você é o melhor! ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">Juntos, chegamos ao primeiro lançamento! Obrigado por me ajudar! É claro que o desenvolvimento continuará, mas agora você pode mudar para compilações mais estáveis, se quiser. Faça isso desativando o teste no Google Play.</string>
-    <string name="nudge_betagoodbye_hint">Nota pequena: as avaliações dadas durante o teste são visíveis apenas para mim, agradeceria se você pudesse dar uma classificação pública ao SD Maid se estiver satisfeito.</string>
-    <string name="nudge_betagoodbye_positive_action">Desativar</string>
-    <string name="nudge_betagoodbye_negative_action">Continue testando</string>
+    <string name="upgrade_screen_restore_purchase_action">Restaurar a compra</string>
+    <string name="upgrade_screen_restore_purchase_message">A sua atualização é válida entre os dispositivos da mesma conta do Google.</string>
+    <string name="upgrade_screen_restore_troubleshooting_msg">Dicas de solução de problemas para atualizações não reconhecidas:</string>
+    <string name="upgrade_screen_restore_sync_patience_hint">A sincronização da Play Store pode demorar bastante. Tente reiniciar, limpar o cache do Google Play ou simplesmente aguarde.</string>
+    <string name="upgrade_screen_restore_multiaccount_hint">Várias contas podem confundir o Google Play. Saia de outras contas ou instale através do site do Google Play, o que força associações com uma conta específica.</string>
 </resources>

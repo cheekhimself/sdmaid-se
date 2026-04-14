@@ -21,7 +21,7 @@ import eu.darken.sdmse.common.pkgs.toKnownPkg
 import eu.darken.sdmse.common.pkgs.toPkgId
 
 data class InstallerInfo(
-    val installingPkg: Pkg?,
+    val installingPkg: Pkg? = null,
     val initiatingPkg: Pkg? = null,
     val originatingPkg: Pkg? = null,
     val sourceType: SourceType = SourceType.UNSPECIFIED,
@@ -58,7 +58,7 @@ data class InstallerInfo(
     }
 }
 
-fun ExtendedInstallData.isSideloaded(): Boolean {
+fun InstallDetails.isSideloaded(): Boolean {
     if (isSystemApp) return false
     return installerInfo.allInstallers.none { it.id == AKnownPkg.GooglePlay.id }
 }
@@ -114,6 +114,7 @@ private fun PackageInfo.getInstallerInfoApi30(packageManager: PackageManager): I
 
 private fun PackageInfo.getInstallerInfoLegacy(packageManager: PackageManager): InstallerInfo {
     val installingPkg = try {
+        @Suppress("DEPRECATION")
         packageManager.getInstallerPackageName(packageName)
             ?.let { Pkg.Id(it) }
             ?.let { it.toKnownPkg() ?: it.toStub() }

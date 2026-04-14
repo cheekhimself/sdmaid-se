@@ -2,7 +2,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
-        android:title="Translation"
+        app:title="@string/settings_acknowledgements_category_translations_title"
+        app:summary="@string/settings_acknowledgements_category_translations_subtitle"
         app:iconSpaceReserved="false">
         <Preference
             android:key="translation.translators"
@@ -20,7 +21,8 @@
         </eu.darken.sdmse.common.preferences.IntentPreference>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Thanks"
+        app:title="@string/settings_acknowledgements_category_thanks_title"
+        app:summary="@string/settings_acknowledgements_category_thanks_subtitle"
         app:iconSpaceReserved="false">
         <eu.darken.sdmse.common.preferences.IntentPreference
             android:key="thanks.maxpatchs"
@@ -31,9 +33,19 @@
                 android:action="android.intent.action.VIEW"
                 android:data="https://twitter.com/maxpatchs" />
         </eu.darken.sdmse.common.preferences.IntentPreference>
+        <eu.darken.sdmse.common.preferences.IntentPreference
+            android:key="thanks.crowdin"
+            android:summary="For supporting translation of open-source projects"
+            android:title="crowdin.com"
+            app:iconSpaceReserved="false">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://crowdin.com/" />
+        </eu.darken.sdmse.common.preferences.IntentPreference>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/settings_licenses_label"
+        app:title="@string/settings_acknowledgements_category_licenses_title"
+        app:summary="@string/settings_acknowledgements_category_licenses_subtitle"
         app:iconSpaceReserved="false">
         <eu.darken.sdmse.common.preferences.IntentPreference
             android:key="license.librootjava"
@@ -79,6 +91,15 @@
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="https://github.com/airbnb/lottie-android" />
+        </eu.darken.sdmse.common.preferences.IntentPreference>
+        <eu.darken.sdmse.common.preferences.IntentPreference
+            android:key="license.zoomimage"
+            android:summary="Library for zoom images, supported Android View, Compose and Compose Multiplatform. (APACHE 2.0)"
+            android:title="ZoomImage"
+            app:iconSpaceReserved="false">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/panpf/zoomimage" />
         </eu.darken.sdmse.common.preferences.IntentPreference>
         <eu.darken.sdmse.common.preferences.IntentPreference
             android:key="license.indicatorfastscroll"

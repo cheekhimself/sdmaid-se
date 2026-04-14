@@ -4,11 +4,22 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build only, no release/upload)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 jobs:
   release-github:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
     environment: foss-production
     steps:
       - name: Decode Keystore
@@ -22,23 +33,16 @@ jobs:
           echo "STORE_PATH=$(echo $TMP_KEYSTORE_FILE_PATH)" >> $GITHUB_ENV
 
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
-      - name: Get the version
-        id: tagger
-        uses: jimschubert/query-tag-action@v2
-        with:
-          skip-unshallow: 'true'
-          abbrev: false
-          commit-ish: HEAD
-
       - name: Assemble beta APK
-        if: contains(steps.tagger.outputs.tag, '-beta')
+        if: contains(github.ref_name, '-beta')
         run: ./gradlew assembleFossBeta
         env:
           VERSION: ${{ github.ref }}
@@ -47,7 +51,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Assemble production APK
-        if: "!contains(steps.tagger.outputs.tag, '-beta')"
+        if: "!contains(github.ref_name, '-beta')"
         run: ./gradlew assembleFossRelease
         env:
           VERSION: ${{ github.ref }}
@@ -56,32 +60,32 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Create pre-release
-        if: contains(steps.tagger.outputs.tag, '-beta')
-        uses: softprops/action-gh-release@v1
+        if: "contains(github.ref_name, '-beta') && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b #v2.5.0
         with:
           prerelease: true
-          tag_name: ${{ steps.tagger.outputs.tag }}
-          name: ${{ steps.tagger.outputs.tag }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: app/build/outputs/apk/foss/beta/*.apk
+          files: app/build/outputs/apk/foss/beta/eu.darken.sdmse-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
-        if: "!contains(steps.tagger.outputs.tag, '-beta')"
-        uses: softprops/action-gh-release@v1
+        if: "!contains(github.ref_name, '-beta') && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b #v2.5.0
         with:
           prerelease: false
-          tag_name: ${{ steps.tagger.outputs.tag }}
-          name: ${{ steps.tagger.outputs.tag }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: app/build/outputs/apk/foss/release/*.apk
+          files: app/build/outputs/apk/foss/release/eu.darken.sdmse-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release-gplay:
     name: Create Google Play release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: gplay-production
     steps:
       - name: Decode Keystore
@@ -105,29 +109,22 @@ jobs:
           echo "SUPPLY_JSON_KEY=$(echo $TMP_SERVICEKEY_FILE_PATH)" >> $GITHUB_ENV
 
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
-      - name: Get the version
-        id: tagger
-        uses: jimschubert/query-tag-action@v2
-        with:
-          skip-unshallow: 'true'
-          abbrev: false
-          commit-ish: HEAD
-
       - name: Set up ruby env
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 #v1.292.0
         with:
-          ruby-version: 2.7.6
+          ruby-version: 3.3.6
           bundler-cache: true
 
       - name: Assemble beta and upload to Google Play
-        if: contains(steps.tagger.outputs.tag, '-beta')
+        if: "contains(github.ref_name, '-beta') && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
         run: bundle exec fastlane beta
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -135,7 +132,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Assemble production and upload to Google Play
-        if: "!contains(steps.tagger.outputs.tag, '-beta')"
+        if: "!contains(github.ref_name, '-beta') && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
         run: bundle exec fastlane production
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}

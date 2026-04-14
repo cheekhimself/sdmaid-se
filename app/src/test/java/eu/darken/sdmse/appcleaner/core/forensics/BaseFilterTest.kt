@@ -2,12 +2,16 @@ package eu.darken.sdmse.appcleaner.core.forensics
 
 import android.content.Context
 import android.content.res.AssetManager
-import eu.darken.sdmse.appcleaner.core.forensics.sieves.dynamic.DynamicSieve
-import eu.darken.sdmse.appcleaner.core.forensics.sieves.json.JsonBasedSieve
+import eu.darken.sdmse.appcleaner.core.forensics.sieves.DynamicAppSieve2
+import eu.darken.sdmse.appcleaner.core.forensics.sieves.JsonAppSieve
 import eu.darken.sdmse.common.areas.DataArea
 import eu.darken.sdmse.common.areas.DataArea.Type
 import eu.darken.sdmse.common.areas.DataAreaManager
-import eu.darken.sdmse.common.files.*
+import eu.darken.sdmse.common.files.APath
+import eu.darken.sdmse.common.files.APathLookup
+import eu.darken.sdmse.common.files.GatewaySwitch
+import eu.darken.sdmse.common.files.ReadException
+import eu.darken.sdmse.common.files.Segments
 import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.forensics.FileForensics
 import eu.darken.sdmse.common.pkgs.Pkg
@@ -19,6 +23,7 @@ import eu.darken.sdmse.common.storage.StorageEnvironment
 import eu.darken.sdmse.systemcleaner.core.SystemCleanerSettings
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -269,7 +274,7 @@ abstract class BaseFilterTest : BaseTest() {
         coEvery { gatewaySwitch.exists(any()) } returns false
         coEvery { gatewaySwitch.canRead(any()) } returns false
         coEvery { gatewaySwitch.lookupFiles(any()) } answers {
-            throw ReadException(arg<APath>(0))
+            throw ReadException(path = arg<APath>(0))
         }
         storageEnvironment.apply {
             every { dataDir } returns LocalPath.build("/data")
@@ -334,27 +339,25 @@ abstract class BaseFilterTest : BaseTest() {
                 c.lastModified?.let {
                     every { modifiedAt } returns it
                 }
+                every { name } returns c.pfpSegs.last()
             }
 
             when (c.matchType) {
                 Candidate.Type.POSITIVE -> {
                     c.areaTypes.forEach { loc ->
                         c.pkgs.forEach { pkg ->
-                            c.prefixFreePaths.forEach { segs ->
-                                withClue("Should match $pkg, $loc $segs") {
-                                    filter.isExpendable(pkg, target, loc, segs) shouldBe true
-                                }
+                            withClue("Should match $pkg, $loc ${c.pfpSegs}") {
+                                filter.match(pkg, target, loc, c.pfpSegs) shouldNotBe null
                             }
                         }
                     }
                 }
+
                 Candidate.Type.NEGATIVE -> {
                     c.areaTypes.forEach { loc ->
                         c.pkgs.forEach { pkg ->
-                            c.prefixFreePaths.forEach { segs ->
-                                withClue("Should NOT match $pkg, $loc $segs") {
-                                    filter.isExpendable(pkg, target, loc, segs) shouldBe false
-                                }
+                            withClue("Should NOT match $pkg, $loc ${c.pfpSegs}") {
+                                filter.match(pkg, target, loc, c.pfpSegs) shouldBe null
                             }
                         }
                     }
@@ -367,7 +370,7 @@ abstract class BaseFilterTest : BaseTest() {
         val matchType: Type,
         val areaTypes: Collection<DataArea.Type>,
         val pkgs: Collection<Pkg.Id>,
-        val prefixFreePaths: Collection<Segments>,
+        val pfpSegs: Segments,
         val lastModified: Instant? = null
     ) {
         enum class Type {
@@ -376,19 +379,19 @@ abstract class BaseFilterTest : BaseTest() {
 
     }
 
-    fun createJsonSieveFactory() = object : JsonBasedSieve.Factory {
-        override fun create(assetPath: String): JsonBasedSieve {
-            return JsonBasedSieve(
+    fun createJsonSieveFactory() = object : JsonAppSieve.Factory {
+        override fun create(assetPath: String): JsonAppSieve {
+            return JsonAppSieve(
                 context = context,
                 assetPath = assetPath,
-                baseMoshi = SerializationAppModule().moshi(),
+                json = SerializationAppModule().json(),
             )
         }
     }
 
-    fun createDynamicSieveFactory() = object : DynamicSieve.Factory {
-        override fun create(configs: Set<DynamicSieve.MatchConfig>): DynamicSieve {
-            return DynamicSieve(
+    fun createDynamicSieve2Factory() = object : DynamicAppSieve2.Factory {
+        override fun create(configs: Set<DynamicAppSieve2.MatchConfig>): DynamicAppSieve2 {
+            return DynamicAppSieve2(
                 configs = configs,
             )
         }

@@ -19,7 +19,25 @@
             app:singleLineTitle="false"
             app:title="@string/dashboard_settings_oneclick_tools_title" />
 
+        <Preference
+            android:summary="@string/dashboard_card_config_desc"
+            app:icon="@drawable/baseline_grid_view_24"
+            app:key="dashboard.card.config"
+            app:persistent="false"
+            app:singleLineTitle="false"
+            app:title="@string/dashboard_card_config_title" />
+
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/shortcuts_settings_category">
+        <CheckBoxPreference
+            app:icon="@drawable/ic_delete_alert_24"
+            app:key="shortcut.oneclick.enabled"
+            app:singleLineTitle="false"
+            app:summary="@string/shortcuts_onetap_enabled_summary"
+            app:title="@string/shortcuts_onetap_enabled_title" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_category_ui_label">
 
         <eu.darken.sdmse.common.preferences.ListPreference2
@@ -42,6 +60,27 @@
             app:singleLineTitle="false"
             app:summary="@string/ui_previews_summary"
             app:title="@string/ui_previews_title" />
+
+        <Preference
+            android:summary="@string/ui_language_override_desc"
+            app:icon="@drawable/ic_language_onsurface"
+            app:isPreferenceVisible="false"
+            app:key="core.ui.language"
+            app:persistent="false"
+            app:singleLineTitle="false"
+            app:title="@string/ui_language_override_label"
+            tools:isPreferenceVisible="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/device_settings_category">
+
+        <eu.darken.sdmse.common.preferences.ListPreference2
+            android:icon="@drawable/ic_baseline_accessibility_new_24"
+            android:key="core.romtype.detection"
+            android:title="@string/appcleaner_automation_romtype_detection_label"
+            app:persistent="false"
+            app:summary="@string/appcleaner_automation_romtype_detection_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_other_label">

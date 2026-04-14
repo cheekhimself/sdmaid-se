@@ -1,27 +1,21 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("kotlin-parcelize")
+    id("projectConfig")
 }
 
 apply(plugin = "dagger.hilt.android.plugin")
 
 android {
-    namespace = "${ProjectConfig.packageName}.common.pkgs"
+    namespace = "${projectConfig.packageName}.common.pkgs"
 
-    setupLibraryDefaults()
+    setupLibraryDefaults(projectConfig)
 
     setupModuleBuildTypes()
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     setupCompileOptions()
 
-    setupKotlinOptions()
 
     testOptions {
         unitTests {
@@ -29,10 +23,12 @@ android {
         }
         tasks.withType<Test> {
             useJUnitPlatform()
-            setupTestLogging()
+            setupTests()
         }
     }
 }
+
+setupKotlinOptions()
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:${Versions.Desugar.core}")
@@ -44,10 +40,9 @@ dependencies {
     addAndroidCore()
     addDI()
     addCoroutines()
-    addIO()
 
     addTesting()
     testImplementation(project(":app-common-test"))
-    testImplementation("org.robolectric:robolectric:4.9.1")
-    testImplementation("androidx.test.ext:junit:1.1.4")
+    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("androidx.test.ext:junit:1.3.0")
 }

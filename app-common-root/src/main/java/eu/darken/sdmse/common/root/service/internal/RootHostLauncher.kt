@@ -4,19 +4,26 @@ import android.content.Context
 import android.os.Debug
 import android.os.IInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
-import eu.darken.rxshell.cmd.Cmd
-import eu.darken.rxshell.cmd.RxCmdShell
+import eu.darken.flowshell.core.cmd.FlowCmd
+import eu.darken.flowshell.core.cmd.FlowCmdShell
+import eu.darken.flowshell.core.cmd.execute
+import eu.darken.flowshell.core.cmd.openSession
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.ipc.getInterface
 import eu.darken.sdmse.common.root.RootException
-import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -39,50 +46,54 @@ class RootHostLauncher @Inject constructor(
         useMountMaster: Boolean = false,
         options: RootHostOptions,
     ): Flow<ConnectionWrapper<Service>> = callbackFlow {
-        log(TAG) { "createConnection($serviceClass, $hostClass, $useMountMaster, $options)" }
-        log(TAG, INFO) { "Initiating connection to host($hostClass) via binder($serviceClass)" }
-
-        val rootSession = try {
-            RxCmdShell.builder().root(true).build().open().blockingGet()
-        } catch (e: Exception) {
-            throw RootException("Failed to open root session.", e.cause)
-        }
+        val iTag = "$TAG:${UUID.randomUUID().toString().takeLast(4)}"
+        log(iTag, INFO) { "createConnection($serviceClass, $hostClass, $useMountMaster, $options)" }
 
         val pairingCode = UUID.randomUUID().toString()
 
         val ipcReceiver = object : RootConnectionReceiver(pairingCode) {
             override fun onConnect(connection: RootConnection) {
-                log(TAG) { "onConnect(connection=$connection)" }
+                log(iTag) { "onConnect(connection=$connection), getting our interface..." }
+                val userConnection = try {
+                    connection.userConnection.getInterface(serviceClass) as Service
+                } catch (e: Exception) {
+                    log(iTag, ERROR) { "Failed to get our interface: ${e.asLog()}" }
+                    close(RootException("Failed to get user connection (ROOT)", e))
+                    return
+                }
 
-                val userConnection = connection.userConnection.getInterface(serviceClass)
-                    ?: throw RootException("Failed to get user connection")
-
-                log(TAG) { "onServiceConnected(...) -> $userConnection" }
+                log(iTag, INFO) { "onServiceConnected(...) got our interface: $userConnection" }
                 trySendBlocking(ConnectionWrapper(userConnection, connection))
             }
 
-            override fun onDisconnect(ipc: RootConnection) {
-                log(TAG) { "onDisconnect(ipc=$ipc)" }
+            override fun onDisconnect(connection: RootConnection) {
+                log(iTag, INFO) { "onDisconnect(ipc=$connection), closing channel..." }
                 close()
+                log(iTag, VERBOSE) { "onDisconnect(ipc=$connection), channel closed" }
             }
         }
 
-        invokeOnClose {
-            log(TAG) { "Canceling!" }
-            ipcReceiver.release()
-            // TODO timeout until we CANCEL?
-            rootSession.close().subscribe()
-        }
-
+        log(iTag) { "Initiating connection to host($hostClass) via binder($serviceClass)" }
         ipcReceiver.connect(context)
 
-        val result = try {
-            val cmdBuilder = RootHostCmdBuilder(context, hostClass)
+        val (rootSession, _) = try {
+            FlowCmdShell("su").openSession(this)
+        } catch (e: Exception) {
+            throw RootException("Failed to open root session.", e)
+        }
 
-            if (useMountMaster) {
-                Cmd.builder("su --mount-master").submit(rootSession).observeOn(Schedulers.io()).blockingGet()
+        if (useMountMaster) {
+            try {
+                log(iTag, INFO) { "Using --mount-master" }
+                val result = FlowCmd("su --mount-master").execute(rootSession)
+                log(iTag) { "--mount-master result: $result" }
+                if (!result.isSuccessful) throw IllegalStateException("--mount-master command was unsuccessful")
+            } catch (e: Exception) {
+                log(iTag) { "Failed to use --mount-master" }
             }
+        }
 
+        try {
             val initArgs = RootHostInitArgs(
                 pairingCode = pairingCode,
                 packageName = context.packageName,
@@ -93,32 +104,56 @@ class RootHostLauncher @Inject constructor(
                 recorderPath = options.recorderPath
             )
 
+            val cmdBuilder = RootHostCmdBuilder(context, hostClass)
+            var retryWithRelocation = false
+
             try {
                 val cmd = cmdBuilder.build(withRelocation = false, initialOptions = initArgs)
-                log { "RootHost launch command is $cmd" }
-
+                log(iTag) { "Launching root host with command: $cmd" }
                 // Doesn't return until root host has quit
-                cmd.submit(rootSession).observeOn(Schedulers.io()).blockingGet()
+                cmd.execute(rootSession).also {
+                    log(iTag) { "Session (WITH-relocation) has ended: $it" }
+                }
             } catch (e: Exception) {
-                log(TAG, WARN) { "Launch without relocation failed: ${e.asLog()}" }
+                if (e is CancellationException) throw e
+                log(iTag, WARN) { "Launch without relocation failed: ${e.asLog()}" }
+                retryWithRelocation = true
+            }
 
-                val cmd = cmdBuilder.build(withRelocation = true, initialOptions = initArgs)
-                log { "RootHost launch command is $cmd" }
-
-                cmd.submit(rootSession).observeOn(Schedulers.io()).blockingGet()
+            if (retryWithRelocation) {
+                try {
+                    val cmd = cmdBuilder.build(withRelocation = true, initialOptions = initArgs)
+                    log(iTag) { "Launching root host (relocation) with command: $cmd" }
+                    // Doesn't return until root host has quit
+                    cmd.execute(rootSession).also {
+                        log(iTag) { "Session (without-relocation) has ended: $it" }
+                    }
+                } catch (e: Exception) {
+                    log(iTag, WARN) { "Launch WITH relocation failed too: ${e.asLog()}" }
+                    throw e
+                }
             }
         } catch (e: Exception) {
-            throw RootException("Failed to launch java root host.", e.cause)
+            if (e is CancellationException) {
+                log(iTag) { "Root host launcher was cancelled: ${e.asLog()}" }
+            } else {
+                log(iTag, WARN) { "All launch attempts failed: ${e.asLog()}" }
+            }
         }
 
-        log(TAG) { "Root host launch result was: $result" }
+        log(iTag, VERBOSE) { "Reached awaitClose" }
+        awaitClose {
+            log(iTag) { "Session is closing..." }
+            ipcReceiver.release()
 
-        // Check exitcode
-        if (result.exitCode == Cmd.ExitCode.SHELL_DIED) {
-            throw RootException("Shell died launching the java root host.")
+            runBlocking {
+                withTimeoutOrNull(10 * 1000) { rootSession.close() } ?: run {
+                    log(iTag) { "timeout on rootSession.close(), canceling..." }
+                    rootSession.cancel()
+                }
+            }
         }
     }
-
 
     data class ConnectionWrapper<Service : IInterface>(
         val service: Service,

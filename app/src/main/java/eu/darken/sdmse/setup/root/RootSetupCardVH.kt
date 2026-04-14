@@ -1,7 +1,9 @@
 package eu.darken.sdmse.setup.root
 
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import eu.darken.sdmse.R
+import eu.darken.sdmse.common.getColorForAttr
 import eu.darken.sdmse.common.lists.binding
 import eu.darken.sdmse.databinding.SetupRootItemBinding
 import eu.darken.sdmse.setup.SetupAdapter
@@ -16,6 +18,21 @@ class RootSetupCardVH(parent: ViewGroup) :
         item: Item,
         payloads: List<Any>
     ) -> Unit = binding { item ->
+
+        rootState.apply {
+            isVisible = item.state.useRoot == true
+            text = getString(
+                if (item.state.ourService) R.string.setup_root_state_ready_label
+                else R.string.setup_root_state_waiting_label
+            )
+            setTextColor(
+                if (item.state.ourService) context.getColorForAttr(android.R.attr.textColorSecondary)
+                else context.getColorForAttr(android.R.attr.colorError)
+            )
+            if (!item.state.isInstalled) {
+                append(" ?")
+            }
+        }
 
         allowRootOptions.apply {
             setOnCheckedChangeListener(null)
@@ -37,11 +54,8 @@ class RootSetupCardVH(parent: ViewGroup) :
     }
 
     data class Item(
-        override val state: RootSetupModule.State,
+        override val state: RootSetupModule.Result,
         val onToggleUseRoot: (Boolean?) -> Unit,
         val onHelp: () -> Unit,
-    ) : SetupAdapter.Item {
-        override val stableId: Long = this.javaClass.hashCode().toLong()
-    }
-
+    ) : SetupAdapter.Item
 }

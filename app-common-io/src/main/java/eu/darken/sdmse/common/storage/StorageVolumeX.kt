@@ -11,12 +11,14 @@ import android.os.Parcelable
 import android.os.UserHandle
 import android.os.storage.StorageVolume
 import android.provider.DocumentsContract
+import androidx.core.net.toUri
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.hasApiLevel
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
@@ -28,10 +30,11 @@ import java.lang.reflect.Method
  */
 @Parcelize
 @TypeParceler<Any, AnyParceler>
-class StorageVolumeX constructor(
+class StorageVolumeX(
     private val volumeObj: Any
 ) : Parcelable {
-    private val volumeClass: Class<*> = volumeObj.javaClass
+    private val volumeClass: Class<*>
+        get() = volumeObj.javaClass
 
 
     private val volume: StorageVolume
@@ -64,6 +67,7 @@ class StorageVolumeX constructor(
     val isMounted: Boolean
         get() = volume.state == Environment.MEDIA_MOUNTED
 
+    @IgnoredOnParcel
     private val methodGetPath: Method? by lazy {
         try {
             volumeClass.getMethod("getPath")
@@ -81,6 +85,7 @@ class StorageVolumeX constructor(
             directory?.path
         }
 
+    @IgnoredOnParcel
     private val methodGetPathFile: Method? by lazy {
         try {
             volumeClass.getMethod("getPathFile")
@@ -90,6 +95,7 @@ class StorageVolumeX constructor(
         }
     }
 
+    @IgnoredOnParcel
     private val methodGetUserLabel: Method? by lazy {
         try {
             volumeClass.getMethod("getUserLabel")
@@ -107,6 +113,7 @@ class StorageVolumeX constructor(
             null
         }
 
+    @IgnoredOnParcel
     private val methodGetDescription: Method? by lazy {
         try {
             volumeClass.getMethod("getDescription", Context::class.java)
@@ -132,6 +139,7 @@ class StorageVolumeX constructor(
         }
     }
 
+    @IgnoredOnParcel
     private val methodGetOwner: Method? by lazy {
         try {
             volumeClass.getMethod("getOwner")
@@ -152,6 +160,7 @@ class StorageVolumeX constructor(
             null
         }
 
+    @Suppress("DEPRECATION")
     fun createAccessIntent(directory: String? = null): Intent? {
         return volume.createAccessIntent(directory)
 //        return Intent(ACTION_OPEN_EXTERNAL_DIRECTORY).apply {
@@ -161,6 +170,7 @@ class StorageVolumeX constructor(
     }
 
     val rootUri: Uri
+        @Suppress("DEPRECATION")
         @SuppressLint("NewApi")
         get() = if (hasApiLevel(29)) {
             volume.createOpenDocumentTreeIntent().getParcelableExtra(DocumentsContract.EXTRA_INITIAL_URI)!!
@@ -174,12 +184,12 @@ class StorageVolumeX constructor(
     val documentUri: Uri
         get() = rootUri.toString()
             .replace("/root/", "/document/")
-            .let { Uri.parse(it) }
+            .toUri()
 
     val treeUri: Uri
         get() = rootUri.toString()
             .replace("/root/", "/tree/")
-            .let { Uri.parse(it) }
+            .toUri()
 
 
     val directory: File?
@@ -228,6 +238,7 @@ class StorageVolumeX constructor(
     }
 }
 
+@Suppress("DEPRECATION")
 internal object AnyParceler : Parceler<Any> {
     override fun create(parcel: Parcel): Any = parcel.readParcelable(StorageVolumeX::class.java.classLoader)!!
 

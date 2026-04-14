@@ -12,8 +12,10 @@ import android.provider.DocumentsContract
 import android.system.Os
 import android.system.StructStat
 import android.text.TextUtils
+import androidx.core.net.toUri
 import eu.darken.sdmse.common.asSequence
 import eu.darken.sdmse.common.debug.Bugs
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
@@ -24,7 +26,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.time.Instant
-import java.util.*
 
 
 data class SAFDocFile(
@@ -147,7 +148,7 @@ data class SAFDocFile(
 
     fun delete(): Boolean = try {
         if (Bugs.isDryRun) {
-            log(SAFGateway.TAG, WARN) { "DRYRUN: Not deleting $uri" }
+            log(SAFGateway.TAG, INFO) { "DRYRUN: Not deleting $uri" }
             exists
         } else {
             DocumentsContract.deleteDocument(resolver, uri)
@@ -198,7 +199,7 @@ data class SAFDocFile(
         }
     }
 
-    internal fun openPFD(contentResolver: ContentResolver, mode: FileMode): ParcelFileDescriptor {
+    fun openPFD(contentResolver: ContentResolver, mode: FileMode): ParcelFileDescriptor {
         return contentResolver.openFileDescriptor(uri, mode.value) ?: throw IOException("Couldn't open $uri")
     }
 
@@ -259,7 +260,7 @@ data class SAFDocFile(
                     append(Uri.encode(it))
                 }
             }
-            return Uri.parse(uriBuilder.toString())
+            return uriBuilder.toString().toUri()
         }
 
         fun fromTreeUri(context: Context, contentResolver: ContentResolver, treeUri: Uri): SAFDocFile {

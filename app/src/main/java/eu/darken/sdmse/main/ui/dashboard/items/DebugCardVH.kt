@@ -1,9 +1,11 @@
 package eu.darken.sdmse.main.ui.dashboard.items
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import eu.darken.sdmse.R
+import eu.darken.sdmse.automation.core.AutomationTask
 import eu.darken.sdmse.common.BuildConfigWrap
 import eu.darken.sdmse.common.debug.DebugCardProvider
 import eu.darken.sdmse.common.lists.binding
@@ -28,6 +30,12 @@ class DebugCardVH(parent: ViewGroup) :
         }
         dryrunEnabled.apply {
             setChecked2(item.isDryRunEnabled)
+            setTextColor(
+                getColorForAttr(
+                    if (item.isDryRunEnabled) android.R.attr.colorError else com.google.android.material.R.attr.colorOnSecondaryContainer
+                )
+            )
+            setTypeface(null, if (item.isDryRunEnabled) Typeface.BOLD else Typeface.NORMAL)
             setOnCheckedChangeListener { _, isChecked -> item.onDryRunEnabled(isChecked) }
         }
         pkgsReloadAction.setOnClickListener { item.onReloadPkgs() }
@@ -56,10 +64,23 @@ class DebugCardVH(parent: ViewGroup) :
         }
         shizukuTestAction.setOnClickListener { item.onTestShizuku() }
 
+        unknownFoldersAction.apply {
+            isVisible = BuildConfigWrap.DEBUG
+            setOnClickListener { item.onCheckUnknownFolders() }
+            isEnabled = !item.isCheckingUnknownFolders
+            text = if (item.isCheckingUnknownFolders) "Checking…" else "Check unknown folders"
+        }
+
         testAction.setOnClickListener { item.onRunTest() }
         testAction.isVisible = BuildConfigWrap.DEBUG
         logviewAction.isVisible = BuildConfigWrap.DEBUG
         logviewAction.setOnClickListener { item.onViewLog() }
+
+        acsDebugAction.apply {
+            isVisible = BuildConfigWrap.DEBUG
+            setOnClickListener { item.onAcsDebug() }
+            text = if (item.acsTask != null) "Stop ACS debug" else "Start ACS debug"
+        }
     }
 
     data class Item(
@@ -75,6 +96,10 @@ class DebugCardVH(parent: ViewGroup) :
         val shizukuTestResult: DebugCardProvider.ShizukuTestResult?,
         val onTestShizuku: () -> Unit,
         val onViewLog: () -> Unit,
+        val onAcsDebug: () -> Unit,
+        val acsTask: AutomationTask?,
+        val onCheckUnknownFolders: () -> Unit,
+        val isCheckingUnknownFolders: Boolean,
     ) : DashboardAdapter.Item {
         override val stableId: Long = this.javaClass.hashCode().toLong()
     }

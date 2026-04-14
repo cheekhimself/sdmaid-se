@@ -14,3 +14,8 @@ build/
 .externalNativeBuild
 .cxx
 .DS_Store
+.kotlin/sessions
+.kotlin/errors
+
+/fastlane/README.md
+.codex

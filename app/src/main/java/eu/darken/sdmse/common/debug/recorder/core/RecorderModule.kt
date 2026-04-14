@@ -1,10 +1,11 @@
 package eu.darken.sdmse.common.debug.recorder.core
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Environment
+import android.os.SystemClock
+import androidx.core.content.pm.PackageInfoCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.darken.sdmse.common.BuildConfigWrap
 import eu.darken.sdmse.common.BuildWrap
@@ -16,12 +17,13 @@ import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.debug.DebugSettings
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
-import eu.darken.sdmse.common.debug.recorder.ui.RecorderActivity
 import eu.darken.sdmse.common.flow.DynamicStateFlow
-import eu.darken.sdmse.common.startServiceCompat
+import eu.darken.sdmse.common.getPackageInfo
+import eu.darken.sdmse.main.core.CurriculumVitae
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -31,8 +33,16 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
@@ -43,68 +53,71 @@ class RecorderModule @Inject constructor(
     private val dataAreaManager: DataAreaManager,
     private val sdmId: SDMId,
     private val debugSettings: DebugSettings,
+    private val curriculumVitae: CurriculumVitae,
+    private val recorderProvider: Provider<Recorder>,
 ) {
 
-    private val triggerFile = try {
-        File(context.getExternalFilesDir(null), FORCE_FILE)
-    } catch (e: Exception) {
-        File(
-            Environment.getExternalStorageDirectory(),
-            "/Android/data/${BuildConfigWrap.APPLICATION_ID}/files/$FORCE_FILE"
-        )
+    private val triggerFile by lazy {
+        try {
+            File(context.getExternalFilesDir(null), FORCE_FILE)
+        } catch (_: Exception) {
+            File(
+                Environment.getExternalStorageDirectory(),
+                "/Android/data/${BuildConfigWrap.APPLICATION_ID}/files/$FORCE_FILE"
+            )
+        }
     }
 
     private val internalState = DynamicStateFlow(TAG, appScope + dispatcherProvider.IO) {
         val triggerFileExists = triggerFile.exists()
-        State(shouldRecord = triggerFileExists || debugSettings.recorderPath.value() != null)
+        val savedPath = debugSettings.recorderPath.value()
+        State(
+            shouldRecord = triggerFileExists || savedPath != null,
+        )
     }
     val state: Flow<State> = internalState.flow
 
     init {
         internalState.flow
             .onEach {
-                log(TAG) { "New Recorder state: $internalState" }
+                log(TAG) { "New Recorder state: $it" }
 
                 internalState.updateBlocking {
                     if (!isRecording && shouldRecord) {
-
-                        val logPath = debugSettings.recorderPath.value()?.let {
+                        val savedPath = debugSettings.recorderPath.value()
+                        val isResuming = savedPath != null
+                        val logDir = savedPath?.let {
                             log(TAG) { "Continuing existing log: $it" }
                             File(it)
-                        } ?: createRecordingFilePath().also {
-                            log(TAG) { "Starting new log: ${it.path}" }
+                        } ?: createRecordingDir().also {
+                            log(TAG) { "Starting new log: $it" }
                             debugSettings.recorderPath.value(it.path)
                         }
 
-                        val newRecorder = Recorder().apply { start(logPath) }
+                        val newRecorder = recorderProvider.get().apply { start(logDir) }
 
                         if (!triggerFile.exists()) triggerFile.createNewFile()
 
                         logInfos()
 
-                        context.startServiceCompat(Intent(context, RecorderService::class.java))
-
                         copy(
-                            recorder = newRecorder
+                            recorder = newRecorder,
+                            currentLogDir = logDir,
+                            recordingStartedAt = if (isResuming) 0L else SystemClock.elapsedRealtime(),
                         )
                     } else if (!shouldRecord && isRecording) {
-                        val currentLog = recorder!!.path!!
-                        log(TAG) { "Stopping log recorder for: $currentLog" }
-                        recorder.stop()
+                        log(TAG) { "Stopping log recorder for: $currentLogDir" }
+                        requireNotNull(recorder) { "Recorder was null despite isRecording" }.stop()
 
                         debugSettings.recorderPath.value(null)
                         if (triggerFile.exists() && !triggerFile.delete()) {
                             log(TAG, ERROR) { "Failed to delete trigger file" }
                         }
 
-                        val intent = RecorderActivity.getLaunchIntent(context, currentLog.path).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-
                         copy(
                             recorder = null,
-                            lastLogPath = currentLog
+                            currentLogDir = null,
+                            recordingStartedAt = 0L,
                         )
                     } else {
                         this
@@ -115,20 +128,84 @@ class RecorderModule @Inject constructor(
             .launchIn(appScope)
     }
 
-    private fun createRecordingFilePath() = File(
-        File(context.externalCacheDir, "debug/logs"),
-        "${BuildConfigWrap.APPLICATION_ID}_logfile_${System.currentTimeMillis()}.log"
-    )
+    private fun createRecordingDir(): File {
+        val pkg = BuildConfigWrap.APPLICATION_ID
+        val version = BuildConfigWrap.VERSION_CODE
+        val timestamp = DateTimeFormatter
+            .ofPattern("yyyyMMdd'T'HHmmss'Z'")
+            .withZone(ZoneOffset.UTC)
+            .format(Instant.now())
+
+        val logId = sdmId.id.take(4)
+        var sessionDir: File? = null
+
+        File(File(context.getExternalFilesDir(null), "debug/logs"), "${pkg}_${version}_${timestamp}_$logId").apply {
+            @Suppress("SetWorldWritable", "SetWorldReadable")
+            if (mkdirs()) {
+                log(TAG) { "Public session dir created" }
+                if (setReadable(true, false)) log(TAG) { "Session dir is readable" }
+                if (setWritable(true, false)) log(TAG) { "Session dir is writeable" }
+                sessionDir = this
+            } else {
+                log(TAG, ERROR) { "Failed to create public session dir" }
+            }
+        }
+
+        if (sessionDir == null) {
+            sessionDir = File(File(context.cacheDir, "debug/logs"), "${pkg}_${version}_${timestamp}_$logId").apply {
+                if (mkdirs()) {
+                    log(TAG) { "Private session dir created" }
+                } else {
+                    log(TAG, ERROR) { "Failed to create private session dir" }
+                }
+            }
+        }
+
+        return requireNotNull(sessionDir?.takeIf { it.exists() }) {
+            "Failed to create recording directory in both external and cache locations"
+        }
+    }
 
     suspend fun startRecorder(): File {
         internalState.updateBlocking {
             copy(shouldRecord = true)
         }
-        return internalState.flow.filter { it.isRecording }.first().currentLogPath!!
+        val state = internalState.flow.filter { it.isRecording }.first()
+        return requireNotNull(state.currentLogDir) { "currentLogDir was null despite isRecording" }
+    }
+
+    suspend fun requestStopRecorder(): StopResult {
+        val currentState = internalState.value()
+        if (!currentState.isRecording) return StopResult.NotRecording
+
+        val logDir = currentState.currentLogDir
+        if (logDir != null) {
+            val elapsedMs = if (currentState.recordingStartedAt > 0) {
+                SystemClock.elapsedRealtime() - currentState.recordingStartedAt
+            } else {
+                // Fallback for resumed sessions — use file creation time
+                try {
+                    val attrs = withContext(dispatcherProvider.IO) {
+                        Files.readAttributes(logDir.toPath(), BasicFileAttributes::class.java)
+                    }
+                    Duration.between(attrs.creationTime().toInstant(), Instant.now()).toMillis()
+                } catch (e: Exception) {
+                    log(TAG, WARN) { "Failed to read log dir creation time: ${e.asLog()}" }
+                    Long.MAX_VALUE // Don't block stop on fallback failure
+                }
+            }
+            if (elapsedMs < MIN_RECORDING_MS) {
+                log(TAG) { "Recording too short: ${elapsedMs}ms < ${MIN_RECORDING_MS}ms" }
+                return StopResult.TooShort
+            }
+        }
+
+        val stoppedDir = stopRecorder() ?: return StopResult.NotRecording
+        return StopResult.Stopped(sessionId = SessionId.derive(stoppedDir), logDir = stoppedDir)
     }
 
     suspend fun stopRecorder(): File? {
-        val currentPath = internalState.value().currentLogPath ?: return null
+        val currentPath = internalState.value().currentLogDir ?: return null
         internalState.updateBlocking {
             copy(shouldRecord = false)
         }
@@ -136,14 +213,30 @@ class RecorderModule @Inject constructor(
         return currentPath
     }
 
+    suspend fun getCurrentLogDir(): File? = internalState.value().currentLogDir
+
+    fun getLogDirectories(): List<File> {
+        val dirs = mutableListOf<File>()
+
+        // Primary location: external files dir
+        context.getExternalFilesDir(null)?.let { externalDir ->
+            File(externalDir, "debug/logs").takeIf { it.exists() }?.let { dirs.add(it) }
+        }
+
+        // Fallback location: cache dir
+        File(context.cacheDir, "debug/logs").takeIf { it.exists() }?.let { dirs.add(it) }
+
+        return dirs
+    }
+
     private suspend fun logInfos() {
-        val pkgInfo = context.packageManager.getPackageInfo(context.packageName, 0)!!
+        val pkgInfo = context.getPackageInfo()
         log(TAG, INFO) { "APILEVEL: ${BuildWrap.VERSION.SDK_INT}" }
         log(TAG, INFO) { "Build.FINGERPRINT: ${BuildWrap.FINGERPRINT}" }
         log(TAG, INFO) { "Build.MANUFACTOR: ${Build.MANUFACTURER}" }
         log(TAG, INFO) { "Build.BRAND: ${Build.BRAND}" }
         log(TAG, INFO) { "Build.PRODUCT: ${Build.PRODUCT}" }
-        val versionInfo = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+        val versionInfo = "${pkgInfo.versionName} (${PackageInfoCompat.getLongVersionCode(pkgInfo)})"
         log(TAG, INFO) { "App: ${context.packageName} - $versionInfo " }
         log(TAG, INFO) { "Build: ${BuildConfigWrap.FLAVOR}-${BuildConfigWrap.BUILD_TYPE}" }
 
@@ -156,22 +249,29 @@ class RecorderModule @Inject constructor(
         val state = dataAreaManager.latestState.firstOrNull()
         log(TAG, INFO) { "Data areas: (${state?.areas?.size})" }
         state?.areas?.forEachIndexed { index, dataArea -> log(TAG, INFO) { "#$index $dataArea" } }
+
+        log(TAG, INFO) { "Update history: ${curriculumVitae.history.firstOrNull()}" }
+    }
+
+    sealed class StopResult {
+        data object TooShort : StopResult()
+        data class Stopped(val sessionId: SessionId, val logDir: File) : StopResult()
+        data object NotRecording : StopResult()
     }
 
     data class State(
         val shouldRecord: Boolean = false,
         internal val recorder: Recorder? = null,
-        val lastLogPath: File? = null,
+        val currentLogDir: File? = null,
+        val recordingStartedAt: Long = 0L,
     ) {
         val isRecording: Boolean
             get() = recorder != null
-
-        val currentLogPath: File?
-            get() = recorder?.path
     }
 
     companion object {
         internal val TAG = logTag("Debug", "Log", "Recorder", "Module")
         private const val FORCE_FILE = "force_debug_run"
+        private const val MIN_RECORDING_MS = 5_000L
     }
 }

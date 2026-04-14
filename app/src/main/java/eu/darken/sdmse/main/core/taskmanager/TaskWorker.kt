@@ -9,22 +9,30 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
-import eu.darken.sdmse.common.debug.logging.Logging.Priority.*
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-
+import eu.darken.sdmse.common.hasApiLevel
+import kotlinx.coroutines.withTimeoutOrNull
 
 @HiltWorker
 class TaskWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val params: WorkerParameters,
-    private val dispatcherProvider: DispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
     private val taskManager: TaskManager,
     private val taskWorkerNotifications: TaskWorkerNotifications,
     private val notificationManager: NotificationManager,
@@ -38,7 +46,7 @@ class TaskWorker @AssistedInject constructor(
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val state = withTimeoutOrNull(3000) { taskManager.state.first() }
+        val state = withTimeoutOrNull(500) { taskManager.state.first() }
         if (state == null) log(TAG, WARN) { "TaskManager state was not available" }
         return taskWorkerNotifications.getForegroundInfo(state)
     }
@@ -46,6 +54,14 @@ class TaskWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = try {
         val start = System.currentTimeMillis()
         log(TAG, VERBOSE) { "Executing $inputData now (runAttemptCount=$runAttemptCount)" }
+
+        try {
+            log(TAG) { "Declaring as foreground task" }
+            setForeground(getForegroundInfo())
+            log(TAG, INFO) { "Foreground state declared!" }
+        } catch (e: IllegalStateException) {
+            log(TAG, ERROR) { "Can't execute in foreground: ${e.asLog()}" }
+        }
 
         doDoWork()
 
@@ -60,6 +76,12 @@ class TaskWorker @AssistedInject constructor(
             finishedWithError = true
             Result.failure(inputData)
         } else {
+            if (hasApiLevel(31)) {
+                @Suppress("NewApi")
+                log(TAG, WARN) { "Worker cancelled, stopReason=$stopReason" }
+            } else {
+                log(TAG, WARN) { "Worker cancelled" }
+            }
             Result.success()
         }
     } finally {
@@ -86,10 +108,10 @@ class TaskWorker @AssistedInject constructor(
                         log(TAG) { "No active tasks, grace period passed, canceling now" }
                         workerScope.cancel()
                     }
+
                     else -> {
                         val activeTasks = state.tasks.filter { !it.isComplete }
                         log(TAG) { "Active tasks: ${activeTasks.size}" }
-                        Unit
                     }
                 }
             }

@@ -1,21 +1,27 @@
 package eu.darken.sdmse.main.ui.dashboard
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.darken.sdmse.MainDirections
+import androidx.navigation.navOptions
+import eu.darken.sdmse.common.navigation.routes.DashboardRoute
 import eu.darken.sdmse.analyzer.core.Analyzer
-import eu.darken.sdmse.analyzer.ui.AnalyzerDashCardVH
+import eu.darken.sdmse.common.navigation.routes.DeviceStorageRoute
 import eu.darken.sdmse.appcleaner.core.AppCleaner
 import eu.darken.sdmse.appcleaner.core.hasData
-import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerDeleteTask
+import eu.darken.sdmse.appcleaner.ui.AppCleanerListRoute
+import eu.darken.sdmse.appcleaner.ui.AppJunkDetailsRoute
+import eu.darken.sdmse.common.navigation.routes.AppControlListRoute
+import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerOneClickTask
+import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerProcessingTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerScanTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerSchedulerTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerTask
-import eu.darken.sdmse.appcleaner.ui.AppCleanerDashCardVH
 import eu.darken.sdmse.appcontrol.core.AppControl
-import eu.darken.sdmse.appcontrol.ui.AppControlDashCardVH
 import eu.darken.sdmse.common.SdmSeLinks
+import eu.darken.sdmse.common.navigation.routes.LogViewRoute
+import eu.darken.sdmse.common.navigation.routes.UpgradeRoute
+import eu.darken.sdmse.corpsefinder.ui.CorpseDetailsRoute
+import eu.darken.sdmse.corpsefinder.ui.CorpseFinderListRoute
 import eu.darken.sdmse.common.SingleLiveEvent
 import eu.darken.sdmse.common.WebpageTool
 import eu.darken.sdmse.common.areas.DataAreaManager
@@ -23,15 +29,24 @@ import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.datastore.valueBlocking
 import eu.darken.sdmse.common.debug.DebugCardProvider
-import eu.darken.sdmse.common.debug.logging.Logging.Priority.*
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.debug.recorder.core.DebugLogSession
+import eu.darken.sdmse.common.debug.recorder.core.DebugLogSessionManager
 import eu.darken.sdmse.common.debug.recorder.core.RecorderModule
+import eu.darken.sdmse.common.debug.recorder.core.SessionId
 import eu.darken.sdmse.common.debug.recorder.ui.DebugRecorderCardVH
+import eu.darken.sdmse.common.debug.recorder.ui.RecorderActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.darken.sdmse.common.flow.intervalFlow
 import eu.darken.sdmse.common.flow.replayingShare
 import eu.darken.sdmse.common.flow.setupCommonEventHandlers
 import eu.darken.sdmse.common.flow.throttleLatest
+import eu.darken.sdmse.common.review.ReviewTool
 import eu.darken.sdmse.common.rngString
 import eu.darken.sdmse.common.uix.ViewModel3
 import eu.darken.sdmse.common.updater.UpdateService
@@ -39,34 +54,89 @@ import eu.darken.sdmse.common.upgrade.UpgradeRepo
 import eu.darken.sdmse.common.upgrade.isPro
 import eu.darken.sdmse.corpsefinder.core.CorpseFinder
 import eu.darken.sdmse.corpsefinder.core.hasData
-import eu.darken.sdmse.corpsefinder.core.tasks.*
-import eu.darken.sdmse.corpsefinder.ui.CorpseFinderDashCardVH
+import eu.darken.sdmse.corpsefinder.core.tasks.CorpseFinderDeleteTask
+import eu.darken.sdmse.corpsefinder.core.tasks.CorpseFinderOneClickTask
+import eu.darken.sdmse.corpsefinder.core.tasks.CorpseFinderScanTask
+import eu.darken.sdmse.corpsefinder.core.tasks.CorpseFinderSchedulerTask
+import eu.darken.sdmse.corpsefinder.core.tasks.CorpseFinderTask
+import eu.darken.sdmse.corpsefinder.core.tasks.UninstallWatcherTask
 import eu.darken.sdmse.deduplicator.core.Deduplicator
+import eu.darken.sdmse.deduplicator.ui.DeduplicatorDetailsRoute
+import eu.darken.sdmse.deduplicator.ui.DeduplicatorListRoute
+import eu.darken.sdmse.deduplicator.core.hasData
 import eu.darken.sdmse.deduplicator.core.tasks.DeduplicatorDeleteTask
+import eu.darken.sdmse.deduplicator.core.tasks.DeduplicatorOneClickTask
 import eu.darken.sdmse.deduplicator.core.tasks.DeduplicatorScanTask
-import eu.darken.sdmse.deduplicator.ui.DeduplicatorDashCardVH
+import eu.darken.sdmse.deduplicator.core.tasks.DeduplicatorTask
+import eu.darken.sdmse.main.core.DashboardCardConfig
+import eu.darken.sdmse.main.ui.navigation.OnboardingWelcomeRoute
+import eu.darken.sdmse.main.core.DashboardCardType
 import eu.darken.sdmse.main.core.GeneralSettings
 import eu.darken.sdmse.main.core.SDMTool
 import eu.darken.sdmse.main.core.motd.MotdRepo
+import eu.darken.sdmse.main.core.release.ReleaseManager
 import eu.darken.sdmse.main.core.taskmanager.TaskManager
-import eu.darken.sdmse.main.ui.dashboard.items.*
+import eu.darken.sdmse.main.core.taskmanager.getLatestResult
+import eu.darken.sdmse.main.ui.dashboard.items.AnniversaryCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.AnniversaryProvider
+import eu.darken.sdmse.main.ui.dashboard.items.DebugCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.ErrorDataAreaVH
+import eu.darken.sdmse.main.ui.dashboard.items.MotdCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.ReviewCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.SetupCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.TitleCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.UpdateCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.AnalyzerDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.AppControlDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.SchedulerDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.SqueezerDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.StatsDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.SwiperDashCardVH
+import eu.darken.sdmse.main.ui.dashboard.items.UpgradeCardVH
 import eu.darken.sdmse.scheduler.core.SchedulerManager
-import eu.darken.sdmse.scheduler.ui.SchedulerDashCardVH
+import eu.darken.sdmse.scheduler.ui.SchedulerManagerRoute
 import eu.darken.sdmse.setup.SetupManager
+import eu.darken.sdmse.setup.SetupRoute
+import eu.darken.sdmse.squeezer.core.Squeezer
+import eu.darken.sdmse.squeezer.core.SqueezerSettings
+import eu.darken.sdmse.squeezer.ui.SqueezerListRoute
+import eu.darken.sdmse.squeezer.ui.SqueezerSetupRoute
+import eu.darken.sdmse.squeezer.core.tasks.SqueezerProcessTask
+import eu.darken.sdmse.squeezer.core.tasks.SqueezerScanTask
+import eu.darken.sdmse.squeezer.core.tasks.SqueezerTask
+import eu.darken.sdmse.stats.core.SpaceHistoryRepo
+import eu.darken.sdmse.stats.core.StatsRepo
+import eu.darken.sdmse.stats.core.StatsSettings
+import eu.darken.sdmse.stats.ui.ReportsRoute
+import eu.darken.sdmse.common.navigation.routes.SwiperSessionsRoute
+import eu.darken.sdmse.systemcleaner.ui.FilterContentDetailsRoute
+import eu.darken.sdmse.systemcleaner.ui.SystemCleanerListRoute
+import eu.darken.sdmse.swiper.core.Swiper
 import eu.darken.sdmse.systemcleaner.core.SystemCleaner
 import eu.darken.sdmse.systemcleaner.core.hasData
-import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerDeleteTask
+import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerOneClickTask
+import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerProcessingTask
 import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerScanTask
 import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerSchedulerTask
 import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerTask
-import eu.darken.sdmse.systemcleaner.ui.SystemCleanerDashCardVH
-import kotlinx.coroutines.flow.*
-import java.util.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    @Suppress("unused") private val handle: SavedStateHandle,
+    @ApplicationContext private val context: android.content.Context,
     dispatcherProvider: DispatcherProvider,
     private val areaManager: DataAreaManager,
     private val taskManager: TaskManager,
@@ -78,18 +148,36 @@ class DashboardViewModel @Inject constructor(
     analyzer: Analyzer,
     debugCardProvider: DebugCardProvider,
     private val deduplicator: Deduplicator,
+    private val squeezer: Squeezer,
+    private val squeezerSettings: SqueezerSettings,
+    swiper: Swiper,
     private val upgradeRepo: UpgradeRepo,
     private val generalSettings: GeneralSettings,
     private val webpageTool: WebpageTool,
     schedulerManager: SchedulerManager,
     private val updateService: UpdateService,
-    private val recorderModule: RecorderModule,
+    private val sessionManager: DebugLogSessionManager,
     private val motdRepo: MotdRepo,
+    private val releaseManager: ReleaseManager,
+    private val reviewTool: ReviewTool,
+    anniversaryProvider: AnniversaryProvider,
+    statsRepo: StatsRepo,
+    private val statsSettings: StatsSettings,
+    private val spaceHistoryRepo: SpaceHistoryRepo,
 ) : ViewModel3(dispatcherProvider = dispatcherProvider) {
 
     init {
         if (!generalSettings.isOnboardingCompleted.valueBlocking) {
-            DashboardFragmentDirections.actionDashboardFragmentToOnboardingWelcomeFragment().navigate()
+            navigateTo(
+                OnboardingWelcomeRoute,
+                navOptions = navOptions {
+                    popUpTo(DashboardRoute) { inclusive = true }
+                }
+            )
+        } else {
+            launch {
+                releaseManager.checkEarlyAdopter()
+            }
         }
     }
 
@@ -135,77 +223,114 @@ class DashboardViewModel @Inject constructor(
         .setupCommonEventHandlers(TAG) { "upgradeInfo" }
         .replayingShare(vmScope)
 
+    private val easterEggTriggered = MutableStateFlow(false)
+
     private val titleCardItem = combine(
         upgradeInfo,
-        taskManager.state
+        taskManager.state,
     ) { upgradeInfo, taskState ->
         TitleCardVH.Item(
             upgradeInfo = upgradeInfo,
+            webpageTool = webpageTool,
             isWorking = !taskState.isIdle,
-            onRibbonClicked = { webpageTool.open(SdmSeLinks.ISSUES) }
+            onRibbonClicked = { webpageTool.open(SdmSeLinks.ISSUES) },
+            onMascotTriggered = { easterEggTriggered.value = it }
         )
     }
 
-    private val corpseFinderItem: Flow<CorpseFinderDashCardVH.Item> = corpseFinder.state.map { state ->
-        CorpseFinderDashCardVH.Item(
-            data = state.data,
-            progress = state.progress,
+    private val corpseFinderItem: Flow<DashboardToolCard.Item> = combine(
+        (corpseFinder.state as Flow<CorpseFinder.State?>).onStart { emit(null) },
+        taskManager.state.map { it.getLatestResult(SDMTool.Type.CORPSEFINDER) },
+    ) { state, lastResult ->
+        DashboardToolCard.Item(
+            toolType = SDMTool.Type.CORPSEFINDER,
+            isInitializing = state == null,
+            result = lastResult,
+            progress = state?.progress,
+            showProRequirement = false,
             onScan = {
                 launch { submitTask(CorpseFinderScanTask()) }
             },
             onDelete = {
                 val task = CorpseFinderDeleteTask()
                 events.postValue(DashboardEvents.CorpseFinderDeleteConfirmation(task))
-            },
+            }.takeIf { state?.data?.hasData == true },
             onCancel = {
                 launch { taskManager.cancel(SDMTool.Type.CORPSEFINDER) }
             },
-            onViewDetails = { showCorpseFinderDetails() }
+            onViewTool = { showCorpseFinder() },
+            onViewDetails = {
+                navigateTo(CorpseDetailsRoute())
+            },
         )
     }
-    private val systemCleanerItem: Flow<SystemCleanerDashCardVH.Item> = systemCleaner.state.map { state ->
-        SystemCleanerDashCardVH.Item(
-            data = state.data,
-            progress = state.progress,
+
+    private val systemCleanerItem: Flow<DashboardToolCard.Item> = combine(
+        (systemCleaner.state as Flow<SystemCleaner.State?>).onStart { emit(null) },
+        taskManager.state.map { it.getLatestResult(SDMTool.Type.SYSTEMCLEANER) },
+    ) { state, lastResult ->
+        DashboardToolCard.Item(
+            toolType = SDMTool.Type.SYSTEMCLEANER,
+            isInitializing = state == null,
+            result = lastResult,
+            progress = state?.progress,
+            showProRequirement = false,
             onScan = {
                 launch { submitTask(SystemCleanerScanTask()) }
             },
             onDelete = {
-                val task = SystemCleanerDeleteTask()
+                val task = SystemCleanerProcessingTask()
                 events.postValue(DashboardEvents.SystemCleanerDeleteConfirmation(task))
-            },
+            }.takeIf { state?.data?.hasData == true },
             onCancel = {
                 launch { taskManager.cancel(SDMTool.Type.SYSTEMCLEANER) }
             },
-            onViewDetails = { showSystemCleanerDetails() }
+            onViewTool = { showSystemCleaner() },
+            onViewDetails = {
+                navigateTo(FilterContentDetailsRoute())
+            },
         )
     }
-    private val appCleanerItem: Flow<AppCleanerDashCardVH.Item> = combine(
-        appCleaner.state,
+
+    private val appCleanerItem: Flow<DashboardToolCard.Item> = combine(
+        (appCleaner.state as Flow<AppCleaner.State?>).onStart { emit(null) },
+        taskManager.state.map { it.getLatestResult(SDMTool.Type.APPCLEANER) },
         upgradeInfo.map { it?.isPro ?: false },
-    ) { state, isPro ->
-        AppCleanerDashCardVH.Item(
-            data = state.data,
-            progress = state.progress,
-            isPro = isPro,
+    ) { state, lastResult, isPro ->
+        DashboardToolCard.Item(
+            toolType = SDMTool.Type.APPCLEANER,
+            isInitializing = state == null,
+            result = lastResult,
+            progress = state?.progress,
+            showProRequirement = !isPro,
             onScan = {
                 launch { submitTask(AppCleanerScanTask()) }
             },
             onDelete = {
-                val task = AppCleanerDeleteTask()
+                val task = AppCleanerProcessingTask()
                 events.postValue(DashboardEvents.AppCleanerDeleteConfirmation(task))
-            },
+            }.takeIf { state?.data?.hasData == true },
             onCancel = {
                 launch { taskManager.cancel(SDMTool.Type.APPCLEANER) }
             },
-            onViewDetails = { showAppCleanerDetails() }
+            onViewTool = { showAppCleaner() },
+            onViewDetails = {
+                navigateTo(AppJunkDetailsRoute())
+            },
         )
     }
 
-    private val deduplicatorItem: Flow<DeduplicatorDashCardVH.Item?> = deduplicator.state.map { state ->
-        DeduplicatorDashCardVH.Item(
-            data = state.data,
-            progress = state.progress,
+    private val deduplicatorItem: Flow<DashboardToolCard.Item?> = combine(
+        (deduplicator.state as Flow<Deduplicator.State?>).onStart { emit(null) },
+        taskManager.state.map { it.getLatestResult(SDMTool.Type.DEDUPLICATOR) },
+        upgradeInfo.map { it?.isPro ?: false },
+    ) { state, lastResult, isPro ->
+        DashboardToolCard.Item(
+            toolType = SDMTool.Type.DEDUPLICATOR,
+            isInitializing = state == null,
+            result = lastResult,
+            progress = state?.progress,
+            showProRequirement = !isPro,
             onScan = {
                 launch { submitTask(DeduplicatorScanTask()) }
             },
@@ -217,34 +342,70 @@ class DashboardViewModel @Inject constructor(
                     )
                     events.postValue(event)
                 }
-            },
+            }.takeIf { state?.data?.hasData == true },
             onCancel = {
                 launch { taskManager.cancel(SDMTool.Type.DEDUPLICATOR) }
             },
-            onViewDetails = { showDeduplicatorDetails() }
+            onViewTool = { showDeduplicator() },
+            onViewDetails = {
+                navigateTo(DeduplicatorDetailsRoute())
+            },
         )
     }
 
-    private val appControlItem: Flow<AppControlDashCardVH.Item?> = appControl.state.mapLatest { state ->
-        AppControlDashCardVH.Item(
-            data = state.data,
-            progress = state.progress,
-            onViewDetails = {
-                DashboardFragmentDirections.actionDashboardFragmentToAppControlListFragment().navigate()
-            }
-        )
-    }
+    private val squeezerItem: Flow<SqueezerDashCardVH.Item?> = (squeezer.state as Flow<Squeezer.State?>)
+        .onStart { emit(null) }
+        .mapLatest { state ->
+            SqueezerDashCardVH.Item(
+                isInitializing = state == null,
+                isNew = true,
+                data = state?.data,
+                progress = state?.progress,
+                onViewDetails = {
+                    navigateTo(SqueezerSetupRoute)
+                },
+            )
+        }
+
+    private val appControlItem: Flow<AppControlDashCardVH.Item?> = (appControl.state as Flow<AppControl.State?>)
+        .onStart { emit(null) }
+        .mapLatest { state ->
+            AppControlDashCardVH.Item(
+                isInitializing = state == null,
+                data = state?.data,
+                progress = state?.progress,
+                onViewDetails = {
+                    navigateTo(AppControlListRoute)
+                }
+            )
+        }
 
     private val analyzerItem: Flow<AnalyzerDashCardVH.Item?> = combine(
         analyzer.data,
         analyzer.progress,
-    ) { data, progress ->
+        intervalFlow(1.hours).flatMapLatest {
+            spaceHistoryRepo.getAllHistory(Instant.now() - Duration.ofDays(7))
+        },
+    ) { data, progress, snapshots ->
+        val combinedDelta = snapshots
+            .groupBy { it.storageId }
+            .values
+            .filter { it.size >= 2 }
+            .sumOf { group ->
+                val sorted = group.sortedBy { it.recordedAt }
+                val firstUsed = sorted.first().let { it.spaceCapacity - it.spaceFree }
+                val lastUsed = sorted.last().let { it.spaceCapacity - it.spaceFree }
+                lastUsed - firstUsed
+            }
+            .takeIf { snapshots.groupBy { s -> s.storageId }.values.any { it.size >= 2 } }
+
         AnalyzerDashCardVH.Item(
             data = data,
             progress = progress,
+            combinedDelta = combinedDelta,
             onViewDetails = {
-                DashboardFragmentDirections.actionDashboardFragmentToDeviceStorageFragment().navigate()
-            }
+                navigateTo(DeviceStorageRoute)
+            },
         )
     }
 
@@ -256,22 +417,22 @@ class DashboardViewModel @Inject constructor(
             schedulerState = schedulerState,
             taskState = taskState,
             onManageClicked = {
-                DashboardFragmentDirections.actionDashboardFragmentToSchedulerManagerFragment().navigate()
+                navigateTo(SchedulerManagerRoute)
             }
         )
     }
 
-    private val dataAreaItem: Flow<DataAreaCardVH.Item?> = areaManager.latestState
+    private val dataAreaItem: Flow<ErrorDataAreaVH.Item?> = areaManager.latestState
         .map {
             if (it == null) return@map null
             if (it.areas.isNotEmpty()) return@map null
-            DataAreaCardVH.Item(
+            ErrorDataAreaVH.Item(
                 state = it,
                 onReload = {
                     launch {
                         areaManager.reload()
                     }
-                }
+                },
             )
         }
 
@@ -296,104 +457,235 @@ class DashboardViewModel @Inject constructor(
             )
         }
 
-    private val listItemsInternal: Flow<List<DashboardAdapter.Item>> = eu.darken.sdmse.common.flow.combine(
-        recorderModule.state,
-        debugCardProvider.create(this),
-        titleCardItem,
-        upgradeInfo,
-        updateInfo,
-        setupManager.state,
-        dataAreaItem,
-        corpseFinderItem,
-        systemCleanerItem,
-        appCleanerItem,
-        deduplicatorItem,
-        appControlItem,
-        analyzerItem,
-        schedulerItem,
-        motdItem,
-        refreshTrigger,
-    ) { recorderState: RecorderModule.State,
-        debugItem: DebugCardVH.Item?,
-        titleInfo: TitleCardVH.Item,
-        upgradeInfo: UpgradeRepo.Info?,
-        updateInfo: UpdateCardVH.Item?,
-        setupState: SetupManager.State,
-        dataAreaInfo: DataAreaCardVH.Item?,
-        corpseFinderItem: CorpseFinderDashCardVH.Item?,
-        systemCleanerItem: SystemCleanerDashCardVH.Item?,
-        appCleanerItem: AppCleanerDashCardVH.Item?,
-        deduplicatorItem: DeduplicatorDashCardVH.Item?,
-        appControlItem: AppControlDashCardVH.Item?,
-        analyzerItem: AnalyzerDashCardVH.Item?,
-        schedulerItem: SchedulerDashCardVH.Item?,
-        motdItem: MotdCardVH.Item?,
-        _ ->
-        val items = mutableListOf<DashboardAdapter.Item>(titleInfo)
+    private val setupCardItem: Flow<SetupCardVH.Item?> = setupManager.state
+        .flatMapLatest { setupState ->
+            if (setupState.isDone || setupState.isDismissed) return@flatMapLatest flowOf(null)
 
-        motdItem?.let { items.add(it) }
-
-        updateInfo?.let { items.add(it) }
-
-        if (!setupState.isComplete && !setupState.isDismissed) {
-            SetupCardVH.Item(
+            val item = SetupCardVH.Item(
                 setupState = setupState,
                 onDismiss = {
                     setupManager.setDismissed(true)
                     events.postValue(DashboardEvents.SetupDismissHint)
                 },
-                onContinue = {
-                    MainDirections.goToSetup().navigate()
+                onContinue = { navigateTo(SetupRoute()) }
+            )
+
+            if (setupState.isIncomplete) return@flatMapLatest flowOf(item)
+
+            if (!setupState.isLoading) return@flatMapLatest flowOf(null)
+
+            intervalFlow(1.seconds).map {
+                val now = Instant.now()
+                val loadingStart = setupState.startedLoadingAt ?: now
+                if (Duration.between(loadingStart, now) >= Duration.ofSeconds(5)) {
+                    item
+                } else {
+                    null
                 }
-            ).run { items.add(this) }
+            }
         }
 
-        dataAreaInfo?.let { items.add(it) }
+    private val reviewItem: Flow<ReviewCardVH.Item?> = reviewTool.state.map { state ->
+        if (!state.shouldAskForReview) return@map null
 
-        corpseFinderItem?.let { items.add(it) }
-        systemCleanerItem?.let { items.add(it) }
-        appCleanerItem?.let { items.add(it) }
-        deduplicatorItem?.let { items.add(it) }
-        appControlItem?.let { items.add(it) }
-        analyzerItem?.let { items.add(it) }
+        ReviewCardVH.Item(
+            onReview = {
+                launch { reviewTool.reviewNow(it) }
+            },
+            onDismiss = {
+                launch { reviewTool.dismiss() }
+            }
+        )
+    }
 
-        schedulerItem?.let { items.add(it) }
+    private val statsItem: Flow<StatsDashCardVH.Item?> = combine(
+        statsRepo.state,
+        upgradeInfo.map { it?.isPro ?: false },
+        statsSettings.retentionReports.flow,
+        statsSettings.retentionPaths.flow,
+        statsSettings.retentionSnapshots.flow,
+    ) { state, isPro, retentionReports, retentionPaths, retentionSnapshots ->
+        // Hide card if all retention settings are disabled
+        if (retentionReports == Duration.ZERO && retentionPaths == Duration.ZERO && retentionSnapshots == Duration.ZERO) {
+            return@combine null
+        }
+        // Also hide if there's no data
+        if (state.isEmpty) return@combine null
+        StatsDashCardVH.Item(
+            state = state,
+            showProRequirement = !isPro,
+            onViewAction = {
+                if (isPro) {
+                    navigateTo(ReportsRoute)
+                } else {
+                    navigateTo(UpgradeRoute())
+                }
+            }
+        )
+    }
+
+    private val anniversaryItem: Flow<AnniversaryCardVH.Item?> = anniversaryProvider.item
+
+    private val swiperItem: Flow<SwiperDashCardVH.Item?> = combine(
+        swiper.getSessionsWithStats(),
+        swiper.progress,
+        upgradeInfo.map { it?.isPro ?: false },
+    ) { sessionsWithStats, progress, isPro ->
+        SwiperDashCardVH.Item(
+            sessionsWithStats = sessionsWithStats,
+            progress = progress,
+            showProRequirement = !isPro,
+            onViewDetails = { showSwiper() }
+        )
+    }
+
+    // Combine refresh trigger with card config to stay within combine's argument limit
+    private val cardConfigWithRefresh: Flow<DashboardCardConfig> = combine(
+        refreshTrigger,
+        generalSettings.dashboardCardConfig.flow,
+    ) { _, config -> config }
+
+    private val listStateInternal: Flow<ListState> = eu.darken.sdmse.common.flow.combine(
+        sessionManager.sessions,
+        debugCardProvider.create(this) { events.postValue(it) },
+        titleCardItem,
+        upgradeInfo,
+        updateInfo,
+        setupCardItem,
+        dataAreaItem,
+        corpseFinderItem,
+        systemCleanerItem,
+        appCleanerItem,
+        deduplicatorItem,
+        squeezerItem,
+        appControlItem,
+        analyzerItem,
+        schedulerItem,
+        motdItem,
+        reviewItem,
+        anniversaryItem,
+        statsItem,
+        swiperItem,
+        easterEggTriggered,
+        cardConfigWithRefresh,
+    ) { sessions: List<DebugLogSession>,
+        debugItem: DebugCardVH.Item?,
+        titleInfo: TitleCardVH.Item,
+        upgradeInfo: UpgradeRepo.Info?,
+        updateInfo: UpdateCardVH.Item?,
+        setupItem: SetupCardVH.Item?,
+        dataAreaError: ErrorDataAreaVH.Item?,
+        corpseFinderItem: DashboardToolCard.Item?,
+        systemCleanerItem: DashboardToolCard.Item?,
+        appCleanerItem: DashboardToolCard.Item?,
+        deduplicatorItem: DashboardToolCard.Item?,
+        squeezerItem: SqueezerDashCardVH.Item?,
+        appControlItem: AppControlDashCardVH.Item?,
+        analyzerItem: AnalyzerDashCardVH.Item?,
+        schedulerItem: SchedulerDashCardVH.Item?,
+        motdItem: MotdCardVH.Item?,
+        reviewItem: ReviewCardVH.Item?,
+        anniversaryItem: AnniversaryCardVH.Item?,
+        statsItem: StatsDashCardVH.Item?,
+        swiperItem: SwiperDashCardVH.Item?,
+        easterEggTriggered,
+        cardConfig: DashboardCardConfig ->
+        val items = mutableListOf<DashboardAdapter.Item>(titleInfo)
+
+        val noError = dataAreaError == null
+
+        val anyInitializing = setOfNotNull(
+            corpseFinderItem?.isInitializing,
+            systemCleanerItem?.isInitializing,
+            appCleanerItem?.isInitializing,
+            deduplicatorItem?.isInitializing,
+            squeezerItem?.isInitializing,
+            appControlItem?.isInitializing,
+        ).any { it }
+
+        if (motdItem == null && updateInfo == null && setupItem == null && noError && reviewItem != null && !anyInitializing) {
+            log(TAG, INFO) { "Showing review item" }
+            items.add(reviewItem)
+        } else if (reviewItem != null) {
+            log(TAG) { "Could show review item but other high priority items are currently being shown" }
+        }
+
+        motdItem?.let { items.add(it) }
+        updateInfo?.let { items.add(it) }
+        setupItem?.let { items.add(it) }
+        dataAreaError?.let { items.add(it) }
+        anniversaryItem?.let { items.add(it) }
+
+        // Add tool cards based on user configuration
+        for (entry in cardConfig.cards) {
+            if (!entry.isVisible) continue
+            when (entry.type) {
+                DashboardCardType.CORPSEFINDER -> corpseFinderItem?.let { items.add(it) }
+                DashboardCardType.SYSTEMCLEANER -> systemCleanerItem?.let { items.add(it) }
+                DashboardCardType.APPCLEANER -> appCleanerItem?.let { items.add(it) }
+                DashboardCardType.DEDUPLICATOR -> deduplicatorItem?.let { items.add(it) }
+                DashboardCardType.SQUEEZER -> squeezerItem?.let { items.add(it) }
+                DashboardCardType.APPCONTROL -> appControlItem?.let { items.add(it) }
+                DashboardCardType.ANALYZER -> analyzerItem?.let { items.add(it) }
+                DashboardCardType.SCHEDULER -> schedulerItem?.let { items.add(it) }
+                DashboardCardType.SWIPER -> swiperItem?.let { items.add(it) }
+                DashboardCardType.STATS -> statsItem?.let { items.add(it) }
+            }
+        }
 
         upgradeInfo
             ?.takeIf { !it.isPro }
             ?.let {
                 UpgradeCardVH.Item(
-                    onUpgrade = { MainDirections.goToUpgradeFragment().navigate() }
+                    onUpgrade = { navigateTo(UpgradeRoute()) }
                 )
             }
             ?.run { items.add(this) }
 
-        recorderState
-            .takeIf { it.isRecording || debugItem != null }
-            ?.let {
-                val item = DebugRecorderCardVH.Item(
-                    webpageTool = webpageTool,
-                    state = it,
-                    onToggleRecording = {
-                        if (it.isRecording) {
-                            launch { recorderModule.stopRecorder() }
-                        } else {
-                            launch { recorderModule.startRecorder() }
+        val recordingSession = sessions.filterIsInstance<DebugLogSession.Recording>().firstOrNull()
+        val isRecording = recordingSession != null
+        if (isRecording || debugItem != null) {
+            val item = DebugRecorderCardVH.Item(
+                webpageTool = webpageTool,
+                isRecording = isRecording,
+                currentLogDir = recordingSession?.logDir,
+                onToggleRecording = {
+                    if (isRecording) {
+                        launch {
+                            when (val result = sessionManager.requestStopRecording()) {
+                                is RecorderModule.StopResult.TooShort -> {
+                                    events.postValue(DashboardEvents.ShowShortRecordingWarning)
+                                }
+                                is RecorderModule.StopResult.Stopped -> {
+                                    launchRecorderActivity(result.sessionId)
+                                }
+                                is RecorderModule.StopResult.NotRecording -> {}
+                            }
                         }
+                    } else {
+                        launch { sessionManager.startRecording() }
                     }
-                )
-                if (it.isRecording) items.add(1, item) else items.add(item)
-            }
+                }
+            )
+            if (isRecording) items.add(1, item) else items.add(item)
+        }
 
         debugItem?.let { items.add(it) }
 
-        items
+        ListState(
+            items = items,
+            isEasterEgg = easterEggTriggered,
+        )
     }
         .throttleLatest(500)
         .replayingShare(vmScope)
 
-    val listItems = listItemsInternal.asLiveData()
+    val listState = listStateInternal.asLiveData()
 
+    data class ListState(
+        val items: List<DashboardAdapter.Item>,
+        val isEasterEgg: Boolean = false,
+    )
 
     data class BottomBarState(
         val isReady: Boolean,
@@ -420,7 +712,7 @@ class DashboardViewModel @Inject constructor(
         systemCleaner.state,
         appCleaner.state,
         generalSettings.enableDashboardOneClick.flow,
-        listItemsInternal.map { items -> items.any { it is MainActionItem } },
+        listStateInternal.map { state -> state.items.any { it is MainActionItem } },
     ) { upgradeInfo,
         taskState,
         corpseState,
@@ -472,10 +764,7 @@ class DashboardViewModel @Inject constructor(
                     submitTask(CorpseFinderDeleteTask())
                 }
 
-                BottomBarState.Action.ONECLICK -> {
-                    submitTask(CorpseFinderScanTask())
-                    submitTask(CorpseFinderDeleteTask())
-                }
+                BottomBarState.Action.ONECLICK -> submitTask(CorpseFinderOneClickTask())
             }
         }
         launch {
@@ -489,13 +778,10 @@ class DashboardViewModel @Inject constructor(
                 BottomBarState.Action.WORKING_CANCELABLE -> taskManager.cancel(SDMTool.Type.SYSTEMCLEANER)
                 BottomBarState.Action.WORKING -> {}
                 BottomBarState.Action.DELETE -> if (systemCleaner.state.first().data != null) {
-                    submitTask(SystemCleanerDeleteTask())
+                    submitTask(SystemCleanerProcessingTask())
                 }
 
-                BottomBarState.Action.ONECLICK -> {
-                    submitTask(SystemCleanerScanTask())
-                    submitTask(SystemCleanerDeleteTask())
-                }
+                BottomBarState.Action.ONECLICK -> submitTask(SystemCleanerOneClickTask())
             }
         }
         launch {
@@ -510,18 +796,17 @@ class DashboardViewModel @Inject constructor(
                 BottomBarState.Action.WORKING -> {}
                 BottomBarState.Action.DELETE -> {
                     if (appCleaner.state.first().data != null && upgradeRepo.isPro()) {
-                        submitTask(AppCleanerDeleteTask())
+                        submitTask(AppCleanerProcessingTask())
                     } else if (appCleaner.state.first().data.hasData && !corpseFinder.state.first().data.hasData && !systemCleaner.state.first().data.hasData) {
-                        MainDirections.goToUpgradeFragment().navigate()
+                        navigateTo(UpgradeRoute())
                     }
                 }
 
                 BottomBarState.Action.ONECLICK -> {
                     if (upgradeRepo.isPro()) {
-                        submitTask(AppCleanerScanTask())
-                        submitTask(AppCleanerDeleteTask())
+                        submitTask(AppCleanerOneClickTask())
                     } else if (appCleaner.state.first().data.hasData && !corpseFinder.state.first().data.hasData && !systemCleaner.state.first().data.hasData) {
-                        MainDirections.goToUpgradeFragment().navigate()
+                        navigateTo(UpgradeRoute())
                     }
                 }
             }
@@ -540,10 +825,7 @@ class DashboardViewModel @Inject constructor(
                     submitTask(DeduplicatorDeleteTask())
                 }
 
-                BottomBarState.Action.ONECLICK -> {
-                    submitTask(DeduplicatorScanTask())
-                    submitTask(DeduplicatorDeleteTask())
-                }
+                BottomBarState.Action.ONECLICK -> submitTask(DeduplicatorOneClickTask())
             }
         }
     }
@@ -553,49 +835,71 @@ class DashboardViewModel @Inject constructor(
         submitTask(CorpseFinderDeleteTask())
     }
 
-    fun showCorpseFinderDetails() {
+    fun showCorpseFinder() {
         log(TAG, INFO) { "showCorpseFinderDetails()" }
-        DashboardFragmentDirections.actionDashboardFragmentToCorpseFinderListFragment().navigate()
+        navigateTo(CorpseFinderListRoute)
     }
 
     fun confirmFilterContentDeletion() = launch {
         log(TAG, INFO) { "confirmFilterContentDeletion()" }
-        submitTask(SystemCleanerDeleteTask())
+        submitTask(SystemCleanerProcessingTask())
     }
 
-    fun showSystemCleanerDetails() {
+    fun showSystemCleaner() {
         log(TAG, INFO) { "showSystemCleanerDetails()" }
-        DashboardFragmentDirections.actionDashboardFragmentToSystemCleanerListFragment().navigate()
+        navigateTo(SystemCleanerListRoute)
     }
 
     fun confirmAppJunkDeletion() = launch {
         log(TAG, INFO) { "confirmAppJunkDeletion()" }
 
         if (!upgradeRepo.isPro()) {
-            MainDirections.goToUpgradeFragment().navigate()
+            navigateTo(UpgradeRoute())
             return@launch
         }
-        submitTask(AppCleanerDeleteTask())
+        submitTask(AppCleanerProcessingTask())
     }
 
-    fun showAppCleanerDetails() {
+    fun showAppCleaner() {
         log(TAG, INFO) { "showAppCleanerDetails()" }
-        DashboardFragmentDirections.actionDashboardFragmentToAppCleanerListFragment().navigate()
+        navigateTo(AppCleanerListRoute)
     }
 
-    fun showDeduplicatorDetails() {
+    fun showDeduplicator() {
         log(TAG, INFO) { "showDeduplicatorDetails()" }
-        DashboardFragmentDirections.actionDashboardFragmentToDeduplicatorListFragment().navigate()
+        navigateTo(DeduplicatorListRoute)
+    }
+
+    fun showSwiper() {
+        log(TAG, INFO) { "showSwiper()" }
+        navigateTo(SwiperSessionsRoute)
     }
 
     fun confirmDeduplicatorDeletion() = launch {
         log(TAG, INFO) { "confirmDeduplicatorDeletion()" }
 
         if (!upgradeRepo.isPro()) {
-            MainDirections.goToUpgradeFragment().navigate()
+            navigateTo(UpgradeRoute())
             return@launch
         }
         submitTask(DeduplicatorDeleteTask())
+    }
+
+    fun showSqueezer() {
+        log(TAG, INFO) { "showSqueezerDetails()" }
+        navigateTo(SqueezerListRoute)
+    }
+
+    fun confirmStopRecording() = launch {
+        val result = sessionManager.forceStopRecording() ?: return@launch
+        launchRecorderActivity(result.sessionId)
+    }
+
+    private fun launchRecorderActivity(sessionId: SessionId) {
+        val intent = RecorderActivity.getLaunchIntent(context, sessionId).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        events.postValue(DashboardEvents.OpenIntent(intent))
     }
 
     fun undoSetupHide() = launch {
@@ -613,18 +917,32 @@ class DashboardViewModel @Inject constructor(
                 is UninstallWatcherTask.Success -> {}
                 is CorpseFinderSchedulerTask.Success -> {}
                 is CorpseFinderDeleteTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is CorpseFinderOneClickTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
             }
 
             is SystemCleanerTask.Result -> when (result) {
                 is SystemCleanerScanTask.Success -> {}
                 is SystemCleanerSchedulerTask.Success -> {}
-                is SystemCleanerDeleteTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is SystemCleanerProcessingTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is SystemCleanerOneClickTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
             }
 
             is AppCleanerTask.Result -> when (result) {
                 is AppCleanerScanTask.Success -> {}
                 is AppCleanerSchedulerTask.Success -> {}
-                is AppCleanerDeleteTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is AppCleanerProcessingTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is AppCleanerOneClickTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+            }
+
+            is DeduplicatorTask.Result -> when (result) {
+                is DeduplicatorScanTask.Success -> {}
+                is DeduplicatorDeleteTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+                is DeduplicatorOneClickTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
+            }
+
+            is SqueezerTask.Result -> when (result) {
+                is SqueezerScanTask.Success -> {}
+                is SqueezerProcessTask.Success -> events.postValue(DashboardEvents.TaskResult(result))
             }
         }
     }

@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name_upgraded">SD Maid SE FOSS</string>
     <string name="app_name_upgrade_postfix">FOSS</string>
-    <string name="upgrade_feature_requires_pro">এই কাজটি করার জন্য SD Maid SE Pro প্রয়োজন</string>
-    <string name="upgrades_dashcard_title">SD Maid আপগ্রেড করুন</string>
+    <string name="upgrade_feature_requires_pro">SD Maid SE FOSS প্রয়োজন</string>
+    <string name="upgrades_dashcard_title">SD Maid SE আপগ্রেড করুন</string>
     <string name="upgrades_dashcard_body">অতিরিক্ত ফিচার আনলক করুন এবং ক্রমাগত বিকাশকে সমর্থন করার জন্য একজন পৃষ্ঠপোষক হন!</string>
     <string name="upgrades_dashcard_upgrade_action">আপগ্রেড করুন</string>
     <string name="upgrade_screen_title">উন্নতি করুন SD Maid</string>
@@ -15,9 +15,5 @@
     <string name="upgrade_screen_sponsor_action">স্পনসর ডেভলপমেন্ট</string>
     <string name="upgrade_screen_sponsor_action_hint">বিকল্প হল বিজ্ঞাপন, বিশ্লেষণ এবং Google Play 🙁</string>
     <string name="upgrade_screen_thanks_toast">ওপেন সোর্স ডেভেলপমেন্ট সমর্থন করার জন্য আপনাকে ধন্যবাদ ❤️</string>
-    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
-    <string name="nudge_betagoodbye_body">একসাথে, আমরা প্রথম রিলিজে এটি তৈরি করেছি! আমাকে পরীক্ষা সাহায্য করার জন্য আপনাকে ধন্যবাদ! ডেভলপমেন্ট অবশ্যই অব্যাহত থাকবে, তবে আপনি এখন নন-বিটা বিল্ডগুলিতে স্যুইচ করতে পারেন। সর্বশেষ স্থিতিশীল রিলিজ ডাউনলোড করে এটি করুন।</string>
-    <string name="nudge_betagoodbye_hint">ছোট্ট টীকা: পরীক্ষামূলক পর্যায়ে দেওয়া রেটিংগুলো শুধুমাত্র আমার কাছে দৃশ্যমান, আপনি যদি এসডি মেইড-এর ব্যাপারে সন্তুষ্ট থাকেন তাহলে আপনি একটি পাবলিক রেটিং দিলে খুব খুশি হব।</string>
-    <string name="nudge_betagoodbye_positive_action">বেরিয়ে আসুন</string>
-    <string name="nudge_betagoodbye_negative_action">পরীক্ষা করতে থাকুন</string>
+    <string name="upgrade_screen_sponsor_return_too_quick">ইতিমধ্যে ফিরে এলেন? আপনার সমর্থন SD Maid কে বাঁচিয়ে রাখে!</string>
 </resources>

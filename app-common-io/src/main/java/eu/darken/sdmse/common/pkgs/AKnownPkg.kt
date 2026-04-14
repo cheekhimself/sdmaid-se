@@ -10,10 +10,9 @@ import eu.darken.sdmse.common.ca.caDrawable
 import eu.darken.sdmse.common.ca.caString
 import eu.darken.sdmse.common.io.R
 import eu.darken.sdmse.common.pkgs.features.AppStore
-import kotlin.reflect.full.isSubclassOf
 
 @Keep
-sealed class AKnownPkg constructor(override val id: Pkg.Id) : Pkg {
+sealed class AKnownPkg(override val id: Pkg.Id) : Pkg {
     constructor(rawPkgId: String) : this(Pkg.Id(rawPkgId))
 
     @get:StringRes open val labelRes: Int? = null
@@ -39,46 +38,54 @@ sealed class AKnownPkg constructor(override val id: Pkg.Id) : Pkg {
             ContextCompat.getDrawable(context, R.drawable.ic_default_app_icon_24)!!
         }
 
-    object AndroidSystem : AKnownPkg("android") {
-        override val labelRes: Int = R.string.apps_known_android_system_label
-    }
+    data object AndroidSystem : AKnownPkg("android")
 
-    object GooglePlay : AKnownPkg("com.android.vending"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_gplay_label
+    data object GooglePlay : AKnownPkg("com.android.vending"), AppStore {
         override val iconRes: Int = R.drawable.ic_baseline_gplay_24
+        override val storeLabel: String = "Google Play"
         override val urlGenerator: ((Pkg.Id) -> String) = {
             "https://play.google.com/store/apps/details?id=${it.name}"
         }
     }
 
-    object VivoAppStore : AKnownPkg("com.vivo.appstore"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_vivo_label
+    data object VivoAppStore : AKnownPkg("com.vivo.appstore"), AppStore {
+        override val storeLabel: String = "Vivo App Store"
     }
 
-    object OppoMarket : AKnownPkg("com.oppo.market"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_oppo_label
+    data object OppoMarket : AKnownPkg("com.oppo.market"), AppStore {
+        override val storeLabel: String = "Oppo Market"
     }
 
-    object HuaweiAppGallery : AKnownPkg("com.huawei.appmarket"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_huawei_label
+    data object HuaweiAppGallery : AKnownPkg("com.huawei.appmarket"), AppStore {
+        override val storeLabel: String = "Huawei AppGallery"
     }
 
-    object SamsungAppStore : AKnownPkg("com.sec.android.app.samsungapps"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_samsung_label
+    data object SamsungAppStore : AKnownPkg("com.sec.android.app.samsungapps"), AppStore {
+        override val storeLabel: String = "Samsung Galaxy Store"
     }
 
-    object XiaomiAppStore : AKnownPkg("com.xiaomi.mipicks"), AppStore {
-        override val labelRes: Int = R.string.apps_known_installer_xiaomi_label
+    data object XiaomiAppStore : AKnownPkg("com.xiaomi.mipicks"), AppStore {
+        override val storeLabel: String = "Xiaomi GetApps"
+    }
+
+    data object FDroid : AKnownPkg("org.fdroid.fdroid"), AppStore {
+        override val storeLabel: String = "F-Droid"
+        override val urlGenerator: ((Pkg.Id) -> String) = {
+            "https://f-droid.org/packages/${it.name}"
+        }
     }
 
     companion object {
-        // Without lazy there is an NPE: https://youtrack.jetbrains.com/issue/KT-25957
-        val values: List<AKnownPkg> by lazy {
-            AKnownPkg::class.nestedClasses
-                .filter { clazz -> clazz.isSubclassOf(AKnownPkg::class) }
-                .map { clazz -> clazz.objectInstance }
-                .filterIsInstance<AKnownPkg>()
-        }
+        val values: List<AKnownPkg> = listOf(
+            AndroidSystem,
+            GooglePlay,
+            VivoAppStore,
+            OppoMarket,
+            HuaweiAppGallery,
+            SamsungAppStore,
+            XiaomiAppStore,
+            FDroid,
+        )
 
         val APP_STORES by lazy { values.filterIsInstance<AppStore>() }
         val OEM_STORES by lazy { APP_STORES - GooglePlay }

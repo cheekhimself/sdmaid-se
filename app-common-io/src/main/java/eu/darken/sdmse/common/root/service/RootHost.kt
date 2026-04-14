@@ -30,7 +30,7 @@ import javax.inject.Inject
  */
 @Keep
 @SuppressLint("UnsafeDynamicallyLoadedCode")
-class RootHost constructor(_args: List<String>) : HasSharedResource<Any>, BaseRootHost("$TAG#${hashCode()}", _args) {
+class RootHost(_args: List<String>) : HasSharedResource<Any>, BaseRootHost("$TAG#${hashCode()}", _args) {
 
     override val sharedResource = SharedResource.createKeepAlive(iTag, hostScope)
 
@@ -58,6 +58,7 @@ class RootHost constructor(_args: List<String>) : HasSharedResource<Any>, BaseRo
 
         ipc.hostOptions
             .onEach { options ->
+                log(TAG) { "New options: $options" }
                 if (options.isDebug && Logging.loggers.none { it == logCatLogger }) {
                     Logging.install(logCatLogger)
                     log(TAG) { "Logger installed!" }
@@ -67,9 +68,8 @@ class RootHost constructor(_args: List<String>) : HasSharedResource<Any>, BaseRo
                 }
 
                 if (options.recorderPath != null && currentFileLogger == null) {
-                    val ogPath = options.recorderPath!!
-                    val newPath = ogPath.replace(".log", "_root.log")
-                    val logger = FileLogger(File(newPath)).also {
+                    val path = File(options.recorderPath!!, "root.log")
+                    val logger = FileLogger(path).also {
                         currentFileLogger = it
                         it.start()
                     }

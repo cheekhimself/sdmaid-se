@@ -1,6 +1,5 @@
 package eu.darken.sdmse.common.files
 
-import eu.darken.sdmse.common.files.*
 import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.files.local.LocalPathLookup
 import eu.darken.sdmse.common.files.saf.SAFDocFile
@@ -14,10 +13,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import testhelpers.BaseTest
+import testhelpers.TestApplication
 import java.time.Instant
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [33], application = TestApplication::class)
 class APathExtensionTest : BaseTest() {
     private val treeUri = "content://com.android.externalstorage.documents/tree/primary%3A"
 
@@ -746,6 +746,14 @@ class APathExtensionTest : BaseTest() {
         }
     }
 
+    // https://github.com/d4rken-org/sdmaid-se/issues/1100
+    @Test fun `remove prefix SAF - issue 1100`() {
+        val searchpath: APath = SAFPath.build(treeUri)
+        val path: APath = SAFPath.build(treeUri, "nextcloud", "folder")
+
+        path.removePrefix(searchpath, overlap = 0) shouldBe segs("nextcloud", "folder")
+    }
+
     @Test fun `filterDistinctRoots operator - LocalPath`() {
         val file1: APath = LocalPath.build("test", "file1")
         val file1s: APath = LocalPath.build("test", "file1", "sub")
@@ -780,5 +788,18 @@ class APathExtensionTest : BaseTest() {
         val file2s: APath = SAFPath.build(treeUri, "test", "file2", "sub")
 
         setOf(file1, file1s, file2, file2s).filterDistinctRoots() shouldBe setOf(file1, file2)
+    }
+
+
+    @Test fun `file extensions`() {
+        LocalPath.build("test", "file1").extension shouldBe null
+        LocalPath.build("test", "file1.abc").extension shouldBe "abc"
+        LocalPath.build("test", "file1.abc.def").extension shouldBe "def"
+        LocalPath.build("test", "file1.abc..").extension shouldBe null
+
+        SAFPath.build(treeUri, "test", "file2").extension shouldBe null
+        SAFPath.build(treeUri, "test", "file2.abc").extension shouldBe "abc"
+        SAFPath.build(treeUri, "test", "file2.abc.def").extension shouldBe "def"
+        SAFPath.build(treeUri, "test", "file2.abc..").extension shouldBe null
     }
 }

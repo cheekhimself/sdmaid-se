@@ -1,11 +1,6 @@
 package eu.darken.sdmse.common.pkgs.features
 
-import android.os.Parcelable
-import eu.darken.sdmse.common.files.APath
-import eu.darken.sdmse.common.files.local.LocalPath
-import eu.darken.sdmse.common.pkgs.Pkg
 import eu.darken.sdmse.common.user.UserHandle2
-import kotlinx.parcelize.Parcelize
 
 interface Installed : PkgInfo {
 
@@ -14,12 +9,23 @@ interface Installed : PkgInfo {
     val installId: InstallId
         get() = InstallId(id, userHandle)
 
-    val sourceDir: APath?
-        get() = applicationInfo?.sourceDir?.let { LocalPath.build(it) }
-
-    @Parcelize
-    data class InstallId(
-        val pkgId: Pkg.Id,
-        val userHandle: UserHandle2,
-    ) : Parcelable
+    /**
+     * Has a few false positives, e.g.
+     * com.android.cts.priv.ctsshim
+     * com.android.nfc
+     * com.google.android.devicelockcontroller
+     * com.google.android.microdroid.empty_payload
+     * com.google.android.virtualmachine.res
+     * com.google.android.compos.payload
+     * com.android.cts.ctsshim
+     */
+    val hasNoSettings: Boolean
+        get() {
+            val isMainline = packageName.startsWith("com.google.mainline.")
+            if (isMainline) return true
+            val hasApexSource = applicationInfo?.sourceDir?.startsWith("/apex/") == true
+            if (hasApexSource) return true
+            val hasApexLibrary = applicationInfo?.nativeLibraryDir?.startsWith("/apex/") == true
+            return hasApexLibrary
+        }
 }

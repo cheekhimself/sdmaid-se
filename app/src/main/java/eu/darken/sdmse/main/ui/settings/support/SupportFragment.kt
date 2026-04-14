@@ -1,6 +1,7 @@
 package eu.darken.sdmse.main.ui.settings.support
 
 import android.os.Bundle
+import android.text.format.Formatter
 import android.view.View
 import androidx.annotation.Keep
 import androidx.fragment.app.viewModels
@@ -11,10 +12,18 @@ import eu.darken.sdmse.R
 import eu.darken.sdmse.common.ClipboardHelper
 import eu.darken.sdmse.common.WebpageTool
 import eu.darken.sdmse.common.debug.recorder.ui.RecorderConsentDialog
+import eu.darken.sdmse.common.debug.recorder.ui.ShortRecordingDialog
 import eu.darken.sdmse.common.observe2
 import eu.darken.sdmse.common.uix.PreferenceFragment2
 import eu.darken.sdmse.main.core.GeneralSettings
+import androidx.navigation.fragment.findNavController
+import eu.darken.sdmse.common.navigation.safeNavigate
+import eu.darken.sdmse.main.ui.navigation.DebugLogSessionsRoute
+import eu.darken.sdmse.main.ui.navigation.SupportFormRoute
 import javax.inject.Inject
+import eu.darken.sdmse.common.ui.R as UiR
+
+
 
 @Keep
 @AndroidEntryPoint
@@ -32,8 +41,18 @@ class SupportFragment : PreferenceFragment2() {
 
     private val installIdPref by lazy { findPreference<Preference>("support.installid")!! }
     private val debugLogPref by lazy { findPreference<Preference>("support.debuglog")!! }
+    private val debugLogFolderPref by lazy { findPreference<Preference>("support.debuglog.folder")!! }
+
+    override fun onResume() {
+        super.onResume()
+        vm.refreshSessions()
+    }
 
     override fun onPreferencesCreated() {
+        findPreference<Preference>("support.contact")!!.setOnPreferenceClickListener {
+            findNavController().safeNavigate(SupportFormRoute)
+            true
+        }
         installIdPref.setOnPreferenceClickListener {
             vm.copyInstallID()
             true
@@ -50,10 +69,24 @@ class SupportFragment : PreferenceFragment2() {
                 .show()
         }
 
+        vm.events.observe2(this) { event ->
+            when (event) {
+                is SupportViewModel.SupportEvents.ShowShortRecordingWarning -> ShortRecordingDialog(
+                    context = requireContext(),
+                    onContinue = {},
+                    onStopAnyway = { vm.confirmStopDebugLog() },
+                ).show()
+
+                is SupportViewModel.SupportEvents.LaunchRecorderActivity -> {
+                    startActivity(event.intent)
+                }
+            }
+        }
+
         vm.isRecording.observe2(this) { isRecording ->
             debugLogPref.setIcon(
-                if (isRecording) R.drawable.ic_cancel
-                else R.drawable.ic_bug_report
+                if (isRecording) UiR.drawable.ic_cancel
+                else UiR.drawable.ic_bug_report
             )
             debugLogPref.setTitle(
                 if (isRecording) R.string.debug_debuglog_stop_action
@@ -69,6 +102,26 @@ class SupportFragment : PreferenceFragment2() {
                 }
                 true
             }
+            debugLogFolderPref.isEnabled = !isRecording
+        }
+
+        vm.debugLogFolderStats.observe2(this) { stats ->
+            if (stats.sessionCount == 0) {
+                debugLogFolderPref.summary = getString(R.string.support_debuglog_folder_empty_desc)
+            } else {
+                val formattedSize = Formatter.formatShortFileSize(requireContext(), stats.totalSizeBytes)
+                debugLogFolderPref.summary = resources.getQuantityString(
+                    R.plurals.support_debuglog_folder_desc,
+                    stats.sessionCount,
+                    stats.sessionCount,
+                    formattedSize
+                )
+            }
+        }
+
+        debugLogFolderPref.setOnPreferenceClickListener {
+            findNavController().safeNavigate(DebugLogSessionsRoute)
+            true
         }
 
         super.onViewCreated(view, savedInstanceState)

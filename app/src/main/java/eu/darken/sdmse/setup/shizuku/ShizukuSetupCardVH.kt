@@ -1,6 +1,7 @@
 package eu.darken.sdmse.setup.shizuku
 
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import eu.darken.sdmse.R
 import eu.darken.sdmse.common.getColorForAttr
@@ -35,6 +36,14 @@ class ShizukuSetupCardVH(parent: ViewGroup) :
             }
         }
 
+        body.apply {
+            text = getString(R.string.setup_shizuku_card_body)
+            if (item.state.alsoHasRoot) {
+                append("\n")
+                append(getString(R.string.setup_shizuku_card_root_info))
+            }
+        }
+
         shizukuState.apply {
             isVisible = item.state.useShizuku == true && item.state.isInstalled
             text = getString(
@@ -47,15 +56,18 @@ class ShizukuSetupCardVH(parent: ViewGroup) :
             )
         }
 
+        shizukuOpenAction.apply {
+            setOnClickListener { item.onOpen() }
+            isGone = !item.state.isInstalled || item.state.useShizuku != true || item.state.isComplete
+        }
+
         helpAction.setOnClickListener { item.onHelp() }
     }
 
     data class Item(
-        override val state: ShizukuSetupModule.State,
+        override val state: ShizukuSetupModule.Result,
         val onToggleUseShizuku: (Boolean?) -> Unit,
         val onHelp: () -> Unit,
-    ) : SetupAdapter.Item {
-        override val stableId: Long = this.javaClass.hashCode().toLong()
-    }
-
+        val onOpen: () -> Unit,
+    ) : SetupAdapter.Item
 }

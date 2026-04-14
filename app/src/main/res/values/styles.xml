@@ -1,41 +1,18 @@
 <resources>
 
-    <style name="DashboardCardItem" parent="Widget.Material3.CardView.Elevated">
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:layout_marginStart">8dp</item>
-        <item name="android:layout_marginEnd">8dp</item>
-    </style>
-
-    <style name="DashboardCardButton.Filled" parent="Widget.Material3.Button.IconButton.Filled">
+    <style name="DashboardCardButton.Filled.Tonal" parent="SDMButton.Icon.Filled.Tonal">
         <item name="android:paddingHorizontal">20dp</item>
         <item name="iconPadding">4dp</item>
     </style>
 
-    <style name="DashboardCardButton.Filled.Tonal" parent="Widget.Material3.Button.IconButton.Filled.Tonal">
+    <style name="DashboardCardButton.Outlined" parent="SDMButton.Icon.Outlined">
         <item name="android:paddingHorizontal">20dp</item>
         <item name="iconPadding">4dp</item>
     </style>
 
-    <style name="DashboardCardButton.Outlined" parent="Widget.Material3.Button.IconButton.Outlined">
+    <style name="DashboardCardButton.Flat" parent="SDMButton.Icon">
         <item name="android:paddingHorizontal">20dp</item>
         <item name="iconPadding">4dp</item>
-    </style>
-
-    <style name="DashboardCardButton.Flat" parent="Widget.Material3.Button.IconButton">
-        <item name="android:paddingHorizontal">20dp</item>
-        <item name="iconPadding">4dp</item>
-    </style>
-
-    <style name="Toolbar" parent="@style/Widget.MaterialComponents.Toolbar.Primary">
-        <item name="android:layout_height">?actionBarSize</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="BaseRecyclerList">
-        <item name="android:fastScrollEnabled">false</item>
-        <item name="fastScrollEnabled">false</item>
-        <item name="android:requiresFadingEdge">none</item>
     </style>
 
     <style name="DefaultListItemContainer">
@@ -74,11 +51,6 @@
         <item name="android:layout_height">40dp</item>
         <item name="android:layout_width">40dp</item>
         <item name="android:contentDescription">Preview image</item>
-    </style>
-
-    <style name="ListItemIconSecondary">
-        <item name="android:layout_height">24dp</item>
-        <item name="android:layout_width">24dp</item>
     </style>
 
     <style name="SmallListItemPrimary" parent="TextAppearance.Material3.BodyLarge">
@@ -154,36 +126,5 @@
         <item name="android:singleLine">true</item>
     </style>
 
-    <style name="AppControlTagStyle" parent="TextAppearance.Material3.LabelSmall">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:layout_marginLeft">2dp</item>
-        <item name="android:layout_marginStart">2dp</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:marqueeRepeatLimit">marquee_forever</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="PreviewRoundedBox">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">16dp</item>
-    </style>
-
-    <style name="PreviewRoundedBox.Small">
-        <item name="cornerSize">8dp</item>
-    </style>
-
-    <style name="PreviewRoundedBox.Medium">
-        <item name="cornerSize">16dp</item>
-    </style>
-
-    <style name="PreviewRoundedBox.Large">
-        <item name="cornerSize">32dp</item>
-    </style>
 
 </resources>

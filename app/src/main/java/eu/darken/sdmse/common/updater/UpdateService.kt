@@ -1,11 +1,14 @@
 package eu.darken.sdmse.common.updater
 
 import eu.darken.sdmse.common.coroutine.AppScope
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
+import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.flow.replayingShare
 import eu.darken.sdmse.common.flow.setupCommonEventHandlers
 import eu.darken.sdmse.main.core.GeneralSettings
+import eu.darken.sdmse.main.core.release.ReleaseManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,7 @@ class UpdateService @Inject constructor(
     @AppScope private val appScope: CoroutineScope,
     private val updateChecker: UpdateChecker,
     generalSettings: GeneralSettings,
+    releaseManager: ReleaseManager,
 ) {
 
     private val updateCheckTrigger = MutableStateFlow(UUID.randomUUID())
@@ -33,15 +37,23 @@ class UpdateService @Inject constructor(
             }
 
             combine(
+                generalSettings.isOnboardingCompleted.flow,
                 generalSettings.isUpdateCheckEnabled.flow,
                 updateCheckTrigger
-            ) { isEnabled, _ ->
-                if (isEnabled) {
-                    updateChecker.getUpdate()
-                } else {
-                    log(TAG) { "Update check is not enabled!" }
-                    null
+            ) { isOnboardingCompleted, isUpdateCheckEnabled, _ ->
+                log(TAG, VERBOSE) { "onboardingComplete=$isOnboardingCompleted, checkEnabled=$isUpdateCheckEnabled" }
+
+                if (!isOnboardingCompleted) {
+                    log(TAG, INFO) { "Onboarding is not yet complete!" }
+                    return@combine null
                 }
+
+                if (!isUpdateCheckEnabled) {
+                    log(TAG, INFO) { "Update check is not enabled!" }
+                    return@combine null
+                }
+
+                updateChecker.getUpdate(betaConsent = releaseManager.hasBetaConsent())
             }
         }
         .setupCommonEventHandlers(TAG) { "availableUpdate" }

@@ -337,8 +337,29 @@ class LocalPathExtensionsTest : BaseTest() {
         }
         prefixLookup.removePrefix(preLookup) shouldBe segs("fix")
         prefixLookup.removePrefix(pre) shouldBe segs("fix")
+
+        prefix.removePrefix(LocalPath.build()) shouldBe segs("pre", "fix")
     }
 
+
+    @Test fun `isUncommonAndroidDir - standard subdirs are not uncommon`() {
+        LocalPath.build("storage", "emulated", "0", "Android", "data", "com.example").isUncommonAndroidDir shouldBe false
+        LocalPath.build("storage", "emulated", "0", "Android", "obb", "com.example").isUncommonAndroidDir shouldBe false
+        LocalPath.build("storage", "emulated", "0", "Android", "media", "com.example").isUncommonAndroidDir shouldBe false
+    }
+
+    @Test fun `isUncommonAndroidDir - uncommon subdirs`() {
+        LocalPath.build("storage", "emulated", "0", "Android", "obj", ".um").isUncommonAndroidDir shouldBe true
+        LocalPath.build("storage", "emulated", "0", "Android", "cache", "file").isUncommonAndroidDir shouldBe true
+    }
+
+    @Test fun `isUncommonAndroidDir - no Android segment`() {
+        LocalPath.build("storage", "emulated", "0", "DCIM", "Camera").isUncommonAndroidDir shouldBe false
+    }
+
+    @Test fun `isUncommonAndroidDir - Android is last segment`() {
+        LocalPath.build("storage", "emulated", "0", "Android").isUncommonAndroidDir shouldBe false
+    }
 
     @Test fun `remove prefix with overlap`() {
         val prefix = LocalPath.build("prefix", "overlap", "folder")
